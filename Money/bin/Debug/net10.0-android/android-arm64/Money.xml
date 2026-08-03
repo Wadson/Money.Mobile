@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Money</name>
+    </assembly>
+    <members>
+        <member name="T:Money.MaterialIconSourceExtension">
+            <summary>
+            Creates a Material icon image source with a semantic, explicit color.
+            This prevents the icon from changing to white when the device uses dark theme
+            while the application control is rendered on a fixed light surface.
+            </summary>
+        </member>
+        <member name="T:Money.Services.AuthService">
+            <summary>Provides local account authentication, lockout, and encrypted session persistence.</summary>
+        </member>
+        <member name="M:Money.Services.AuthService.#ctor(Money.Services.DatabaseService)">
+            <summary>Provides local account authentication, lockout, and encrypted session persistence.</summary>
+        </member>
+        <member name="T:Money.Services.DatabaseService">
+            <summary>Manages the local SQLite database and all financial operations.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.InitializeAsync">
+            <summary>Creates and migrates the database on first use.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.AddCategoryAsync(System.String,System.String,System.String,System.String,System.Nullable{System.Int64})">
+            <summary>Creates a root category or a dependent subcategory with a maximum of three levels.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetDashboardAsync(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>Loads consolidated dashboard metrics for the current month.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.AddTransactionAsync(Money.Models.TransactionDraft)">
+            <summary>Adds a transaction and updates its funding source atomically.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveInstallmentTransactionAsync(Money.Models.TransactionDraft,System.Int32,System.DateTime)">
+            <summary>
+            Saves a grouping transaction and all installments atomically. The parent is
+            an audit/grouping row; balances and dashboard totals use the child rows.
+            </summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetMetasAsync">
+            <summary>Lista as metas financeiras do usuário, ordenadas pela data-alvo.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveMetaAsync(System.Nullable{System.Int64},System.String,System.Decimal,System.Decimal,System.DateTime,System.DateTime,System.String,System.String,System.String,System.String)">
+            <summary>Cria ou atualiza uma meta financeira com auditoria.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.DeleteMetaAsync(System.Int64)">
+            <summary>Exclui uma meta pertencente ao usuário atual.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetTagsAsync">
+            <summary>Lista todas as tags do usuário.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveTagAsync(System.Nullable{System.Int64},System.String,System.String,System.String)">
+            <summary>Cria ou atualiza uma tag.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.DeleteTagAsync(System.Int64)">
+            <summary>Exclui uma tag e seus vínculos N:N.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SetTransactionTagsAsync(System.Int64,System.Collections.Generic.IEnumerable{System.Int64})">
+            <summary>Substitui atomicamente as tags vinculadas a uma transação.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetLembretesAsync(System.String)">
+            <summary>Lista lembretes, opcionalmente filtrados por status.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveLembreteAsync(System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.DateTime,System.String)">
+            <summary>Cria ou atualiza um lembrete validado pelo banco.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.AddTransferAsync(System.Int64,System.Int64,System.Decimal,System.DateTime,System.String,System.String)">
+            <summary>Registra uma transferência entre duas contas e atualiza saldos atomicamente.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GenerateCardInvoicesAsync(System.Int32,System.Int32)">
+            <summary>Gera ou recalcula as faturas mensais de todos os cartões ativos.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetCardInvoicesAsync(System.Int32,System.Int32)">
+            <summary>Lista faturas de cartão de um período.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetMonthlyReportAsync">
+            <summary>Retorna o resumo mensal otimizado pela view vw_resumo_mensal.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetCategoryExpenseReportAsync(System.Int32,System.Int32)">
+            <summary>Retorna gastos por categoria usando a view otimizada.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.ImportTransactionsAsync(System.Collections.Generic.IEnumerable{Money.Models.TransactionDraft},System.String,System.String)">
+            <summary>Importa rascunhos sequencialmente e registra o resultado da importação.</summary>
+        </member>
+        <member name="T:Money.ThemeColor">
+            <summary>
+            Resolves semantic colors from the global ResourceDictionary for views created in code.
+            </summary>
+        </member>
+        <member name="T:Money.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+    </members>
+</doc>

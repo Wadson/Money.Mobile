@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="Money.CardManagementPage" 
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" 
+             Title="Cartões"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <!-- Header com gradiente -->
+        <Border Grid.Row="0" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="20,16">
+            <Grid ColumnDefinitions="Auto,*,44,Auto" ColumnSpacing="8">
+
+
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Aspect="AspectFit" Clicked="OnCloseClicked"/>
+
+                <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="2">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="6">
+                        
+                        <Label Text="Cartões" TextColor="{StaticResource BlingTextLight}" FontSize="22" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                    <Label Text="Gerencie seus cartões de crédito" TextColor="{StaticResource BlingTextLight}" FontSize="12"/>
+                </VerticalStackLayout>
+
+                <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=UploadFile, ColorResource=BlingPrimary, IconSize=21}"
+                             BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                             WidthRequest="40" HeightRequest="40" Padding="9" CornerRadius="10"
+                             AutomationProperties.Name="Importar fatura CSV" Clicked="OnImportInvoiceClicked"/>
+                <ImageButton Grid.Column="3" Source="{icons:MaterialIconSource Icon=Add, ColorResource=BlingTextLight, IconSize=24}"
+                             BackgroundColor="{StaticResource BlingPrimary}" WidthRequest="44" HeightRequest="44"
+                             Padding="10" CornerRadius="22" Clicked="OnNewClicked" AutomationProperties.Name="Novo cartão"/>
+            </Grid>
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <ScrollView Grid.Row="1" Grid.RowSpan="2" Padding="8,20">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="960" HorizontalOptions="Fill">
+
+                <!-- Formulário -->
+                <Border x:Name="FormCard" Style="{StaticResource ContentCard}" 
+                        IsVisible="False" Padding="20">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label x:Name="FormTitle" Text="Novo cartão" 
+                                   TextColor="{StaticResource BlingPrimary}" FontSize="18" FontAttributes="Bold"/>
+                            <Button Grid.Column="1" Text="" ImageSource="{icons:MaterialIconSource Icon=Close, ColorResource=BlingText, IconSize=20}" BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="18"
+                                    Clicked="OnCancelFormClicked"
+                                    WidthRequest="36" HeightRequest="36"/>
+                        </Grid>
+
+                        <!-- Campo Nome -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="NOME DO CARTÃO" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Border Style="{StaticResource InputContainer}"><Entry x:Name="NameEntry" Placeholder="Ex: Nubank, Itaú, etc."
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        </VerticalStackLayout>
+
+                        <!-- Campo Limite -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="LIMITE DE CRÉDITO" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Border Style="{StaticResource InputContainer}"><Entry x:Name="LimitEntry" Placeholder="R$ 0,00" Keyboard="Numeric"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        </VerticalStackLayout>
+
+                        <!-- Dias -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="DIA DO FECHAMENTO" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                                <Border Style="{StaticResource InputContainer}"><Entry x:Name="ClosingEntry" Keyboard="Numeric" Placeholder="1 a 31"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="DIA DO VENCIMENTO" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                                <Border Style="{StaticResource InputContainer}"><Entry x:Name="DueEntry" Keyboard="Numeric" Placeholder="1 a 31"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="COR DO CARTÃO" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Border Style="{StaticResource InputContainer}"><Entry x:Name="ColorEntry" MaxLength="7" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Spacing="8">
+                            <Button BackgroundColor="{StaticResource BlingPrimary}" WidthRequest="34" HeightRequest="34" CornerRadius="17" Padding="0" Clicked="OnColorClicked"/>
+                            <Button BackgroundColor="{StaticResource BlingPrimary}" WidthRequest="34" HeightRequest="34" CornerRadius="17" Padding="0" Clicked="OnColorClicked"/>
+                            <Button BackgroundColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" WidthRequest="34" HeightRequest="34" CornerRadius="17" Padding="0" Clicked="OnColorClicked"/>
+                            <Button BackgroundColor="{StaticResource BlingPrimary}" WidthRequest="34" HeightRequest="34" CornerRadius="17" Padding="0" Clicked="OnColorClicked"/>
+                            <Button BackgroundColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" WidthRequest="34" HeightRequest="34" CornerRadius="17" Padding="0" Clicked="OnColorClicked"/>
+                        </HorizontalStackLayout>
+
+                        <!-- Mensagem de Erro -->
+                        <Label x:Name="ErrorLabel" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12" IsVisible="False" Padding="8,4"/>
+
+                        <!-- Botões -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,8,0,0">
+                            <Button Text="Cancelar" 
+                                    BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}"
+                                    CornerRadius="10" HeightRequest="46"
+                                    Clicked="OnCancelFormClicked" ImageSource="{icons:MaterialIconSource Icon=Close, ColorResource=BlingTextLight, IconSize=20}"/>
+                            <Button Grid.Column="1" Text="Salvar cartão" ImageSource="{icons:MaterialIconSource Icon=Save, ColorResource=BlingTextLight, IconSize=20}"
+                                    BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}"
+                                    CornerRadius="10" HeightRequest="46"
+                                    FontAttributes="Bold"
+                                    Clicked="OnSaveClicked"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>                <!-- Resumo dos Cartões -->
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8" x:Name="SummaryCards">
+                    <Border Style="{StaticResource ContentCard}" Padding="16,14">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="Total de cartões" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" VerticalTextAlignment="Center"/>
+                            <Label x:Name="TotalCardsLabel" Grid.Column="1" Text="0" TextColor="{StaticResource BlingPrimary}" FontSize="22" FontAttributes="Bold"/>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Row="1" Style="{StaticResource ContentCard}" Padding="16,14">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="Limite total" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" VerticalTextAlignment="Center"/>
+                            <Label x:Name="TotalLimitLabel" Grid.Column="1" Text="R$ 0" TextColor="{StaticResource BlingPrimary}" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="End"/>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Row="2" Style="{StaticResource ContentCard}" Padding="16,14">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="Limite usado" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" VerticalTextAlignment="Center"/>
+                            <Label x:Name="UsedLimitLabel" Grid.Column="1" Text="R$ 0" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="End"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Estado Vazio -->
+                <VerticalStackLayout x:Name="EmptyState" Spacing="12" HorizontalOptions="Center" Margin="0,40">
+                    <mi:MauiIcon Icon="{mi:Material Icon=CreditCard}" IconSize="56" IconColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" HorizontalOptions="Center"/>
+                    <Label Text="Nenhum cartão cadastrado" TextColor="{StaticResource BlingPrimary}" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                    <Label Text="Clique em '+ Novo' para adicionar seu primeiro cartão" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <!-- Lista de Cartões -->
+                <VerticalStackLayout x:Name="CardsContainer" Spacing="12" HorizontalOptions="Fill"/>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

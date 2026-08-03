@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money"
+             xmlns:models="clr-namespace:Money.Models"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="Money.CreditCardAnalysisPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="Auto,*">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Aspect="AspectFit" Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                    <HorizontalStackLayout Spacing="6">
+                       
+                        <Label Text="Análise de cartões" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                    <Label x:Name="PeriodLabel" TextColor="{StaticResource BlingTextLight}" FontSize="10"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+        <RefreshView x:Name="RefreshContent" Grid.Row="1" Refreshing="OnRefresh">
+            <ScrollView>
+                <VerticalStackLayout Padding="16,16,16,30" Spacing="16">
+                    <Border Style="{StaticResource ContentCard}" Padding="10">
+                        <Grid ColumnDefinitions="44,*,44">
+                            <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnPreviousMonthClicked"/>
+                            <Label x:Name="InvoicePeriodLabel" Grid.Column="1" HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center" TextColor="{StaticResource BlingPrimary}" FontAttributes="Bold"/>
+                            <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=ArrowForward, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnNextMonthClicked"/>
+                        </Grid>
+                    </Border>
+                    <Border BackgroundColor="{StaticResource BlingPrimary}" StrokeThickness="0" Padding="20"
+                            StrokeShape="RoundRectangle 20">
+                        <VerticalStackLayout Spacing="15">
+                            <Label Text="TODOS OS CARTÕES" TextColor="{StaticResource BlingTextLight}" FontSize="10"
+                                   FontAttributes="Bold" CharacterSpacing="1.4"/>
+                            <Label x:Name="TotalInvoiceLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}"
+                                   FontSize="31" FontAttributes="Bold"/>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout>
+                                    <Label Text="Limite combinado" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                                    <Label x:Name="TotalLimitLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}"
+                                           FontSize="13" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Text="Disponível geral" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                                    <Label x:Name="TotalAvailableLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}"
+                                           FontSize="13" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Selecione um cartão" TextColor="{StaticResource BlingPrimary}" FontSize="16"
+                               FontAttributes="Bold"/>
+                        <CarouselView x:Name="CardsCarousel" HeightRequest="90"
+                                      PositionChanged="OnCardPositionChanged" PeekAreaInsets="22">
+                            <CarouselView.ItemTemplate>
+                                <DataTemplate x:DataType="models:CreditCardAnalysis">
+                                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" Margin="4"
+                                            Padding="14" StrokeShape="RoundRectangle 15">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="{Binding Name}" TextColor="{StaticResource BlingPrimary}"
+                                                       FontSize="13" FontAttributes="Bold"/>
+                                                <Label Text="{Binding Invoice, StringFormat='Fatura R$ {0:N2}'}"
+                                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10"/>
+                                            </VerticalStackLayout>
+                                            <mi:MauiIcon Grid.Column="1" Icon="{mi:Material Icon=CreditCard}" IconSize="28"
+                                                         IconColor="{StaticResource BlingPrimary}" WidthRequest="34" HeightRequest="34"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CarouselView.ItemTemplate>
+                        </CarouselView>
+                    </VerticalStackLayout>
+
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" Padding="18"
+                            StrokeShape="RoundRectangle 18">
+                        <VerticalStackLayout Spacing="13">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout>
+                                    <Label x:Name="SelectedCardNameLabel" Text="Cartão"
+                                           TextColor="{StaticResource BlingPrimary}" FontSize="17" FontAttributes="Bold"/>
+                                    <Label Text="Fatura atual" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10"/>
+                                </VerticalStackLayout>
+                                <Label x:Name="SelectedInvoiceLabel" Grid.Column="1" Text="R$ 0,00"
+                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="20" FontAttributes="Bold"/>
+                            </Grid>
+                            <ProgressBar x:Name="UsageProgress" HeightRequest="9"
+                                         ProgressColor="{StaticResource BlingPrimary}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"/>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label x:Name="UsageLabel" Text="R$ 0,00 utilizado"
+                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10"/>
+                                <Label x:Name="AvailableLabel" Grid.Column="1" Text="R$ 0,00 disponível"
+                                       TextColor="{StaticResource BlingPrimary}" FontSize="10"/>
+                            </Grid>
+                            <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"/>
+                            <Grid ColumnDefinitions="*,*">
+                                <VerticalStackLayout>
+                                    <Label Text="FECHAMENTO" Style="{StaticResource CardCaption}"/>
+                                    <Label x:Name="ClosingLabel" Text="—" TextColor="{StaticResource BlingPrimary}"
+                                           FontSize="15" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Text="MELHOR DIA DE COMPRA" Style="{StaticResource CardCaption}"/>
+                                    <Label x:Name="BestDayLabel" Text="—" TextColor="{StaticResource BlingPrimary}"
+                                           FontSize="15" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" Padding="18"
+                            StrokeShape="RoundRectangle 18">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Distribuição dos gastos" TextColor="{StaticResource BlingPrimary}"
+                                   FontSize="17" FontAttributes="Bold"/>
+                            <VerticalStackLayout x:Name="CategoriesContainer" Spacing="11"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" Padding="18"
+                            StrokeShape="RoundRectangle 18">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Faturas do período" TextColor="{StaticResource BlingPrimary}"
+                                       FontSize="17" FontAttributes="Bold"/>
+                                <Button Grid.Column="1" Text="Recalcular" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                        TextColor="{StaticResource BlingPrimary}" FontSize="11" HeightRequest="36"
+                                        Clicked="OnGenerateInvoicesClicked" ImageSource="{icons:MaterialIconSource Icon=Refresh, ColorResource=BlingPrimary, IconSize=20}"/>
+                            </Grid>
+                            <Border Style="{StaticResource InputContainer}"><Picker x:Name="PaymentAccountPicker" Title="Conta para pagamento" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                            <VerticalStackLayout x:Name="InvoicesContainer" Spacing="12"/>
+                            <VerticalStackLayout x:Name="InvoiceDetailsContainer" IsVisible="False" Spacing="7"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

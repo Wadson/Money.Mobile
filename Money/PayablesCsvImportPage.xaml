@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:icons="clr-namespace:Money"
+ xmlns:models="clr-namespace:Money.Models" x:Class="Money.PayablesCsvImportPage"
+ BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+ Shell.NavBarIsVisible="False">
+ <Grid RowDefinitions="Auto,Auto,*,Auto">
+  <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+   <Grid ColumnDefinitions="44,*" ColumnSpacing="12">
+    <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnBackClicked"/>
+    <VerticalStackLayout Grid.Column="1"><Label Text="Importar Contas a Pagar" TextColor="{StaticResource BlingTextLight}" FontSize="19" FontAttributes="Bold"/><Label Text="CSV com validação antes da gravação" TextColor="{StaticResource BlingTextLight}" FontSize="10"/></VerticalStackLayout>
+   </Grid>
+  </Border>
+  <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="14,12,14,8" Padding="12">
+   <VerticalStackLayout Spacing="9">
+    <Label Text="Colunas: Descricao; Valor; DataVencimento; Categoria; Fornecedor; Observacoes" FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+    <Border Style="{StaticResource InputContainer}"><Picker x:Name="AccountPicker" Title="Conta associada aos lançamentos" BackgroundColor="Transparent"/></Border>
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+     <Button Text="Baixar modelo CSV" ImageSource="{icons:MaterialIconSource Icon=Download, ColorResource=BlingPrimary, IconSize=19}"
+             BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}" BorderColor="{StaticResource BlingPrimary}"
+             BorderWidth="1" FontSize="11" Clicked="OnDownloadTemplateClicked"/>
+     <Button Grid.Column="1" Text="Selecionar CSV" ImageSource="{icons:MaterialIconSource Icon=UploadFile, ColorResource=BlingTextLight, IconSize=19}" Style="{StaticResource PrimaryButton}" FontSize="11" Clicked="OnPickFileClicked"/>
+    </Grid>
+    <Label x:Name="FileLabel" Text="Nenhum arquivo selecionado" FontSize="10" TextColor="{StaticResource BlingPrimary}"/>
+    <Label x:Name="SummaryLabel" FontSize="11" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+   </VerticalStackLayout>
+  </Border>
+  <CollectionView x:Name="PreviewList" Grid.Row="2" Margin="14,0" SelectionMode="None">
+   <CollectionView.ItemTemplate><DataTemplate x:DataType="models:PayableImportRow">
+    <Border Style="{StaticResource ContentCard}" Padding="10" Margin="0,0,0,7">
+     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
+      <Label Text="{Binding Description}" FontAttributes="Bold" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+      <Label Grid.Column="1" Text="{Binding AmountText}" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+      <Label Grid.Row="1" Text="{Binding Category, StringFormat='Categoria: {0}'}" FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+      <Label Grid.Row="1" Grid.Column="1" Text="{Binding DueDate, StringFormat='{0:dd/MM/yyyy}'}" FontSize="10"/>
+      <Label Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Status}" TextColor="{Binding StatusColor}" FontSize="10" FontAttributes="Bold"/>
+     </Grid>
+    </Border>
+   </DataTemplate></CollectionView.ItemTemplate>
+  </CollectionView>
+  <Border Grid.Row="3" Padding="14,10" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}">
+   <Grid ColumnDefinitions="*,1.5*" ColumnSpacing="10"><Button Text="Cancelar" BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}" BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" Clicked="OnBackClicked"/><Button x:Name="ImportButton" Grid.Column="1" Text="Importar contas válidas" Style="{StaticResource PrimaryButton}" IsEnabled="False" Clicked="OnImportClicked"/></Grid>
+  </Border>
+ </Grid>
+</ContentPage>

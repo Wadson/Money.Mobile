@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money"
+             xmlns:models="clr-namespace:Money.Models"
+             x:Class="Money.DataCleanupPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}"
+                StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="44,*" ColumnSpacing="12">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}"
+                             BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                             WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12"
+                             Clicked="OnCancelClicked"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="1">
+                    <Label Text="Limpeza do Banco de Dados" TextColor="{StaticResource BlingTextLight}"
+                           FontSize="19" FontAttributes="Bold"/>
+                    <Label Text="Escolha somente os históricos que deseja remover"
+                           TextColor="{StaticResource BlingTextLight}" FontSize="10"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <VerticalStackLayout Grid.Row="1" Padding="14,12,14,8" Spacing="10">
+            <Border BackgroundColor="#FFF7ED" Stroke="#F59E0B" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12" Padding="12">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <mi:MauiIcon Icon="{mi:Material Icon=Warning}" IconSize="24" IconColor="#D97706"/>
+                    <Label Grid.Column="1"
+                           Text="Atenção: a exclusão de registros é permanente e não poderá ser desfeita."
+                           TextColor="#92400E" FontSize="12" FontAttributes="Bold"/>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource SelectionControlContainer}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="1">
+                        <Label Text="Selecionar todos" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                        <Label x:Name="SelectionSummaryLabel" Text="Nenhum histórico selecionado" FontSize="10"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                    </VerticalStackLayout>
+                    <CheckBox x:Name="SelectAllCheckBox" Grid.Column="1" Color="{StaticResource BlingPrimary}"
+                              CheckedChanged="OnSelectAllChanged"/>
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+
+        <CollectionView x:Name="CleanupList" Grid.Row="2" SelectionMode="None" Margin="14,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:DataCleanupItem">
+                    <Border Style="{StaticResource ContentCard}" Padding="12" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="10">
+                            <Border WidthRequest="42" HeightRequest="42" StrokeThickness="0"
+                                    BackgroundColor="{StaticResource BlingPrimary}" StrokeShape="RoundRectangle 11">
+                                <mi:MauiIcon Icon="{Binding Icon}" IconSize="24"
+                                             IconColor="{StaticResource BlingTextLight}"/>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="{Binding Name}" FontSize="13" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                <Label Text="{Binding Description}" FontSize="10" LineBreakMode="TailTruncation"
+                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                                <Label Text="{Binding CountText}" FontSize="10" TextColor="{StaticResource BlingPrimary}"/>
+                            </VerticalStackLayout>
+                            <CheckBox Grid.Column="2" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Color="{StaticResource BlingPrimary}" CheckedChanged="OnItemCheckedChanged"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Border Grid.Row="3" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                StrokeThickness="1" Padding="14,12">
+            <Grid ColumnDefinitions="*,1.5*" ColumnSpacing="10">
+                <Button Text="Cancelar" BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}"
+                        BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" HeightRequest="48"
+                        Clicked="OnCancelClicked"/>
+                <Button x:Name="DeleteButton" Grid.Column="1" Text="Excluir selecionados"
+                        ImageSource="{icons:MaterialIconSource Icon=DeleteSweep, ColorResource=BlingTextLight, IconSize=20}"
+                        Style="{StaticResource PrimaryButton}" HeightRequest="48" IsEnabled="False"
+                        Clicked="OnDeleteClicked"/>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>
