@@ -421,6 +421,17 @@ public sealed class DatabaseService
                 """);
         }
 
+        if (version < 14)
+        {
+            // O aplicativo trabalha somente com categorias simples. Preserva todos
+            // os registros existentes e remove apenas os vínculos hierárquicos legados.
+            await ExecuteAsync(db, """
+                UPDATE Categorias SET id_categoria_pai=NULL
+                WHERE id_categoria_pai IS NOT NULL;
+                PRAGMA user_version=14;
+                """);
+        }
+
         await EnsureSupplierSchemaAsync(db);
     }
 
@@ -541,27 +552,28 @@ public sealed class DatabaseService
     }
 
     public Task<List<CategoryItem>> GetCategoriesAsync(string? type = null) => QueryAsync(
-        $"""
-        WITH RECURSIVE arvore(id_categoria,nome_categoria,tipo,cor,icone,id_categoria_pai,nivel,caminho) AS (
-          SELECT id_categoria,nome_categoria,tipo,cor,icone,id_categoria_pai,1,nome_categoria
-          FROM Categorias WHERE id_usuario={CurrentUserId} AND ativo=1 AND id_categoria_pai IS NULL
-          UNION ALL
-          SELECT c.id_categoria,c.nome_categoria,c.tipo,c.cor,c.icone,c.id_categoria_pai,a.nivel+1,a.caminho||' / '||c.nome_categoria
-          FROM Categorias c JOIN arvore a ON a.id_categoria=c.id_categoria_pai
-          WHERE c.id_usuario={CurrentUserId} AND c.ativo=1
-        )
-        SELECT id_categoria,nome_categoria,tipo,cor,icone,id_categoria_pai,nivel,caminho
-        FROM arvore WHERE (@type IS NULL OR tipo=@type) ORDER BY tipo,caminho
+        """
+        SELECT id_categoria,nome_categoria,tipo,cor,icone,NULL,1,nome_categoria
+        FROM Categorias
+        WHERE id_usuario=@user AND ativo=1 AND (@type IS NULL OR tipo=@type)
+        ORDER BY tipo,nome_categoria
         """,
         r => new CategoryItem(r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetString(3),
             r.IsDBNull(4) ? null : r.GetString(4), r.IsDBNull(5) ? null : r.GetInt64(5),
             r.GetInt32(6), r.GetString(7)),
-        ("@type", type));
+        ("@user", CurrentUserId), ("@type", type));
 
     public Task<List<FinancialReportItem>> GetFinancialReportItemsAsync(
         int month, int year, long? categoryId = null, string paymentStatus = "todas",
         long? supplierId = null, long? cardId = null) => QueryAsync(
         """
+        WITH RECURSIVE categorias_selecionadas(id_categoria) AS (
+          SELECT @category WHERE @category IS NOT NULL
+          UNION ALL
+          SELECT c.id_categoria FROM Categorias c
+          JOIN categorias_selecionadas p ON c.id_categoria_pai=p.id_categoria
+          WHERE c.id_usuario=@user
+        )
         SELECT t.id_transacao,
                date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END),
                t.descricao,t.tipo,t.valor,c.id_categoria,
@@ -591,9 +603,10 @@ public sealed class DatabaseService
         ("@category", categoryId), ("@status", paymentStatus), ("@supplier", supplierId),
         ("@card", cardId));
 
-    /// <summary>Creates a root category or a dependent subcategory with a maximum of three levels.</summary>
+    /// <summary>Cria uma categoria simples. A hierarquia legada não é utilizada pela interface.</summary>
     public async Task AddCategoryAsync(string name, string type, string color, string? icon, long? parentId)
     {
+        parentId = null;
         name = name.Trim();
         if (name.Length < 2)
             throw new ArgumentException("Informe um nome com pelo menos dois caracteres.");
@@ -637,6 +650,7 @@ public sealed class DatabaseService
 
     public async Task UpdateCategoryAsync(long id, string name, string type, string color, string? icon, long? parentId)
     {
+        parentId = null;
         if (id == parentId)
             throw new ArgumentException("Uma categoria não pode depender dela mesma.");
         await using var db = new SqliteConnection(ConnectionString);
@@ -1187,8 +1201,15 @@ public sealed class DatabaseService
     }
 
     public Task<List<ContaPagar>> GetContasPagarAsync(int? mes, int? ano, bool? pagas = false,
-        long? supplierId = null, long? cardId = null) => QueryAsync(
+        long? supplierId = null, long? cardId = null, long? categoryId = null) => QueryAsync(
         """
+        WITH RECURSIVE categorias_selecionadas(id_categoria) AS (
+          SELECT @category WHERE @category IS NOT NULL
+          UNION ALL
+          SELECT c.id_categoria FROM Categorias c
+          JOIN categorias_selecionadas p ON c.id_categoria_pai=p.id_categoria
+          WHERE c.id_usuario=@user
+        )
         SELECT t.id_transacao,t.descricao,COALESCE(c.nome_categoria,'Sem categoria'),
                COALESCE(t.data_vencimento,t.data),t.valor,
                CASE WHEN t.pago=1 THEN 'Paga'
@@ -1204,12 +1225,12 @@ public sealed class DatabaseService
         LEFT JOIN Fornecedores f ON f.id_fornecedor=t.id_fornecedor
         WHERE t.id_usuario=@user AND t.tipo='despesa'
           AND (@paid IS NULL OR COALESCE(t.pago,0)=@paid)
-          AND t.data_vencimento IS NOT NULL
           AND NOT (COALESCE(t.parcelado,0)=1 AND t.id_transacao_pai IS NULL)
           AND (@month IS NULL OR CAST(strftime('%m',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=@month)
           AND (@year IS NULL OR CAST(strftime('%Y',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=@year)
           AND (@supplier IS NULL OR t.id_fornecedor=@supplier)
           AND (@card IS NULL OR t.id_cartao=@card)
+          AND (@category IS NULL OR t.id_categoria=@category)
         ORDER BY CASE WHEN t.pago=0 AND date(COALESCE(t.data_vencimento,t.data))<date('now','localtime') THEN 0 ELSE 1 END,
           COALESCE(t.data_vencimento,t.data),t.id_transacao
         """,
@@ -1222,7 +1243,7 @@ public sealed class DatabaseService
             IdFornecedor = r.IsDBNull(9) ? null : r.GetInt64(9), FornecedorNome = r.GetString(10)
         }, ("@user", CurrentUserId), ("@month", mes), ("@year", ano),
         ("@paid", pagas is null ? null : pagas.Value ? 1 : 0), ("@supplier", supplierId),
-        ("@card", cardId));
+        ("@card", cardId), ("@category", categoryId));
 
     public async Task<ResumoContasPagar> GetResumoContasPagarAsync(int? mes, int? ano)
     {

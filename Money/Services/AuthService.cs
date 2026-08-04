@@ -158,7 +158,10 @@ public sealed class AuthService(DatabaseService database)
         await db.OpenAsync();
         var name = Convert.ToString(await ScalarAsync(db, "SELECT nome FROM Usuarios WHERE id_usuario=@id AND ativo=1", ("@id", id)));
         if (string.IsNullOrWhiteSpace(name))
+        {
+            SecureStorage.Default.Remove(SessionKey);
             return false;
+        }
         SetSession(id, name);
         return true;
     }

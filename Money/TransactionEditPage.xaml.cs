@@ -60,7 +60,7 @@ public partial class TransactionEditPage : ContentPage
             TransactionDateButton.Text = data.Date.ToString("dd/MM/yyyy");
             CategoryPicker.SelectedIndex = _categories.FindIndex(x => x.Id == data.CategoryId);
             CategorySelectionButton.Text = CategoryPicker.SelectedIndex >= 0
-                ? _categories[CategoryPicker.SelectedIndex].FullPath ?? _categories[CategoryPicker.SelectedIndex].Name
+                ? _categories[CategoryPicker.SelectedIndex].Name
                 : "Selecione a categoria";
             NotesEditor.Text = data.Notes;
             SupplierPanel.IsVisible = _type == "despesa";

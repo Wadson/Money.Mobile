@@ -98,7 +98,7 @@ public partial class PayablesCsvImportPage : ContentPage
             if (amount <= 0) errors.Add("Valor deve ser maior que zero");
             if (!DateTime.TryParseExact(Cell(cells, "DataVencimento"), ["dd/MM/yyyy", "yyyy-MM-dd"], _culture, DateTimeStyles.None, out var due)) errors.Add("Data de vencimento inválida");
             var categoryName = Cell(cells, "Categoria");
-            var category = _categories.FirstOrDefault(x => Normalize(x.Name) == Normalize(categoryName) || Normalize(x.FullPath ?? "") == Normalize(categoryName));
+            var category = _categories.FirstOrDefault(x => Normalize(x.Name) == Normalize(categoryName));
             if (category is null) errors.Add($"Categoria não cadastrada: {categoryName}");
             result.Add(new PayableImportRow { LineNumber = i + 1, Description = description, Amount = amount, DueDate = due, Category = categoryName, CategoryId = category?.Id, Supplier = Cell(cells, "Fornecedor"), Notes = Cell(cells, "Observacoes"), Error = string.Join(" · ", errors) });
         }

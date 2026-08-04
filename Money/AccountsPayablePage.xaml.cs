@@ -17,6 +17,7 @@ public partial class AccountsPayablePage : ContentPage
     private long? _selectedSupplierId;
     private long? _selectedCardId;
     private string? _selectedCategory;
+    private long? _selectedCategoryId;
     private bool? _paidFilter = false;
     private bool _loading;
 
@@ -78,11 +79,11 @@ public partial class AccountsPayablePage : ContentPage
         options.AddRange(_categories.Select((category, index) => new SelectionOption
         {
             Index = index + 1,
-            Label = category.FullPath ?? category.Name,
+            Label = category.Name,
             ImageSource = CategoryVisualResolver.Icon(category),
             Background = CategoryVisualResolver.Background(category),
             Foreground = CategoryVisualResolver.Foreground(category),
-            IsSelected = string.Equals(_selectedCategory, category.Name, StringComparison.OrdinalIgnoreCase)
+            IsSelected = _selectedCategoryId == category.Id
         }));
 
         var page = new OptionSelectionPage("Selecione a categoria", options);
@@ -91,12 +92,14 @@ public partial class AccountsPayablePage : ContentPage
             if (option.Index == 0)
             {
                 _selectedCategory = null;
+                _selectedCategoryId = null;
                 CategorySelectionButton.Text = "Todas as categorias";
                 return;
             }
             var category = _categories[option.Index - 1];
             _selectedCategory = category.Name;
-            CategorySelectionButton.Text = category.FullPath ?? category.Name;
+            _selectedCategoryId = category.Id;
+            CategorySelectionButton.Text = category.Name;
         };
         await Navigation.PushModalAsync(page);
     }
@@ -130,10 +133,7 @@ public partial class AccountsPayablePage : ContentPage
         {
             var (month, year) = SelectedPeriod();
             var items = await _database.GetContasPagarAsync(month, year, _paidFilter,
-                _selectedSupplierId, _selectedCardId);
-            if (!string.IsNullOrWhiteSpace(_selectedCategory))
-                items = items.Where(x => string.Equals(x.Categoria, _selectedCategory,
-                    StringComparison.OrdinalIgnoreCase)).ToList();
+                _selectedSupplierId, _selectedCardId, _selectedCategoryId);
             var summary = new ResumoContasPagar(items.Count, items.Sum(x => x.Valor),
                 items.Count(x => x.Status == "Vencida"));
             _items = items;
@@ -162,6 +162,7 @@ public partial class AccountsPayablePage : ContentPage
         _selectedMonth = null;
         _selectedYear = null;
         _selectedCategory = null;
+        _selectedCategoryId = null;
         _paidFilter = false;
         _selectedSupplierId = null;
         _selectedCardId = null;
@@ -384,6 +385,7 @@ public partial class AccountsPayablePage : ContentPage
         _selectedMonth = null;
         _selectedYear = null;
         _selectedCategory = null;
+        _selectedCategoryId = null;
         _paidFilter = false;
         _selectedSupplierId = null;
         _selectedCardId = null;

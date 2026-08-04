@@ -102,7 +102,7 @@
             <summary>Creates and migrates the database on first use.</summary>
         </member>
         <member name="M:Money.Services.DatabaseService.AddCategoryAsync(System.String,System.String,System.String,System.String,System.Nullable{System.Int64})">
-            <summary>Creates a root category or a dependent subcategory with a maximum of three levels.</summary>
+            <summary>Cria uma categoria simples. A hierarquia legada não é utilizada pela interface.</summary>
         </member>
         <member name="M:Money.Services.DatabaseService.GetDashboardAsync(System.Nullable{System.Int32},System.Nullable{System.Int32})">
             <summary>Loads consolidated dashboard metrics for the current month.</summary>

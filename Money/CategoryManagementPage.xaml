@@ -96,9 +96,9 @@
                                     WidthRequest="36" HeightRequest="36" Padding="0"/>
                         </Grid>
 
-                        <!-- Nível -->
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="NÍVEL DA CATEGORIA" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                        <!-- Compatibilidade interna; hierarquia desativada -->
+                        <VerticalStackLayout x:Name="LevelPanel" IsVisible="False" Spacing="6">
+                            <Label Text="CATEGORIA" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
                             <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" StrokeThickness="1" Stroke="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="10"/>
@@ -106,7 +106,7 @@
                                 <Picker x:Name="LevelPicker" SelectedIndexChanged="OnLevelChanged" Margin="8,0" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}">
                                     <Picker.Items>
                                         <x:String>Categoria principal</x:String>
-                                        <x:String>Subcategoria</x:String>
+                                        <x:String>Categoria</x:String>
                                     </Picker.Items>
                                 </Picker>
                             </Border>
@@ -127,14 +127,14 @@
                             </Grid>
                         </VerticalStackLayout>
 
-                        <!-- Categoria Pai -->
+                        <!-- Compatibilidade interna; painel permanentemente oculto -->
                         <VerticalStackLayout x:Name="ParentPanel" IsVisible="False" Spacing="6">
-                            <Label Text="CATEGORIA PAI" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Label Text="CATEGORIA" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
                             <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" StrokeThickness="1" Stroke="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
-                                <Picker x:Name="ParentPicker" Title="Selecione a categoria pai" Margin="8,0" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                                <Picker x:Name="ParentPicker" Title="Categoria" Margin="8,0" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
                             </Border>
                             <Label Text="Somente categorias do mesmo tipo e até 2 níveis"
                                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" Margin="2,0,0,0"/>

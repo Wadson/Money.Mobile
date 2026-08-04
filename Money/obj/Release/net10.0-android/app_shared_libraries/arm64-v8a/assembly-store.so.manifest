@@ -60,7 +60,7 @@
 0x32243413e774362a di:115 mi:115 do:5871570 ds:8513 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.CardView.dll
 0x326256f7722d4fe5 di:106 mi:106 do:5602150 ds:17023 ddo:0 dds:0 cdo:0 cds:0 SkiaSharp.Views.Maui.Controls.dll
 0x329753a17a517811 di:54 mi:54 do:3198942 ds:9979 ddo:0 dds:0 cdo:0 cds:0 fr/Microsoft.Maui.Controls.resources
-0x34276bbdc40a6885 di:143 mi:143 do:6788706 ds:627726 ddo:0 dds:0 cdo:0 cds:0 Money.dll
+0x34276bbdc40a6885 di:143 mi:143 do:6788706 ds:629187 ddo:0 dds:0 cdo:0 cds:0 Money.dll
 0x34dfd74fe2afcf37 di:97 mi:97 do:4905102 ds:402800 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Maui
 0x34e292762d9615df di:48 mi:48 do:3139020 ds:9982 ddo:0 dds:0 cdo:0 cds:0 cs/Microsoft.Maui.Controls.resources.dll
 0x3508234247f48404 di:95 mi:95 do:3951439 ds:880395 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Maui.Controls
@@ -135,7 +135,7 @@
 0x78a45e51311409b6 di:122 mi:122 do:6102031 ds:63587 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.Fragment.dll
 0x7adb8da2ac89b647 di:53 mi:53 do:3188965 ds:9977 ddo:0 dds:0 cdo:0 cds:0 fi/Microsoft.Maui.Controls.resources.dll
 0x7b150145c0a9058c di:83 mi:83 do:3756149 ds:91539 ddo:0 dds:0 cdo:0 cds:0 Microsoft.Data.Sqlite
-0x7b2a0b97eecb3c10 di:143 mi:143 do:6788706 ds:627726 ddo:0 dds:0 cdo:0 cds:0 Money
+0x7b2a0b97eecb3c10 di:143 mi:143 do:6788706 ds:629187 ddo:0 dds:0 cdo:0 cds:0 Money
 0x7bef86a4335c4870 di:6 mi:6 do:71477 ds:54863 ddo:0 dds:0 cdo:0 cds:0 System.ComponentModel.TypeConverter
 0x7c0820144cd34d6a di:71 mi:71 do:3368755 ds:9986 ddo:0 dds:0 cdo:0 cds:0 sk/Microsoft.Maui.Controls.resources.dll
 0x7c60acf6404e96b6 di:128 mi:128 do:6218085 ds:30306 ddo:0 dds:0 cdo:0 cds:0 Xamarin.AndroidX.Navigation.Common.Android.dll

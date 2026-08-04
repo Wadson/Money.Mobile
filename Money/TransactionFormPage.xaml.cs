@@ -96,8 +96,7 @@ public partial class TransactionFormPage : ContentPage
     private async Task LoadCategoriesAsync()
     {
         _categories = await _database.GetCategoriesAsync(_selectedType);
-        CategoryPicker.ItemsSource = _categories.Select(x =>
-            $"{new string('·', Math.Max(0, x.Level - 1))} {x.Name}".Trim()).ToList();
+        CategoryPicker.ItemsSource = _categories.Select(x => x.Name).ToList();
         CategoryPicker.SelectedIndex = -1;
         CategorySelectionButton.Text = "Selecione uma categoria";
     }

@@ -62,7 +62,7 @@ public partial class App : Application
 
             await _auth.InitializeAsync();
             // Modo local de usuário único. O fluxo de login permanece disponível para reativação futura.
-            await _auth.ActivateLocalUserAsync();
+            var restoredSession = await _auth.TryRestoreSessionAsync();
             var settings = await _database.GetSettingsAsync();
             UserAppTheme = settings.Theme switch
             {
@@ -71,9 +71,9 @@ public partial class App : Application
                 _ => AppTheme.Unspecified
             };
 
-            var shell = new AppShell();
-            shell.SetMainPage(_services.GetRequiredService<MainPage>());
-            window.Page = shell;
+            window.Page = restoredSession
+                ? CreateAuthenticatedShell()
+                : CreateLoginNavigation();
         }
         catch (Exception ex)
         {
@@ -103,6 +103,37 @@ public partial class App : Application
                 }
             };
         }
+    }
+
+    public void ShowAuthenticatedArea()
+    {
+        if (Windows.Count > 0)
+            Windows[0].Page = CreateAuthenticatedShell();
+    }
+
+    public void ShowLogin()
+    {
+        _auth.Logout();
+        if (Windows.Count > 0)
+            Windows[0].Page = CreateLoginNavigation();
+    }
+
+    private AppShell CreateAuthenticatedShell()
+    {
+        var shell = new AppShell();
+        shell.SetMainPage(_services.GetRequiredService<MainPage>());
+        return shell;
+    }
+
+    private NavigationPage CreateLoginNavigation()
+    {
+        var page = _services.GetRequiredService<LoginPage>();
+        NavigationPage.SetHasNavigationBar(page, false);
+        return new NavigationPage(page)
+        {
+            BarBackgroundColor = ThemeColor.Get("BlingCard"),
+            BarTextColor = ThemeColor.Get("BlingText")
+        };
     }
 
     private static string GetCompleteErrorMessage(Exception exception)

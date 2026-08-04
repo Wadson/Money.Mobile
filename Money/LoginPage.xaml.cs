@@ -21,7 +21,7 @@ public partial class LoginPage : ContentPage
             ErrorLabel.IsVisible = true;
             return;
         }
-        Application.Current!.Windows[0].Page = new AppShell();
+        (Application.Current as App)?.ShowAuthenticatedArea();
     }
 
     private async void OnRegisterClicked(object? sender, EventArgs e)
@@ -29,4 +29,10 @@ public partial class LoginPage : ContentPage
 
     private async void OnForgotClicked(object? sender, EventArgs e)
         => await Navigation.PushModalAsync(new RecoveryPage(_auth));
+
+    private void OnTogglePasswordClicked(object? sender, EventArgs e)
+    {
+        PasswordEntry.IsPassword = !PasswordEntry.IsPassword;
+        PasswordVisibilityButton.Text = PasswordEntry.IsPassword ? "Mostrar" : "Ocultar";
+    }
 }

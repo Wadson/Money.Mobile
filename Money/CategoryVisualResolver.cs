@@ -57,7 +57,7 @@ public static class CategoryVisualResolver
     public static SelectionOption Option(CategoryItem category, int index, bool selected) => new()
     {
         Index = index,
-        Label = category.FullPath ?? category.Name,
+        Label = category.Name,
         ImageSource = Icon(category),
         // Em fundos escuros, cores de categorias como preto/grafite perdem contraste.
         Foreground = IsDarkTheme() ? Colors.White : Foreground(category),

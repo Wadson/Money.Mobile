@@ -70,7 +70,7 @@ public partial class ReportPage : ContentPage
         };
         options.AddRange(_categories.Select((category, index) => new SelectionOption
         {
-            Index = index + 1, Label = category.FullPath ?? category.Name,
+            Index = index + 1, Label = category.Name,
             ImageSource = CategoryVisualResolver.Icon(category),
             Background = CategoryVisualResolver.Background(category),
             Foreground = CategoryVisualResolver.Foreground(category),
@@ -89,7 +89,7 @@ public partial class ReportPage : ContentPage
             {
                 var category = _categories[option.Index - 1];
                 _categoryId = category.Id;
-                _categoryName = category.FullPath ?? category.Name;
+                _categoryName = category.Name;
                 CategoryButton.Text = _categoryName;
             }
             ResetResult();

@@ -21,7 +21,7 @@ public partial class BudgetManagementPage : ContentPage
         {
             PeriodLabel.Text = _period.ToString("MMMM / yyyy", _culture);
             _categories = await _database.GetCategoriesAsync("despesa");
-            CategoryPicker.ItemsSource = _categories.Select(x => x.FullPath ?? x.Name).ToList();
+            CategoryPicker.ItemsSource = _categories.Select(x => x.Name).ToList();
             _items = await _database.GetBudgetsAsync(_period.Month, _period.Year);
             BudgetsContainer.Children.Clear();
             foreach (var item in _items) BudgetsContainer.Children.Add(Card(item));
@@ -71,7 +71,7 @@ public partial class BudgetManagementPage : ContentPage
         var item = _items.Single(x => x.Id == id); _editingId = id; FormTitle.Text = "Editar orçamento";
         CategoryPicker.SelectedIndex = _categories.FindIndex(x => x.Id == item.CategoryId);
         CategorySelectionButton.Text = CategoryPicker.SelectedIndex >= 0
-            ? _categories[CategoryPicker.SelectedIndex].FullPath ?? _categories[CategoryPicker.SelectedIndex].Name
+            ? _categories[CategoryPicker.SelectedIndex].Name
             : "Selecione a categoria";
         LimitEntry.Text = item.Limit.ToString("N2", _culture); NotesEditor.Text = item.Notes; FormCard.IsVisible = true;
     }

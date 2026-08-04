@@ -111,7 +111,7 @@ public partial class RegisterPage : ContentPage
             );
 
             await Navigation.PopModalAsync();
-            Application.Current!.Windows[0].Page = new AppShell();
+            (Application.Current as App)?.ShowAuthenticatedArea();
         }
         catch (Exception ex)
         {
@@ -128,6 +128,28 @@ public partial class RegisterPage : ContentPage
     private async void OnCancelClicked(object? sender, EventArgs e)
     {
         await Navigation.PopModalAsync();
+    }
+
+    private async void OnSelectRecoveryQuestionClicked(object? sender, EventArgs e)
+    {
+        var questions = RecoveryQuestionPicker.ItemsSource?.Cast<object>()
+            .Select(x => x.ToString() ?? string.Empty).ToList()
+            ?? RecoveryQuestionPicker.Items.Select(x => x?.ToString() ?? string.Empty).ToList();
+        var options = questions.Select((question, index) => new SelectionOption
+        {
+            Index = index,
+            Label = question,
+            Background = ThemeColor.Get("BlingCard"),
+            Foreground = ThemeColor.Get("BlingPrimary"),
+            IsSelected = RecoveryQuestionPicker.SelectedIndex == index
+        });
+        var page = new OptionSelectionPage("Pergunta de segurança", options);
+        page.Selected += (_, option) =>
+        {
+            RecoveryQuestionPicker.SelectedIndex = option.Index;
+            RecoveryQuestionButton.Text = option.Label;
+        };
+        await Navigation.PushModalAsync(page);
     }
 
     private async void OnLoginTapped(object sender, EventArgs e)

@@ -41,7 +41,7 @@ public partial class PlanningPage : ContentPage
             ErrorLabel.IsVisible = false;
             _categories = await _database.GetCategoriesAsync("despesa");
             GoalCategoryPicker.ItemsSource = new[] { "Sem categoria" }
-                .Concat(_categories.Select(x => x.FullPath ?? x.Name)).ToList();
+                .Concat(_categories.Select(x => x.Name)).ToList();
             if (GoalCategoryPicker.SelectedIndex < 0) GoalCategoryPicker.SelectedIndex = 0;
             RenderGoals(await _database.GetMetasAsync());
             RenderReminders(await _database.GetLembretesAsync());
@@ -125,7 +125,7 @@ public partial class PlanningPage : ContentPage
     {
         if (!TryMoney(GoalTargetEntry.Text, out var target) || target <= 0) { ShowError("Informe um valor objetivo maior que zero."); return; }
         if (!TryMoney(GoalCurrentEntry.Text, out var current)) current = 0;
-        var category = GoalCategoryPicker.SelectedIndex > 0 ? _categories[GoalCategoryPicker.SelectedIndex - 1].FullPath ?? _categories[GoalCategoryPicker.SelectedIndex - 1].Name : null;
+        var category = GoalCategoryPicker.SelectedIndex > 0 ? _categories[GoalCategoryPicker.SelectedIndex - 1].Name : null;
         try
         {
             await _database.SaveMetaAsync(null, GoalNameEntry.Text ?? "", target, current,

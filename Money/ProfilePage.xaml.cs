@@ -24,4 +24,11 @@ public partial class ProfilePage : ContentPage
         catch (Exception ex) { await ThemedDialog.ShowAsync(this, "Atenção", SqliteErrorMessage.ToFriendly(ex)); }
     }
     private async void OnCloseClicked(object? s, EventArgs e)=>await Navigation.PopModalAsync();
+    private async void OnLogoutClicked(object? sender, EventArgs e)
+    {
+        var confirmed = await ThemedDialog.ConfirmAsync(this, "Sair da conta",
+            "Deseja encerrar sua sessão neste dispositivo?", "Sair", "Cancelar");
+        if (confirmed)
+            (Application.Current as App)?.ShowLogin();
+    }
 }

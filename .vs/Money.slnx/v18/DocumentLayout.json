@@ -1,7 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Projetos\\Money\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A8F13EE6-606C-8FA5-90E5-BA15B3411BF8}|Money\\Money.csproj|d:\\projetos\\money\\money\\resources\\styles\\colors.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{A8F13EE6-606C-8FA5-90E5-BA15B3411BF8}|Money\\Money.csproj|solutionrelative:money\\resources\\styles\\colors.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +14,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -17,11 +22,20 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:1:0:{fabf9319-47eb-497e-b8f6-d9f73fba5f55}"
+              "Name": "ST:3:0:{fabf9319-47eb-497e-b8f6-d9f73fba5f55}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:3:0:{fabf9319-47eb-497e-b8f6-d9f73fba5f55}"
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Colors.xaml",
+              "DocumentMoniker": "D:\\Projetos\\Money\\Money\\Resources\\Styles\\Colors.xaml",
+              "RelativeDocumentMoniker": "Money\\Resources\\Styles\\Colors.xaml",
+              "ToolTip": "D:\\Projetos\\Money\\Money\\Resources\\Styles\\Colors.xaml",
+              "RelativeToolTip": "Money\\Resources\\Styles\\Colors.xaml",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-08-04T11:33:11.624Z",
+              "EditorCaption": ""
             }
           ]
         }

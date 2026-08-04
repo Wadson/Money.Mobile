@@ -75,7 +75,7 @@ public partial class CategoryManagementPage : ContentPage
                                    (filter == "income" && x.Type == "receita")).ToList();
         var search = NormalizeSearchText(CategorySearchBar.Text ?? string.Empty);
         if (!string.IsNullOrWhiteSpace(search))
-            items = items.Where(x => NormalizeSearchText(x.FullPath ?? x.Name).Contains(search,
+            items = items.Where(x => NormalizeSearchText(x.Name).Contains(search,
                 StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (items.Count == 0)
@@ -87,7 +87,7 @@ public partial class CategoryManagementPage : ContentPage
         }
 
         EmptyState.IsVisible = false;
-        var ordered = items.OrderBy(x => x.Level).ThenBy(x => x.Name).ToList();
+        var ordered = items.OrderBy(x => x.Name).ToList();
         var visibleItems = ordered.Take(_visibleCategoryCount).ToList();
         CountLabel.Text = visibleItems.Count < ordered.Count
             ? $"{ordered.Count} categorias • exibindo {visibleItems.Count}"
@@ -103,7 +103,7 @@ public partial class CategoryManagementPage : ContentPage
 
     private Border CreateCategoryCard(CategoryItem item)
     {
-        var indent = (item.Level - 1) * 20;
+        const int indent = 0;
 
         var card = new Border
         {
@@ -154,7 +154,7 @@ public partial class CategoryManagementPage : ContentPage
 
         var levelBadge = new Border
         {
-            BackgroundColor = item.Level == 1 ? ThemeColor.Get("BlingCard") : ThemeColor.Get("BlingCard"),
+            BackgroundColor = ThemeColor.Get("BlingCard"),
             Padding = new Thickness(10, 4),
             StrokeShape = new RoundRectangle
             {
@@ -165,7 +165,7 @@ public partial class CategoryManagementPage : ContentPage
         };
         var levelText = new Label
         {
-            Text = item.Level == 1 ? "Principal" : $"Nível {item.Level}",
+            Text = "Categoria",
             TextColor = ThemeColor.Get("BlingText"),
             FontSize = 10,
             FontAttributes = FontAttributes.Bold
@@ -325,7 +325,7 @@ public partial class CategoryManagementPage : ContentPage
     {
         _editingId = item.Id;
         FormTitle.Text = "Editar categoria";
-        LevelPicker.SelectedIndex = item.ParentId is null ? 0 : 1;
+        LevelPicker.SelectedIndex = 0;
         NameEntry.Text = item.Name;
         ColorEntry.Text = item.Color ?? BlingPalette.PrimaryHex;
         ColorPreview.BackgroundColor = ThemeColor.Parse(item.Color);
@@ -508,10 +508,10 @@ public partial class CategoryManagementPage : ContentPage
             return;
         }
 
-        var isChild = LevelPicker.SelectedIndex == 1;
+        var isChild = false;
         if (isChild && ParentPicker.SelectedIndex <= 0)
         {
-            ShowError("Selecione uma categoria pai para a subcategoria.");
+            ShowError("Selecione uma categoria.");
             return;
         }
 
@@ -573,7 +573,7 @@ public partial class CategoryManagementPage : ContentPage
     {
         var confirm = await ThemedDialog.ConfirmDeleteAsync(this,
             "Excluir categoria",
-            $"Tem certeza que deseja excluir '{item.Name}'?{Environment.NewLine}As subcategorias também serão removidas."
+            $"Tem certeza que deseja excluir a categoria '{item.Name}'?"
         );
 
         if (!confirm)

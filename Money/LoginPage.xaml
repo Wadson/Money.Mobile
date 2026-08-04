@@ -54,7 +54,19 @@
                 <Label Text="Email" Style="{StaticResource CardCaption}" Margin="0,10,0,0"/>
                 <Border Style="{StaticResource InputContainer}"><Entry x:Name="EmailEntry" Placeholder="voce@email.com" Keyboard="Email" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
                 <Label Text="Senha" Style="{StaticResource CardCaption}"/>
-                <Border Style="{StaticResource InputContainer}"><Entry x:Name="PasswordEntry" Placeholder="Sua senha" IsPassword="True" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                <Border Style="{StaticResource InputContainer}" Padding="12,0,4,0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                        <Entry x:Name="PasswordEntry" Placeholder="Sua senha" IsPassword="True"
+                               BackgroundColor="Transparent"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                        <Button x:Name="PasswordVisibilityButton" Grid.Column="1" Text="Mostrar"
+                                BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}"
+                                BorderWidth="0" Padding="8,0" HeightRequest="44"
+                                FontSize="12" FontAttributes="Bold"
+                                Clicked="OnTogglePasswordClicked"/>
+                    </Grid>
+                </Border>
                 <Grid ColumnDefinitions="*,Auto">
                     <Border Style="{StaticResource SelectionControlContainer}"><HorizontalStackLayout>
                         <CheckBox x:Name="RememberCheck"/>

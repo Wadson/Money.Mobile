@@ -109,7 +109,12 @@
                         <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
                                 StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
                                 Padding="12,2" HeightRequest="46">
-                            <Picker x:Name="RecoveryQuestionPicker" Title="Selecione uma pergunta"
+                            <Button x:Name="RecoveryQuestionButton" Text="Selecione uma pergunta"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderWidth="0" HorizontalOptions="Fill" HeightRequest="44"
+                                    Clicked="OnSelectRecoveryQuestionClicked"/>
+                            <Picker x:Name="RecoveryQuestionPicker" Title="Selecione uma pergunta" IsVisible="False"
                                     FontSize="14" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
                                     TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" VerticalOptions="Center">
                                 <Picker.Items>
