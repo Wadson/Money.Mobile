@@ -38,6 +38,7 @@ namespace Money
             builder.Services.AddTransient<MonthlyOverviewPage>();
             builder.Services.AddTransient<MorePage>();
             builder.Services.AddTransient<BackupPage>();
+            builder.Services.AddTransient<PaymentReversalPage>();
             builder.Services.AddTransient<ProfilePage>();
             builder.Services.AddTransient<DataCleanupPage>();
             builder.Services.AddTransient<PayablesCsvImportPage>();

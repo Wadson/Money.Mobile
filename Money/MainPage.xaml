@@ -109,10 +109,14 @@
                     </Border>
 
                     <!-- Quick actions -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                            StrokeThickness="1" StrokeShape="RoundRectangle 18" Padding="12" Shadow="{StaticResource CardShadow}">
                     <VerticalStackLayout Spacing="11">
                         <Label Text="Ações rápidas" TextColor="{StaticResource BlingPrimary}" FontSize="18" FontAttributes="Bold"/>
-                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="9">
-                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" StrokeThickness="0" HeightRequest="76"
+                        <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="6">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" Shadow="{StaticResource CardShadow}" HeightRequest="82"
                                     StrokeShape="RoundRectangle 16">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnQuickExpenseTapped"/>
@@ -120,50 +124,64 @@
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center" VerticalOptions="Center">
                                     <mi:MauiIcon Icon="{mi:Material Icon=TrendingDown}" IconSize="30" IconColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
                                                  WidthRequest="38" HeightRequest="38" HorizontalOptions="Center"/>
-                                    <Label Text="Despesa" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" FontAttributes="Bold"/>
+                                    <Label Text="Despesa" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
                                 </VerticalStackLayout>
                             </Border>
-                            <Border Grid.Column="1" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" StrokeThickness="0"
-                                    HeightRequest="76" StrokeShape="RoundRectangle 16">
+                            <Border Grid.Column="1" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" Shadow="{StaticResource CardShadow}"
+                                    HeightRequest="82" StrokeShape="RoundRectangle 16">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnQuickIncomeTapped"/>
                                 </Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center" VerticalOptions="Center">
                                     <mi:MauiIcon Icon="{mi:Material Icon=TrendingUp}" IconSize="30" IconColor="{StaticResource BlingPrimary}"
                                                  WidthRequest="38" HeightRequest="38" HorizontalOptions="Center"/>
-                                    <Label Text="Receita" TextColor="{StaticResource BlingPrimary}" FontSize="13" FontAttributes="Bold"/>
+                                    <Label Text="Receita" TextColor="{StaticResource BlingPrimary}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
                                 </VerticalStackLayout>
                             </Border>
-                            <Border Grid.Column="2" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" StrokeThickness="0"
-                                    HeightRequest="76" StrokeShape="RoundRectangle 16">
+                            <Border Grid.Column="2" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" Shadow="{StaticResource CardShadow}"
+                                    HeightRequest="82" StrokeShape="RoundRectangle 16">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnQuickPayTapped"/>
                                 </Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center" VerticalOptions="Center">
                                     <mi:MauiIcon Icon="{mi:Material Icon=ReceiptLong}" IconSize="30" IconColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
                                                  WidthRequest="38" HeightRequest="38" HorizontalOptions="Center"/>
-                                    <Label Text="Pagar" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" FontAttributes="Bold"/>
+                                    <Label Text="Pagar Conta" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
                                 </VerticalStackLayout>
                             </Border>
-                            <Border Grid.Column="3" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" StrokeThickness="0"
-                                    HeightRequest="76" StrokeShape="RoundRectangle 16">
+                            <Border Grid.Column="3" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" Shadow="{StaticResource CardShadow}"
+                                    HeightRequest="82" StrokeShape="RoundRectangle 16">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnQuickCardsTapped"/>
                                 </Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3" HorizontalOptions="Center" VerticalOptions="Center">
                                     <mi:MauiIcon Icon="{mi:Material Icon=CreditCard}" IconSize="30" IconColor="{StaticResource BlingPrimary}"
                                                  WidthRequest="38" HeightRequest="38" HorizontalOptions="Center"/>
-                                    <Label Text="Cartões" TextColor="{StaticResource BlingPrimary}" FontSize="13" FontAttributes="Bold"/>
+                                    <Label Text="Cartões" TextColor="{StaticResource BlingPrimary}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Grid.Column="4"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1"
+                                    Shadow="{StaticResource CardShadow}" HeightRequest="82" StrokeShape="RoundRectangle 16">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnQuickAccountsTapped"/></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <mi:MauiIcon Icon="{mi:Material Icon=AccountBalanceWallet}" IconSize="30" IconColor="{StaticResource BlingPrimary}" WidthRequest="38" HeightRequest="38" HorizontalOptions="Center"/>
+                                    <Label Text="Contas e Carteiras" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaxLines="2"/>
                                 </VerticalStackLayout>
                             </Border>
                         </Grid>
                     </VerticalStackLayout>
+                    </Border>
 
                     <!-- Upcoming bills -->
                     <VerticalStackLayout Spacing="11">
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Spacing="1">
-                                <Label Text="Próximas contas" TextColor="{StaticResource BlingPrimary}" FontSize="18" FontAttributes="Bold"/>
+                                <Label Text="Contas vencidas" TextColor="{StaticResource BlingPrimary}" FontSize="18" FontAttributes="Bold"/>
                                 <Label x:Name="OverdueSummaryLabel" Text="Nenhuma conta vencida"
                                        TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14"/>
                             </VerticalStackLayout>
@@ -207,6 +225,40 @@
                             <VerticalStackLayout x:Name="TransactionsContainer" Spacing="0"/>
                         </Border>
                     </VerticalStackLayout>
+
+                    <!-- Mini dashboard: composição transparente do balanço mensal -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                            StrokeThickness="1" Padding="16" StrokeShape="RoundRectangle 14" Shadow="{StaticResource CardShadow}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Resumo detalhado do mês" TextColor="{StaticResource BlingPrimary}" FontSize="16" FontAttributes="Bold"/>
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="9" RowSpacing="9">
+                                <mi:MauiIcon Icon="{mi:Material Icon=TrendingUp}" IconSize="19" IconColor="{StaticResource BlingPrimary}"/>
+                                <Label Grid.Column="1" Text="Receitas confirmadas / salários" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                                <Label x:Name="DetailIncomeLabel" Grid.Column="2" Text="R$ 0,00" TextColor="{StaticResource BlingPrimary}" FontSize="12" FontAttributes="Bold"/>
+
+                                <mi:MauiIcon Grid.Row="1" Icon="{mi:Material Icon=CheckCircle}" IconSize="19" IconColor="{StaticResource BlingPrimary}"/>
+                                <Label Grid.Row="1" Grid.Column="1" Text="Despesas pagas" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                                <Label x:Name="DetailPaidExpensesLabel" Grid.Row="1" Grid.Column="2" Text="R$ 0,00" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12" FontAttributes="Bold"/>
+
+                                <mi:MauiIcon Grid.Row="2" Icon="{mi:Material Icon=Schedule}" IconSize="19" IconColor="{StaticResource BlingPrimary}"/>
+                                <Label Grid.Row="2" Grid.Column="1" Text="Despesas pendentes (a vencer)" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                                <Label x:Name="DetailPendingExpensesLabel" Grid.Row="2" Grid.Column="2" Text="R$ 0,00" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12" FontAttributes="Bold"/>
+
+                                <mi:MauiIcon Grid.Row="3" Icon="{mi:Material Icon=CreditCard}" IconSize="19" IconColor="{StaticResource BlingPrimary}"/>
+                                <Label Grid.Row="3" Grid.Column="1" Text="Gastos em cartão de crédito" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                                <Label x:Name="DetailCardExpensesLabel" Grid.Row="3" Grid.Column="2" Text="R$ 0,00" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12" FontAttributes="Bold"/>
+
+                                <mi:MauiIcon Grid.Row="4" Icon="{mi:Material Icon=AccountBalance}" IconSize="19" IconColor="{StaticResource BlingPrimary}"/>
+                                <Label Grid.Row="4" Grid.Column="1" Text="Saldo em contas bancárias (atual)" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                                <Label x:Name="DetailBankBalanceLabel" Grid.Row="4" Grid.Column="2" Text="R$ 0,00" TextColor="{StaticResource BlingPrimary}" FontSize="12" FontAttributes="Bold"/>
+
+                                <BoxView Grid.Row="5" Grid.ColumnSpan="3" HeightRequest="1" VerticalOptions="Start" Color="{StaticResource BlingPrimary}"/>
+                                <Label Grid.Row="5" Grid.Column="1" Text="Resultado líquido do mês" Margin="0,7,0,0" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12" FontAttributes="Bold"/>
+                                <Label x:Name="DetailNetResultLabel" Grid.Row="5" Grid.Column="2" Text="R$ 0,00" Margin="0,7,0,0" TextColor="{StaticResource BlingPrimary}" FontSize="13" FontAttributes="Bold"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
 
                     <!-- Secondary long-term view -->
                     <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" Padding="18"

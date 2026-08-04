@@ -55,6 +55,8 @@ public partial class MorePage : ContentPage
         => await Navigation.PushModalAsync(new AccountManagementPage(_database));
     private async void OnBudgetsTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new BudgetManagementPage(_database));
+    private async void OnPaymentReversalTapped(object? sender, TappedEventArgs e)
+        => await Navigation.PushModalAsync(new PaymentReversalPage(_database));
     private async void OnBackupTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new BackupPage(_backup));
     private async void OnBackClicked(object? sender, EventArgs e) => await Navigation.PopModalAsync();

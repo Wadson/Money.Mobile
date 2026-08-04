@@ -351,6 +351,36 @@ public partial class TransactionFormPage : ContentPage
         await Navigation.PushModalAsync(page);
     }
 
+    private async void OnSelectDestinationAccountClicked(object? sender, EventArgs e)
+    {
+        if (_accounts.Count == 0)
+        {
+            await ThemedDialog.ShowAsync(this, "Conta de destino",
+                "Cadastre uma conta bancária antes de realizar uma transferência.");
+            return;
+        }
+
+        var options = _accounts.Select((account, index) => new SelectionOption
+        {
+            Index = index,
+            Label = $"{account.Name} · {account.Balance.ToString("C2", _culture)}",
+            ImageSource = account.Type is "poupanca" or "investimento"
+                ? MaterialIcons.Savings
+                : MaterialIcons.AccountBalance,
+            Background = ThemeColor.Get("BlingCard"),
+            Foreground = ThemeColor.Get("BlingPrimary"),
+            IsSelected = DestinationAccountPicker.SelectedIndex == index
+        });
+
+        var page = new OptionSelectionPage("Selecione a conta de destino", options);
+        page.Selected += (_, option) =>
+        {
+            DestinationAccountPicker.SelectedIndex = option.Index;
+            DestinationAccountSelectionButton.Text = _accounts[option.Index].Name;
+        };
+        await Navigation.PushModalAsync(page);
+    }
+
     private async void OnSelectSupplierClicked(object? sender, EventArgs e)
     {
         var options = new List<SelectionOption>

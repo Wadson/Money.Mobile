@@ -57,9 +57,9 @@
         </Grid>
 
         <!-- CORPO ROLÁVEL -->
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Always">
 
-            <VerticalStackLayout Padding="16" Spacing="14">
+            <VerticalStackLayout Padding="16,16,16,80" Spacing="14">
 
                 <!-- CARD DO FORMULÁRIO -->
                 <Border x:Name="FormCard" 

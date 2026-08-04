@@ -235,22 +235,24 @@ public sealed class DatabaseService
 
                 DROP VIEW IF EXISTS vw_resumo_mensal;
                 CREATE VIEW vw_resumo_mensal AS
-                SELECT id_usuario,strftime('%Y-%m',data) mes_ano,
+                SELECT id_usuario,
+                  strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END) mes_ano,
                   SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END) total_receitas,
                   SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) total_despesas,
                   SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)-
                   SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) saldo_mes
                 FROM Transacoes WHERE pago=1
                   AND NOT(parcelado=1 AND id_transacao_pai IS NULL)
-                GROUP BY id_usuario,strftime('%Y-%m',data);
+                GROUP BY id_usuario,
+                  strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END);
                 DROP VIEW IF EXISTS vw_gastos_categoria;
                 CREATE VIEW vw_gastos_categoria AS
                 SELECT t.id_usuario,c.nome_categoria,c.tipo,c.cor,
-                  strftime('%Y-%m',t.data) mes_ano,SUM(t.valor) total
+                  strftime('%Y-%m',COALESCE(t.data_vencimento,t.data)) mes_ano,SUM(t.valor) total
                 FROM Transacoes t JOIN Categorias c ON c.id_categoria=t.id_categoria
                 WHERE t.pago=1 AND t.tipo='despesa'
                   AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL)
-                GROUP BY t.id_usuario,c.id_categoria,strftime('%Y-%m',t.data);
+                GROUP BY t.id_usuario,c.id_categoria,strftime('%Y-%m',COALESCE(t.data_vencimento,t.data));
                 DROP VIEW IF EXISTS vw_saude_financeira;
                 CREATE VIEW vw_saude_financeira AS
                 SELECT id_usuario,
@@ -285,8 +287,8 @@ public sealed class DatabaseService
                     ELSE 'ok' END status
                 FROM Orcamentos o JOIN Categorias c ON c.id_categoria=o.id_categoria
                 LEFT JOIN Transacoes t ON t.id_categoria=o.id_categoria AND t.tipo='despesa'
-                  AND t.pago=1 AND CAST(strftime('%m',t.data) AS INTEGER)=o.mes
-                  AND CAST(strftime('%Y',t.data) AS INTEGER)=o.ano
+                  AND t.pago=1 AND CAST(strftime('%m',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=o.mes
+                  AND CAST(strftime('%Y',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=o.ano
                   AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL)
                 GROUP BY o.id_orcamento;
                 PRAGMA user_version=7;
@@ -388,6 +390,37 @@ public sealed class DatabaseService
 
         // Reparação idempotente para bancos restaurados que possuam user_version=12,
         // mas tenham sido produzidos antes da estrutura de fornecedores existir.
+        if (version < 13)
+        {
+            // Competência civil: receitas usam a data do lançamento/recebimento;
+            // despesas usam o vencimento, igual às telas de contas a pagar.
+            await ExecuteAsync(db, """
+                DROP VIEW IF EXISTS vw_resumo_mensal;
+                CREATE VIEW vw_resumo_mensal AS
+                SELECT id_usuario,
+                  strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END) mes_ano,
+                  SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END) total_receitas,
+                  SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) total_despesas,
+                  SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)-
+                  SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) saldo_mes
+                FROM Transacoes WHERE pago=1
+                  AND NOT(parcelado=1 AND id_transacao_pai IS NULL)
+                GROUP BY id_usuario,
+                  strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END);
+
+                DROP VIEW IF EXISTS vw_gastos_categoria;
+                CREATE VIEW vw_gastos_categoria AS
+                SELECT t.id_usuario,c.nome_categoria,c.tipo,c.cor,
+                  strftime('%Y-%m',COALESCE(t.data_vencimento,t.data)) mes_ano,SUM(t.valor) total
+                FROM Transacoes t JOIN Categorias c ON c.id_categoria=t.id_categoria
+                WHERE t.pago=1 AND t.tipo='despesa'
+                  AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL)
+                GROUP BY t.id_usuario,c.id_categoria,
+                  strftime('%Y-%m',COALESCE(t.data_vencimento,t.data));
+                PRAGMA user_version=13;
+                """);
+        }
+
         await EnsureSupplierSchemaAsync(db);
     }
 
@@ -529,27 +562,32 @@ public sealed class DatabaseService
         int month, int year, long? categoryId = null, string paymentStatus = "todas",
         long? supplierId = null, long? cardId = null) => QueryAsync(
         """
-        SELECT t.id_transacao,date(t.data),t.descricao,t.tipo,t.valor,c.id_categoria,
+        SELECT t.id_transacao,
+               date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END),
+               t.descricao,t.tipo,t.valor,c.id_categoria,
                c.nome_categoria,COALESCE(a.nome_conta,cc.nome_cartao,'—'),COALESCE(t.pago,0)
         FROM Transacoes t
         LEFT JOIN Categorias c ON c.id_categoria=t.id_categoria
         LEFT JOIN Contas a ON a.id_conta=t.id_conta
         LEFT JOIN CartoesCredito cc ON cc.id_cartao=t.id_cartao
         WHERE t.id_usuario=@user
-          AND CAST(strftime('%m',t.data) AS INTEGER)=@month
-          AND CAST(strftime('%Y',t.data) AS INTEGER)=@year
+          AND date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END)>=date(@start)
+          AND date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END)<date(@end)
           AND (@category IS NULL OR t.id_categoria=@category)
           AND (@supplier IS NULL OR t.id_fornecedor=@supplier)
           AND (@card IS NULL OR t.id_cartao=@card)
           AND (@status='todas' OR (@status='pagas' AND COALESCE(t.pago,0)=1)
                OR (@status='abertas' AND COALESCE(t.pago,0)=0))
-        ORDER BY COALESCE(c.nome_categoria,'Sem categoria'),date(t.data),t.id_transacao
+        ORDER BY COALESCE(c.nome_categoria,'Sem categoria'),
+                 date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END),
+                 t.id_transacao
         """,
         r => new FinancialReportItem(
             r.GetInt64(0), r.GetDateTime(1), r.GetString(2), r.GetString(3), r.GetDecimal(4),
             r.IsDBNull(5) ? null : r.GetInt64(5), r.IsDBNull(6) ? "Sem categoria" : r.GetString(6),
             r.GetString(7), r.GetInt32(8) == 1),
-        ("@user", CurrentUserId), ("@month", month), ("@year", year),
+        ("@user", CurrentUserId), ("@start", $"{year:D4}-{month:D2}-01"),
+        ("@end", new DateTime(year, month, 1).AddMonths(1).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)),
         ("@category", categoryId), ("@status", paymentStatus), ("@supplier", supplierId),
         ("@card", cardId));
 
@@ -849,6 +887,51 @@ public sealed class DatabaseService
             ("@id", id), ("@user", CurrentUserId), ("@type", expectedType));
         return items.SingleOrDefault()
             ?? throw new InvalidOperationException("O lançamento não foi encontrado.");
+    }
+
+    public Task<List<InstallmentScheduleItem>> GetTransactionInstallmentsAsync(long transactionId) => QueryAsync(
+        """
+        WITH selected AS (
+          SELECT COALESCE(id_transacao_pai,id_transacao) series_id
+          FROM Transacoes WHERE id_transacao=@id AND id_usuario=@user AND tipo='despesa'
+        )
+        SELECT t.id_transacao,COALESCE(t.numero_parcela,1),COALESCE(t.total_parcelas,1),
+               COALESCE(t.data_vencimento,t.data),COALESCE(t.pago,0),t.valor
+        FROM Transacoes t CROSS JOIN selected s
+        WHERE t.id_usuario=@user AND t.tipo='despesa' AND t.parcelado=1
+          AND (t.id_transacao=s.series_id OR t.id_transacao_pai=s.series_id)
+          AND NOT (t.id_transacao=s.series_id AND EXISTS(
+              SELECT 1 FROM Transacoes child WHERE child.id_transacao_pai=s.series_id AND child.numero_parcela=1))
+        ORDER BY COALESCE(t.numero_parcela,1),COALESCE(t.data_vencimento,t.data),t.id_transacao
+        """,
+        r => new InstallmentScheduleItem(r.GetInt64(0), r.GetInt32(1), r.GetInt32(2),
+            r.GetDateTime(3), r.GetInt32(4) == 1, r.GetDecimal(5)),
+        ("@id", transactionId), ("@user", CurrentUserId));
+
+    public async Task UpdateInstallmentDueDatesAsync(IReadOnlyDictionary<long, DateTime> dueDates)
+    {
+        if (dueDates.Count == 0) return;
+        await using var db = new SqliteConnection(ConnectionString);
+        await db.OpenAsync();
+        await using var transaction = await db.BeginTransactionAsync();
+        try
+        {
+            foreach (var item in dueDates)
+            {
+                var updated = await ExecuteCountAsync(db, """
+                    UPDATE Transacoes SET data_vencimento=@due,data_atualizacao=CURRENT_TIMESTAMP
+                    WHERE id_transacao=@id AND id_usuario=@user AND tipo='despesa' AND parcelado=1
+                    """, ("@due", item.Value.Date), ("@id", item.Key), ("@user", CurrentUserId));
+                if (updated != 1) throw new InvalidOperationException("Uma das parcelas não foi encontrada.");
+                await ExecuteAsync(db, """
+                    INSERT INTO Logs(id_usuario,acao,tabela,registro_id,dados_novos,origem)
+                    VALUES(@user,'ALTERAR_VENCIMENTO','Transacoes',@id,@new,'TransactionEditPage')
+                    """, ("@user", CurrentUserId), ("@id", item.Key), ("@new", $"data_vencimento={item.Value:yyyy-MM-dd}"));
+            }
+            await transaction.CommitAsync();
+        }
+        catch { await transaction.RollbackAsync(); throw; }
+        DataChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task UpdateListedTransactionAsync(long id, string expectedType, string description,
@@ -1219,28 +1302,52 @@ public sealed class DatabaseService
     {
         await using var db = new SqliteConnection(ConnectionString);
         await db.OpenAsync();
-        var income = await DecimalAsync(db, """
-            SELECT COALESCE(SUM(valor),0) FROM Transacoes
-            WHERE id_usuario=@user AND tipo='receita'
-              AND NOT (parcelado=1 AND id_transacao_pai IS NULL)
-              AND CAST(strftime('%m',data) AS INTEGER)=@month
-              AND CAST(strftime('%Y',data) AS INTEGER)=@year
-            """, ("@user", CurrentUserId), ("@month", month), ("@year", year));
-        var accountExpenses = await DecimalAsync(db, """
-            SELECT COALESCE(SUM(valor),0) FROM Transacoes
-            WHERE id_usuario=@user AND tipo='despesa' AND id_conta IS NOT NULL
-              AND NOT (parcelado=1 AND id_transacao_pai IS NULL)
-              AND CAST(strftime('%m',data) AS INTEGER)=@month
-              AND CAST(strftime('%Y',data) AS INTEGER)=@year
-            """, ("@user", CurrentUserId), ("@month", month), ("@year", year));
-        var cardInvoices = await DecimalAsync(db, """
-            SELECT COALESCE(SUM(valor),0) FROM Transacoes
-            WHERE id_usuario=@user AND tipo='despesa' AND id_cartao IS NOT NULL
-              AND NOT (parcelado=1 AND id_transacao_pai IS NULL)
-              AND CAST(strftime('%m',data) AS INTEGER)=@month
-              AND CAST(strftime('%Y',data) AS INTEGER)=@year
-            """, ("@user", CurrentUserId), ("@month", month), ("@year", year));
-        var total = accountExpenses + cardInvoices;
+        var start = new DateTime(year, month, 1);
+        var end = start.AddMonths(1);
+        decimal income, paidExpenses, pendingExpenses, accountExpenses, cardInvoices, total;
+        await using (var command = CreateCommand(db, """
+            SELECT
+              COALESCE(SUM(CASE WHEN tipo='receita' AND COALESCE(pago,0)=1
+                AND date(data)>=date(@start) AND date(data)<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                THEN valor ELSE 0 END),0) income,
+              COALESCE(SUM(CASE WHEN tipo='despesa' AND COALESCE(pago,0)=1
+                AND date(COALESCE(data_vencimento,data))>=date(@start)
+                AND date(COALESCE(data_vencimento,data))<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                THEN valor ELSE 0 END),0) paid_expenses,
+              COALESCE(SUM(CASE WHEN tipo='despesa' AND COALESCE(pago,0)=0
+                AND date(COALESCE(data_vencimento,data))>=date(@start)
+                AND date(COALESCE(data_vencimento,data))<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                THEN valor ELSE 0 END),0) pending_expenses,
+              COALESCE(SUM(CASE WHEN tipo='despesa' AND id_conta IS NOT NULL
+                AND date(COALESCE(data_vencimento,data))>=date(@start)
+                AND date(COALESCE(data_vencimento,data))<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                THEN valor ELSE 0 END),0) account_expenses,
+              COALESCE(SUM(CASE WHEN tipo='despesa' AND id_cartao IS NOT NULL
+                AND date(COALESCE(data_vencimento,data))>=date(@start)
+                AND date(COALESCE(data_vencimento,data))<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                THEN valor ELSE 0 END),0) card_expenses,
+              COALESCE(SUM(CASE WHEN tipo='despesa'
+                AND date(COALESCE(data_vencimento,data))>=date(@start)
+                AND date(COALESCE(data_vencimento,data))<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                THEN valor ELSE 0 END),0) total_expenses
+            FROM Transacoes WHERE id_usuario=@user
+            """, ("@start", start.Date), ("@end", end.Date), ("@user", CurrentUserId)))
+        await using (var reader = await command.ExecuteReaderAsync())
+        {
+            await reader.ReadAsync();
+            income = reader.GetDecimal(0); paidExpenses = reader.GetDecimal(1);
+            pendingExpenses = reader.GetDecimal(2); accountExpenses = reader.GetDecimal(3);
+            cardInvoices = reader.GetDecimal(4); total = reader.GetDecimal(5);
+        }
+        var bankBalance = await DecimalAsync(db,
+            "SELECT COALESCE(SUM(saldo_atual),0) FROM Contas WHERE id_usuario=@user AND ativo=1",
+            ("@user", CurrentUserId));
         var remaining = income - total;
         var commitment = income <= 0 ? (total > 0 ? 100 : 0) : total / income * 100;
         var today = DateTime.Today;
@@ -1248,8 +1355,11 @@ public sealed class DatabaseService
         var daysRemaining = isCurrentMonth
             ? Math.Max(1, DateTime.DaysInMonth(year, month) - today.Day + 1)
             : DateTime.DaysInMonth(year, month);
-        return new(income, accountExpenses, cardInvoices, total, remaining, commitment,
-            remaining / daysRemaining, daysRemaining);
+        System.Diagnostics.Debug.WriteLine(
+            $"[MonthlyOverview] {year:D4}-{month:D2}: receitas={income:0.00}; pagas={paidExpenses:0.00}; " +
+            $"pendentes={pendingExpenses:0.00}; cartao={cardInvoices:0.00}; total={total:0.00}; saldo={remaining:0.00}");
+        return new(income, paidExpenses, pendingExpenses, accountExpenses, cardInvoices, bankBalance,
+            total, remaining, commitment, remaining / daysRemaining, daysRemaining);
     }
 
     public Task MarcarComoPagaAsync(long idTransacao) =>

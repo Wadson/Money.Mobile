@@ -55,6 +55,12 @@ public partial class MainPage : ContentPage
         MonthlyIncomeLabel.Text = Currency(monthly.Income);
         MonthlyExpensesLabel.Text = Currency(monthly.TotalExpenses);
         MonthlyRemainingLabel.Text = Currency(monthly.Remaining);
+        DetailIncomeLabel.Text = Currency(monthly.Income);
+        DetailPaidExpensesLabel.Text = Currency(monthly.PaidExpenses);
+        DetailPendingExpensesLabel.Text = Currency(monthly.PendingExpenses);
+        DetailCardExpensesLabel.Text = Currency(monthly.CardInvoices);
+        DetailBankBalanceLabel.Text = Currency(monthly.BankBalance);
+        DetailNetResultLabel.Text = Currency(monthly.Remaining);
         var commitmentColor = monthly.Commitment < 70 ? "BlingPrimary" :
             monthly.Commitment <= 90 ? "BlingText" : "BlingText";
         CommitmentProgress.Progress = Math.Clamp((double)(monthly.Commitment / 100), 0, 1);
@@ -73,15 +79,9 @@ public partial class MainPage : ContentPage
             : $"{overdueCount} conta{(overdueCount == 1 ? "" : "s")} vencida{(overdueCount == 1 ? "" : "s")}";
         OverdueSummaryLabel.TextColor = ThemeColor.Get(overdueCount == 0 ? "BlingText" : "BlingText");
 
-        var periodStart = month == DateTime.Today.Month && year == DateTime.Today.Year
-            ? DateTime.Today
-            : new DateTime(year, month, 1);
-        var periodEnd = periodStart.AddDays(7);
         var nextBills = payables
-            .Where(x => x.Status == "Vencida" ||
-                        (x.DataVencimento.Date >= periodStart && x.DataVencimento.Date < periodEnd))
-            .OrderBy(x => x.Status == "Vencida" ? 0 : 1)
-            .ThenBy(x => x.DataVencimento)
+            .Where(x => x.Status == "Vencida")
+            .OrderBy(x => x.DataVencimento)
             .Take(4);
         BuildBills(nextBills);
         BuildBudgets(dashboard.Budgets.Take(4));
@@ -106,8 +106,8 @@ public partial class MainPage : ContentPage
         var items = source.ToList();
         if (items.Count == 0)
         {
-            BillsContainer.Children.Add(EmptyState(MaterialIcons.CheckCircle, "Nenhuma conta pendente",
-                "Suas próximas contas aparecerão aqui."));
+            BillsContainer.Children.Add(EmptyState(MaterialIcons.CheckCircle, "Nenhuma conta vencida",
+                "Todas as contas do período estão em dia."));
             return;
         }
 
@@ -314,6 +314,8 @@ public partial class MainPage : ContentPage
         OnAccountsPayableClicked(sender, EventArgs.Empty);
     private void OnQuickCardsTapped(object? sender, TappedEventArgs e) =>
         OnManageCardsClicked(sender, EventArgs.Empty);
+    private async void OnQuickAccountsTapped(object? sender, TappedEventArgs e)
+        => await Navigation.PushModalAsync(new AccountManagementPage(_database));
 
     private async void OnRefreshClicked(object? sender, EventArgs e) => await RefreshAsync();
     private async void OnPullToRefresh(object? sender, EventArgs e)

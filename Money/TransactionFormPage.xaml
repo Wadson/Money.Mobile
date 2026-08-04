@@ -107,13 +107,16 @@
                             <Label Text="Categoria" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
                             <Button x:Name="CategorySelectionButton" Text="Selecione uma categoria" 
                                     ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=BlingText, IconSize=20}"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}" FontSize="14"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    BorderWidth="1" CornerRadius="10" HeightRequest="48"
                                     HorizontalOptions="Fill" Clicked="OnSelectCategoryClicked"/>
                             <Picker x:Name="CategoryPicker" IsVisible="False" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
                         </VerticalStackLayout>
 
                         <VerticalStackLayout x:Name="SupplierPanel" Spacing="4">
-                            <Label Text="Fornecedor (opcional)" FontSize="11" FontAttributes="Bold"/>
+                            <Label Text="Fornecedor (opcional)" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
                             <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" StrokeShape="RoundRectangle 8" Padding="8,0">
                                 <Button x:Name="SupplierSelectionButton" Text="Nenhum fornecedor"
                                         HeightRequest="44" Padding="8,0" BackgroundColor="Transparent"
@@ -129,7 +132,7 @@
                             <Label Text="Origem / Destino" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
                             <Button x:Name="SourceTypeSelectionButton" Text="Selecione conta ou cartão"
                                     ImageSource="{icons:MaterialIconSource Icon=SwapHoriz, ColorResource=BlingPrimary, IconSize=20}"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
                                     BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1" FontSize="14"
                                     HorizontalOptions="Fill" Clicked="OnSelectSourceTypeClicked"/>
                             <Picker x:Name="SourceTypePicker" IsVisible="False" SelectedIndexChanged="OnSourceTypeChanged"/>
@@ -140,7 +143,9 @@
                             <Label Text="Selecione a conta" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
                             <Button x:Name="AccountSelectionButton" Text="Selecione a conta" 
                                     ImageSource="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=BlingText, IconSize=20}"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}" FontSize="14"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    BorderWidth="1" CornerRadius="10" HeightRequest="48"
                                     HorizontalOptions="Fill" Clicked="OnSelectAccountClicked"/>
                             <Picker x:Name="AccountPicker" IsVisible="False" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
                         </VerticalStackLayout>
@@ -150,7 +155,7 @@
                             <Label Text="Selecione o cartão" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
                             <Button x:Name="CardSelectionButton" Text="Selecione o cartão"
                                     ImageSource="{icons:MaterialIconSource Icon=CreditCard, ColorResource=BlingPrimary, IconSize=20}"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
                                     BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1" FontSize="14"
                                     HorizontalOptions="Fill" Clicked="OnSelectCardClicked"/>
                             <Picker x:Name="CardPicker" IsVisible="False" SelectedIndexChanged="OnCardChanged"/>
@@ -162,13 +167,17 @@
                 <Border x:Name="DestinationPanel" IsVisible="False" Style="{StaticResource ContentCard}" Padding="12" StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Conta de destino" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
-                        <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
-                                StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
-                                Padding="12,2" HeightRequest="46">
-                            <Picker x:Name="DestinationAccountPicker" Title="Selecione a conta de destino" 
-                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
-                                    TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" VerticalOptions="Center"/>
-                        </Border>
+                        <Button x:Name="DestinationAccountSelectionButton"
+                                Text="Selecione a conta de destino"
+                                ImageSource="{icons:MaterialIconSource Icon=AccountBalance, ColorResource=BlingPrimary, IconSize=20}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                BorderWidth="1" CornerRadius="10" HeightRequest="48"
+                                HorizontalOptions="Fill"
+                                Clicked="OnSelectDestinationAccountClicked"/>
+                        <!-- Mantido apenas como estado interno para preservar a validação e gravação existentes. -->
+                        <Picker x:Name="DestinationAccountPicker" IsVisible="False"/>
                     </VerticalStackLayout>
                 </Border>
 

@@ -52,18 +52,24 @@ public partial class AccountManagementPage : ContentPage
     private View CreateCard(AccountItem item)
     {
         var color = SafeColor(item.Color);
-        var grid = new Grid { ColumnDefinitions = [new(48), new(GridLength.Star), new(GridLength.Auto)], ColumnSpacing = 10 };
-        grid.Add(new Border
+        var grid = new Grid
         {
-            HeightRequest = 44, WidthRequest = 44, BackgroundColor = color.WithAlpha(.14f), StrokeThickness = 0,
-            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 14 },
+            ColumnDefinitions = [new(44), new(GridLength.Star), new(GridLength.Auto)],
+            RowDefinitions = [new(GridLength.Auto), new(GridLength.Auto)],
+            ColumnSpacing = 8, RowSpacing = 6
+        };
+        var icon = new Border
+        {
+            HeightRequest = 40, WidthRequest = 40, BackgroundColor = color.WithAlpha(.14f), StrokeThickness = 0,
+            StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
             Content = new MauiIcon
             {
-                Icon = PathFor(item.Icon), IconSize = 28, IconColor = color, HeightRequest = 34, WidthRequest = 34,
+                Icon = PathFor(item.Icon), IconSize = 24, IconColor = color, HeightRequest = 30, WidthRequest = 30,
                 HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center
             }
-        });
-        grid.Add(new VerticalStackLayout
+        };
+        grid.Add(icon, 0, 0);
+        var identity = new VerticalStackLayout
         {
             Spacing = 2, VerticalOptions = LayoutOptions.Center,
             Children =
@@ -71,14 +77,22 @@ public partial class AccountManagementPage : ContentPage
                 new Label { Text = item.Name, TextColor = ThemeColor.Get("BlingPrimary"), FontAttributes = FontAttributes.Bold },
                 new Label { Text = item.Type, TextColor = ThemeColor.Get("BlingText"), FontSize = 10 }
             }
-        }, 1);
-        var actions = new HorizontalStackLayout { Spacing = 4 };
-        var edit = Action("Editar", "BlingCard", "BlingPrimary", item.Id); edit.Clicked += OnEditClicked;
+        };
+        grid.Add(identity, 1, 0);
+        Grid.SetColumnSpan(identity, 2);
+        var balance = new Label
+        {
+            Text = item.Balance.ToString("C2", _culture), TextColor = color,
+            FontSize = 20, FontAttributes = FontAttributes.Bold, VerticalTextAlignment = TextAlignment.Center
+        };
+        grid.Add(balance, 0, 1);
+        Grid.SetColumnSpan(balance, 2);
+        var actions = new HorizontalStackLayout { Spacing = 6, HorizontalOptions = LayoutOptions.End };
+        var edit = Action("Editar", "BlingPrimary", "BlingTextLight", item.Id); edit.Clicked += OnEditClicked;
         var delete = Action("Excluir", "BlingPrimary", "BlingTextLight", item.Id); delete.Clicked += OnDeleteClicked;
         actions.Children.Add(edit); actions.Children.Add(delete);
-        grid.Add(actions, 2);
-        var content = new VerticalStackLayout { Spacing = 10, Children = { grid, new Label { Text = item.Balance.ToString("C2", _culture), TextColor = color, FontSize = 20, FontAttributes = FontAttributes.Bold } } };
-        return new Border { Style = (Style)Application.Current!.Resources["ContentCard"], Padding = 14, Content = content };
+        grid.Add(actions, 2, 1);
+        return new Border { Style = (Style)Application.Current!.Resources["ContentCard"], Padding = 10, Content = grid };
     }
 
     private void OnNewClicked(object? sender, EventArgs e) { Clear(); FormCard.IsVisible = true; NameEntry.Focus(); }

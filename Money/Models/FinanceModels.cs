@@ -54,6 +54,8 @@ public sealed record TransactionEditData(long Id, string Description, decimal Am
     bool Recurring = false, string? Frequency = null, long? SupplierId = null,
     bool Installment = false, int InstallmentNumber = 1, int TotalInstallments = 1,
     long? ParentTransactionId = null);
+public sealed record InstallmentScheduleItem(long Id, int Number, int Total, DateTime DueDate,
+    bool Paid, decimal Amount);
 public sealed record HomePaymentStats(int PaidThisMonth, int TotalThisMonth)
 {
     public int PaidRate => TotalThisMonth == 0 ? 0 :
@@ -68,9 +70,9 @@ public sealed record CreditCardAnalysis(long? CardId, string Name, decimal Invoi
         Math.Clamp((double)((CreditLimit - Available) / CreditLimit), 0, 1);
     public int BestPurchaseDay => ClosingDay >= 28 ? 1 : ClosingDay + 1;
 }
-public sealed record MonthlyOverview(decimal Income, decimal AccountExpenses,
-    decimal CardInvoices, decimal TotalExpenses, decimal Remaining, decimal Commitment,
-    decimal AvailablePerDay, int DaysRemaining);
+public sealed record MonthlyOverview(decimal Income, decimal PaidExpenses, decimal PendingExpenses,
+    decimal AccountExpenses, decimal CardInvoices, decimal BankBalance, decimal TotalExpenses,
+    decimal Remaining, decimal Commitment, decimal AvailablePerDay, int DaysRemaining);
 public sealed record MetaItem(long Id, long UserId, string Name, decimal TargetValue,
     decimal CurrentValue, DateTime StartDate, DateTime TargetDate, string? Category,
     string Priority, string Status, string? Notes);

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money"
+             x:Class="Money.PaymentReversalPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="44,*" ColumnSpacing="12">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                    <Label Text="Estorno de pagamentos" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"/>
+                    <Label Text="Localize uma despesa paga para reabri-la" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="12,10,12,8" Padding="10">
+            <VerticalStackLayout Spacing="8">
+                <SearchBar x:Name="SearchEntry" Placeholder="Pesquisar pela descrição" TextChanged="OnSearchChanged"/>
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="7" RowSpacing="7">
+                    <Button x:Name="PeriodButton" Text="Todos os períodos" FontSize="11" Padding="6" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" CornerRadius="10" Clicked="OnSelectPeriodClicked"/>
+                    <Button x:Name="CategoryButton" Grid.Column="1" Text="Todas as categorias" FontSize="11" Padding="6" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" CornerRadius="10" Clicked="OnSelectCategoryClicked"/>
+                    <Button x:Name="SupplierButton" Grid.Row="1" Text="Todos os fornecedores" FontSize="11" Padding="6" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" CornerRadius="10" Clicked="OnSelectSupplierClicked"/>
+                    <Button x:Name="CardButton" Grid.Row="1" Grid.Column="1" Text="Todos os cartões" FontSize="11" Padding="6" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" CornerRadius="10" Clicked="OnSelectCardClicked"/>
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Button Text="Aplicar filtros" Style="{StaticResource PrimaryButton}" Clicked="OnApplyClicked"/>
+                    <Button Grid.Column="1" Text="Limpar" BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" CornerRadius="10" Clicked="OnClearClicked"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <CollectionView x:Name="PaymentsList" Grid.Row="2" Margin="12,0,12,12" SelectionMode="None">
+            <CollectionView.EmptyView><Label Text="Nenhum pagamento encontrado." HorizontalTextAlignment="Center" Margin="24" TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource ContentCard}" Padding="12" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="3">
+                            <Label Text="{Binding Descricao}" FontAttributes="Bold" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" LineBreakMode="TailTruncation"/>
+                            <Label Grid.Column="1" Text="{Binding Valor, StringFormat='R$ {0:N2}'}" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                            <Label Grid.Row="1" Text="{Binding Categoria}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding DataVencimento, StringFormat='Venc. {0:dd/MM/yyyy}'}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <Label Grid.Row="2" Text="{Binding Parcela, StringFormat='Parcela {0}'}" FontSize="10" TextColor="{StaticResource BlingPrimary}"/>
+                            <Button Grid.Row="2" Grid.Column="1" Text="Estornar" BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" HeightRequest="38" Padding="12,0" CornerRadius="10" CommandParameter="{Binding Id}" Clicked="OnReverseClicked"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

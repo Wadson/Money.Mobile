@@ -17,6 +17,9 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<!-- .NET MAUI 10: gera InitializeComponent em C# e elimina a dependência
+		     de EmbeddedResource para carregar XAML no Android Release. -->
+		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Enable XAML source generation for faster build times and improved performance.
 		     This generates C# code from XAML at compile time instead of runtime inflation.
@@ -33,7 +36,7 @@
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0.2</ApplicationDisplayVersion>
-		<ApplicationVersion>3</ApplicationVersion>
+		<ApplicationVersion>7</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
@@ -50,13 +53,7 @@
 		<Compile Remove="tools\MoneyMigration\**\*.cs" />
 		<Compile Remove="tools\SupplierMigration\**\*.cs" />
 		<Compile Remove="tools\ReportPreview\**\*.cs" />
-
-		<!-- Preserve XAML resources in Release. The Android startup loader calls
-		     InitializeComponent/LoadFromXaml and therefore needs the embedded resources. -->
-		<MauiXaml Update="App.xaml" Inflator="Runtime" />
-		<MauiXaml Update="AppShell.xaml" Inflator="Runtime" />
-		<MauiXaml Update="Resources\Styles\Colors.xaml" Inflator="XamlC" />
-		<MauiXaml Update="Resources\Styles\Styles.xaml" Inflator="XamlC" />
+		<Compile Remove="tools\MonthlyAudit\**\*.cs" />
 
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#00A859" />

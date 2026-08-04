@@ -219,10 +219,18 @@
                                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                                         <Label Text="Primeira parcela" Style="{StaticResource CardCaption}"/>
                                         <Border Style="{StaticResource InputContainer}">
-                                            <DatePicker x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"/>
+                                            <DatePicker x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"
+                                                        DateSelected="OnFirstInstallmentDateSelected"/>
                                         </Border>
                                     </VerticalStackLayout>
                                 </Grid>
+                                <VerticalStackLayout x:Name="InstallmentSchedulePanel" IsVisible="False" Spacing="8">
+                                    <Label Text="Parcelas do lançamento" FontSize="13" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                    <Label Text="Toque na data para alterar o vencimento. Parcelas pagas também podem ser ajustadas."
+                                           FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                                    <VerticalStackLayout x:Name="InstallmentsContainer" Spacing="7"/>
+                                </VerticalStackLayout>
                             </VerticalStackLayout>
                         </Border>
 

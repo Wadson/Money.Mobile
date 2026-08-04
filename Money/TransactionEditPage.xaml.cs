@@ -17,8 +17,13 @@ public partial class TransactionEditPage : ContentPage
     private List<AccountItem> _accounts = [];
     private List<CardItem> _cards = [];
     private readonly Dictionary<long, CheckBox> _tagChecks = [];
+    private readonly Dictionary<long, DateTime> _installmentDueDates = [];
+    private readonly Dictionary<long, Button> _installmentDateButtons = [];
+    private List<InstallmentScheduleItem> _installmentSchedule = [];
+    private bool _updatingFirstInstallmentDate;
     private bool _loaded;
     private bool _existingInstallment;
+    private bool _originalPaid;
 
     public event EventHandler? Saved;
 
@@ -74,6 +79,7 @@ public partial class TransactionEditPage : ContentPage
             DueDateButton.Text = (data.DueDate ?? data.Date).ToString("dd/MM/yyyy");
             PaymentStatusCard.IsVisible = _type == "despesa";
             PaidSwitch.IsToggled = data.Paid;
+            _originalPaid = data.Paid;
             PaymentDatePicker.Date = data.PaymentDate ?? DateTime.Today;
             PaymentDateBorder.IsVisible = data.Paid;
             RecurringSwitch.IsToggled = data.Recurring;
@@ -89,10 +95,13 @@ public partial class TransactionEditPage : ContentPage
             FirstInstallmentDatePicker.Date = data.DueDate ?? data.Date;
             if (_existingInstallment)
             {
+                PaymentStatusCard.IsVisible = false;
                 InstallmentSwitch.IsEnabled = false;
                 InstallmentStepper.IsEnabled = false;
-                FirstInstallmentDatePicker.IsEnabled = false;
-                InstallmentHintLabel.Text = $"Parcela {data.InstallmentNumber}/{data.TotalInstallments} · edite os dados desta parcela";
+                FirstInstallmentDatePicker.IsVisible = true;
+                FirstInstallmentDatePicker.IsEnabled = true;
+                InstallmentHintLabel.Text = $"Parcela {data.InstallmentNumber}/{data.TotalInstallments} · altere a primeira data para recalcular toda a série";
+                await LoadInstallmentScheduleAsync();
             }
             RenderTags(selectedTags);
             _loaded = true;
@@ -150,8 +159,10 @@ public partial class TransactionEditPage : ContentPage
                     ? _suppliers[SupplierPicker.SelectedIndex - 1].IdFornecedor : null,
                 useCard ? null : _accounts[AccountPicker.SelectedIndex].Id,
                 useCard ? _cards[CardPicker.SelectedIndex].Id : null,
-                _type == "despesa" && PaidSwitch.IsToggled,
-                _type == "despesa" && PaidSwitch.IsToggled ? PaymentDatePicker.Date : null);
+                _type == "despesa" && (_existingInstallment ? _originalPaid : PaidSwitch.IsToggled),
+                _type == "despesa" && (_existingInstallment ? _originalPaid : PaidSwitch.IsToggled) ? PaymentDatePicker.Date : null);
+            if (_existingInstallment)
+                await _database.UpdateInstallmentDueDatesAsync(_installmentDueDates);
             await ThemedDialog.ShowAsync(this,
                 _type == "receita" ? "Salário alterado" : "Conta alterada",
                 _type == "receita" ? "Salário alterado com sucesso!" : "Conta alterada com sucesso!");
@@ -184,6 +195,86 @@ public partial class TransactionEditPage : ContentPage
             });
         }
     }
+    private async Task LoadInstallmentScheduleAsync()
+    {
+        var installments = await _database.GetTransactionInstallmentsAsync(_id);
+        _installmentSchedule = installments.OrderBy(x => x.Number).ThenBy(x => x.Id).ToList();
+        _installmentDueDates.Clear();
+        _installmentDateButtons.Clear();
+        InstallmentsContainer.Children.Clear();
+        foreach (var item in _installmentSchedule)
+        {
+            _installmentDueDates[item.Id] = item.DueDate.Date;
+            var dateButton = new Button
+            {
+                Text = item.DueDate.ToString("dd/MM/yyyy"), CommandParameter = item.Id,
+                BackgroundColor = ThemeColor.Get("BlingPrimary"), TextColor = ThemeColor.Get("BlingTextLight"),
+                FontSize = 12, FontAttributes = FontAttributes.Bold, HeightRequest = 40,
+                Padding = new Thickness(10, 0), CornerRadius = 10
+            };
+            dateButton.Clicked += OnInstallmentDateClicked;
+            _installmentDateButtons[item.Id] = dateButton;
+            var details = new VerticalStackLayout
+            {
+                Spacing = 1, VerticalOptions = LayoutOptions.Center,
+                Children =
+                {
+                    new Label { Text = $"Parcela {item.Number}/{item.Total}", FontSize = 12,
+                        FontAttributes = FontAttributes.Bold, TextColor = ThemeColor.Get("BlingText") },
+                    new Label { Text = item.Amount.ToString("C2", _culture), FontSize = 10,
+                        TextColor = ThemeColor.Get("BlingTextMuted") }
+                }
+            };
+            var row = new Grid
+            {
+                ColumnDefinitions = [new(GridLength.Star), new(GridLength.Auto), new(GridLength.Auto)],
+                ColumnSpacing = 8, Padding = new Thickness(10, 6), BackgroundColor = ThemeColor.Get("BlingCard")
+            };
+            row.Add(details);
+            row.Add(new Label { Text = item.Paid ? "Paga" : "Pendente", TextColor = ThemeColor.Get("BlingPrimary"),
+                FontSize = 10, FontAttributes = FontAttributes.Bold, VerticalTextAlignment = TextAlignment.Center }, 1);
+            row.Add(dateButton, 2);
+            InstallmentsContainer.Children.Add(new Border
+            {
+                Stroke = ThemeColor.Get("BlingPrimary"), StrokeThickness = 1,
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 11 }, Content = row
+            });
+        }
+        InstallmentSchedulePanel.IsVisible = _installmentSchedule.Count > 0;
+        if (_installmentSchedule.Count > 0)
+        {
+            var first = _installmentSchedule.OrderBy(x => x.Number).First();
+            _updatingFirstInstallmentDate = true;
+            FirstInstallmentDatePicker.Date = first.DueDate.Date;
+            _updatingFirstInstallmentDate = false;
+        }
+    }
+
+    private void OnFirstInstallmentDateSelected(object? sender, DateChangedEventArgs e)
+    {
+        if (_updatingFirstInstallmentDate || !_existingInstallment || _installmentSchedule.Count == 0) return;
+        var firstNumber = _installmentSchedule.Min(x => x.Number);
+        var selectedDate = (e.NewDate ?? e.OldDate ?? DateTime.Today).Date;
+        foreach (var installment in _installmentSchedule)
+        {
+            var dueDate = selectedDate.AddMonths(installment.Number - firstNumber);
+            _installmentDueDates[installment.Id] = dueDate;
+            if (_installmentDateButtons.TryGetValue(installment.Id, out var button))
+                button.Text = dueDate.ToString("dd/MM/yyyy");
+        }
+    }
+
+    private async void OnInstallmentDateClicked(object? sender, EventArgs e)
+    {
+        if (sender is not Button button || !long.TryParse(button.CommandParameter?.ToString(), out var id) ||
+            !_installmentDueDates.TryGetValue(id, out var currentDate)) return;
+        await ShowDateSelectorAsync("Vencimento da parcela", currentDate, date =>
+        {
+            _installmentDueDates[id] = date.Date;
+            button.Text = date.ToString("dd/MM/yyyy");
+        });
+    }
+
     private void OnRecurringToggled(object? sender, ToggledEventArgs e) => FrequencyBorder.IsVisible = e.Value;
     private void OnPaidToggled(object? sender, ToggledEventArgs e) => PaymentDateBorder.IsVisible = e.Value;
     private void OnInstallmentToggled(object? sender, ToggledEventArgs e) => InstallmentPanel.IsVisible = e.Value;

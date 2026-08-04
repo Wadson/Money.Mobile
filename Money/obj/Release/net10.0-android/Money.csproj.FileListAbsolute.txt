@@ -486,6 +486,7 @@ D:\Projetos\Money\Money\obj\Release\net10.0-android\app_shared_libraries\arm64-v
 D:\Projetos\Money\Money\obj\Release\net10.0-android\app_shared_libraries\x86_64\libxamarin-app.so
 D:\Projetos\Money\Money\obj\Release\net10.0-android\android\bin\classes.dex
 D:\Projetos\Money\Money\obj\Release\net10.0-android\android\bin\classes2.dex
+D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_AdditionalPostLinkerSteps.stamp
 D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_CleanIntermediateIfNeeded.stamp
 D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_CompileJava.stamp
 D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_CompileToDalvik.stamp
@@ -494,4 +495,3 @@ D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_ConvertResourcesCases
 D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_GenerateJavaStubs.stamp
 D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_GeneratePackageManagerJava.stamp
 D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_ResolveLibraryProjectImports.stamp
-D:\Projetos\Money\Money\obj\Release\net10.0-android\stamp\_AdditionalPostLinkerSteps.stamp
