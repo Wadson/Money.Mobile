@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="Money.Views.SettingsAndData.DataOperationsPage" 
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" 
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Cabeçalho Principal -->
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" 
+                             BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                             WidthRequest="44" HeightRequest="44" 
+                             Padding="10" CornerRadius="12" 
+                             Aspect="AspectFit" 
+                             Clicked="OnBackClicked"
+                             VerticalOptions="Center"/>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                    <Label Text="Dados e segurança" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"/>
+                    <Label Text="Importações, backups e histórico" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,16,16,40" Spacing="16"
+                                 MaximumWidthRequest="1200" HorizontalOptions="Fill">
+
+                <!-- Card: Importar Movimentações -->
+                <Border Style="{StaticResource ContentCard}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Importar movimentações" Style="{StaticResource SectionTitle}"/>
+                        <Label Text="Extratos simples: descrição, valor, data, tipo, categoria e conta. Também aceita OFX."
+                               Style="{StaticResource SectionSubtitle}"/>
+
+                        <Button Text="Importar extrato simples CSV ou OFX" 
+                                ImageSource="{icons:MaterialIconSource Icon=UploadFile, ColorResource=BlingTextLight, IconSize=20}" 
+                                Style="{StaticResource PrimaryButton}" 
+                                HeightRequest="46"
+                                CornerRadius="10"
+                                FontAttributes="Bold"
+                                Clicked="OnImportClicked"/>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Text="Importar Contas a Pagar"
+                                    ImageSource="{icons:MaterialIconSource Icon=ReceiptLong, ColorResource=BlingTextLight, IconSize=18}"
+                                    Style="{StaticResource PrimaryButton}" HeightRequest="46" Padding="7,4" FontSize="11"
+                                    Clicked="OnOpenPayablesImportClicked"/>
+                            <Button Grid.Column="1" Text="Importar Fatura Cartão"
+                                    ImageSource="{icons:MaterialIconSource Icon=CreditCard, ColorResource=BlingTextLight, IconSize=18}"
+                                    Style="{StaticResource PrimaryButton}" HeightRequest="46" Padding="7,4" FontSize="11"
+                                    Clicked="OnOpenCardInvoiceImportClicked"/>
+                        </Grid>
+
+                        <Label Text="Modelos para preenchimento" Style="{StaticResource CardCaption}"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Text="Modelo Contas a Pagar"
+                                    ImageSource="{icons:MaterialIconSource Icon=Download, ColorResource=BlingPrimary, IconSize=18}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource BlingPrimary}"
+                                    BorderColor="{StaticResource BlingPrimary}"
+                                    BorderWidth="1"
+                                    CornerRadius="10"
+                                    HeightRequest="46"
+                                    Padding="8,4"
+                                    FontSize="11"
+                                    Clicked="OnDownloadPayablesTemplateClicked"/>
+                            <Button Grid.Column="1"
+                                    Text="Modelo Fatura Cartão"
+                                    ImageSource="{icons:MaterialIconSource Icon=Download, ColorResource=BlingPrimary, IconSize=18}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource BlingPrimary}"
+                                    BorderColor="{StaticResource BlingPrimary}"
+                                    BorderWidth="1"
+                                    CornerRadius="10"
+                                    HeightRequest="46"
+                                    Padding="8,4"
+                                    FontSize="11"
+                                    Clicked="OnDownloadCardTemplateClicked"/>
+                        </Grid>
+
+                        <ActivityIndicator x:Name="ImportActivity" 
+                                           IsVisible="False" 
+                                           IsRunning="False"
+                                           Color="{StaticResource BlingPrimary}"
+                                           HorizontalOptions="Center"
+                                           Margin="0,4,0,0"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Backup e Restauração -->
+                <Border Style="{StaticResource ContentCard}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Backup" Style="{StaticResource SectionTitle}"/>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Criar / exportar" 
+                                    ImageSource="{icons:MaterialIconSource Icon=Backup, ColorResource=BlingPrimary, IconSize=20}" 
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                    TextColor="{StaticResource BlingPrimary}" 
+                                    HeightRequest="44"
+                                    CornerRadius="10"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    Clicked="OnBackupClicked"/>
+
+                            <Button Grid.Column="1" 
+                                    Text="Restaurar" 
+                                    ImageSource="{icons:MaterialIconSource Icon=Restore, ColorResource=BlingText, IconSize=20}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
+                                    HeightRequest="44"
+                                    CornerRadius="10"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    Clicked="OnRestoreClicked"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Importações Realizadas -->
+                <Border Style="{StaticResource ContentCard}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Importações realizadas" Style="{StaticResource SectionTitle}"/>
+                        <VerticalStackLayout x:Name="ImportsContainer" Spacing="8"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Histórico de Backups -->
+                <Border Style="{StaticResource ContentCard}" Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Histórico de backups" Style="{StaticResource SectionTitle}"/>
+                        <VerticalStackLayout x:Name="BackupsContainer" Spacing="8"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Mensagem de Erro -->
+                <Label x:Name="ErrorLabel" IsVisible="False" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" Margin="0,4,0,0"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

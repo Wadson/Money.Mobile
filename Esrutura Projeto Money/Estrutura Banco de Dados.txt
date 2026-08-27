@@ -1,0 +1,210 @@
+Usuarios
+ ├─ id_usuario INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ nome text NOT NULL
+ ├─ email text NOT NULL
+ ├─ senha_hash text NOT NULL
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ ultimo_acesso text
+ ├─ ativo bigint DEFAULT (1)
+ ├─ tentativas_falhas bigint DEFAULT (0) NOT NULL
+ ├─ bloqueado_ate text
+ ├─ senha_alterada_em text
+ ├─ data_nascimento text
+ ├─ pergunta_recuperacao text
+ ├─ resposta_recuperacao_hash text
+ ├─ palavra_chave_hash text
+ ├─ dica_palavra_chave text
+
+Tags
+ ├─ id_tag INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_tag text NOT NULL
+ ├─ cor text DEFAULT ('#2C3E50')
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ icone text DEFAULT ('tag')
+
+Notificacoes
+ ├─ id_notificacao INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ titulo text NOT NULL
+ ├─ mensagem text NOT NULL
+ ├─ nivel text DEFAULT ('info') NOT NULL
+ ├─ lida bigint DEFAULT (0) NOT NULL
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+
+Metas
+ ├─ id_meta INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_meta text NOT NULL
+ ├─ valor_objetivo real NOT NULL
+ ├─ valor_atual real DEFAULT (0)
+ ├─ data_inicio text NOT NULL
+ ├─ data_meta text NOT NULL
+ ├─ categoria text
+ ├─ prioridade text DEFAULT ('media')
+ ├─ status text DEFAULT ('em_andamento')
+ ├─ observacoes text
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ data_atualizacao text DEFAULT (CURRENT_TIMESTAMP)
+
+Logs
+ ├─ id_log INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint
+ ├─ acao text NOT NULL
+ ├─ tabela text
+ ├─ registro_id bigint
+ ├─ dados_anteriores text
+ ├─ dados_novos text
+ ├─ data_hora text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ origem text
+
+Importacoes
+ ├─ id_importacao INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_arquivo text NOT NULL
+ ├─ formato text NOT NULL
+ ├─ total_registros bigint DEFAULT (0) NOT NULL
+ ├─ duplicados bigint DEFAULT (0) NOT NULL
+ ├─ data_importacao text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+
+Fornecedores
+ ├─ id_fornecedor INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_fornecedor text NOT NULL
+ ├─ ativo bigint DEFAULT (1)
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+
+Contas
+ ├─ id_conta INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_conta text NOT NULL
+ ├─ saldo_inicial numeric(53,0) DEFAULT (0) NOT NULL
+ ├─ saldo_atual numeric(53,0) DEFAULT (0) NOT NULL
+ ├─ tipo_conta text NOT NULL
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ data_atualizacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ ativo bigint DEFAULT (1)
+ ├─ cor text DEFAULT ('#2D9CDB')
+ ├─ icone text DEFAULT ('🏦')
+
+Configuracoes
+ ├─ id_configuracao INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ moeda text DEFAULT ('R$')
+ ├─ formato_data text DEFAULT ('dd/MM/yyyy')
+ ├─ primeiro_dia_semana text DEFAULT ('Domingo')
+ ├─ tema text DEFAULT ('Claro')
+ ├─ idioma text DEFAULT ('pt-BR')
+ ├─ notificacoes_email bigint DEFAULT (1)
+ ├─ alerta_vencimento_dias bigint DEFAULT (3)
+ ├─ backup_automatico bigint DEFAULT (0)
+ ├─ frequencia_backup text DEFAULT ('semanal')
+
+Categorias
+ ├─ id_categoria INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_categoria text NOT NULL
+ ├─ tipo text NOT NULL
+ ├─ id_categoria_pai bigint
+ ├─ cor text DEFAULT ('#2C3E50')
+ ├─ icone text
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ ativo bigint DEFAULT (1)
+
+Orcamentos
+ ├─ id_orcamento INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ id_categoria bigint NOT NULL
+ ├─ valor_limite numeric(53,0) NOT NULL
+ ├─ mes bigint NOT NULL
+ ├─ ano bigint NOT NULL
+ ├─ valor_realizado numeric(53,0) DEFAULT (0)
+ ├─ observacoes text
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ data_atualizacao text DEFAULT (CURRENT_TIMESTAMP)
+
+Receitas
+ ├─ id_receita INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ id_categoria bigint NOT NULL
+ ├─ valor numeric(53,0) NOT NULL
+ ├─ data text NOT NULL
+ ├─ descricao text NOT NULL
+ ├─ recorrente bigint DEFAULT (0)
+ ├─ frequencia text
+ ├─ data_proximo_pagamento text
+ ├─ observacoes text
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ ativo bigint DEFAULT (1)
+
+CartoesCredito
+ ├─ id_cartao INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_cartao text NOT NULL
+ ├─ limite_credito numeric(53,0) NOT NULL
+ ├─ dia_fechamento bigint NOT NULL
+ ├─ dia_vencimento bigint NOT NULL
+ ├─ limite_utilizado numeric(53,0) DEFAULT (0)
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ ativo bigint DEFAULT (1)
+ ├─ cor text DEFAULT ('#8A05BE')
+
+FaturasCartao
+ ├─ id_fatura INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_cartao bigint NOT NULL
+ ├─ mes_referencia bigint NOT NULL
+ ├─ ano_referencia bigint NOT NULL
+ ├─ valor_total real DEFAULT (0) NOT NULL
+ ├─ data_vencimento text NOT NULL
+ ├─ status text DEFAULT ('aberta') NOT NULL
+ ├─ data_pagamento text
+
+Transacoes
+ ├─ id_transacao INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_conta bigint
+ ├─ id_cartao bigint
+ ├─ id_categoria bigint
+ ├─ id_usuario bigint NOT NULL
+ ├─ valor real NOT NULL
+ ├─ data text NOT NULL
+ ├─ descricao text NOT NULL
+ ├─ tipo text NOT NULL
+ ├─ parcelado bigint DEFAULT (0)
+ ├─ numero_parcelas bigint
+ ├─ id_transacao_pai bigint
+ ├─ observacoes text
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ data_atualizacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ id_fatura bigint
+ ├─ id_conta_destino bigint
+ ├─ data_vencimento text
+ ├─ pago bigint DEFAULT (0) NOT NULL
+ ├─ data_pagamento text
+ ├─ numero_parcela bigint DEFAULT (1)
+ ├─ total_parcelas bigint DEFAULT (1)
+ ├─ recorrente bigint DEFAULT (0)
+ ├─ frequencia text
+ ├─ id_fornecedor bigint
+
+TransacoesTags
+ ├─ id_transacao bigint NOT NULL
+ ├─ id_tag bigint NOT NULL
+
+Lembretes
+ ├─ id_lembrete INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ id_transacao bigint
+ ├─ titulo text NOT NULL
+ ├─ descricao text
+ ├─ data_lembrete text NOT NULL
+ ├─ status text DEFAULT ('pendente')
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+
+Backups
+ ├─ id_backup INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+ ├─ id_usuario bigint NOT NULL
+ ├─ nome_arquivo text NOT NULL
+ ├─ tamanho_kb bigint
+ ├─ data_criacao text DEFAULT (CURRENT_TIMESTAMP)
+ ├─ localizacao text
+ ├─ tipo text

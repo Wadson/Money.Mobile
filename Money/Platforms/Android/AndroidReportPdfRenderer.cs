@@ -17,8 +17,10 @@ internal static class AndroidReportPdfRenderer
 
     public static Task GenerateAsync(string path, IReadOnlyList<FinancialReportItem> items,
         string period, string? categoryName, string statusLabel,
-        decimal income, decimal expenses, decimal balance) => Task.Run(() =>
+        decimal income, decimal paidExpenses, decimal pendingExpenses, decimal balance) => Task.Run(() =>
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        items ??= Array.Empty<FinancialReportItem>();
         var culture = CultureInfo.GetCultureInfo("pt-BR");
         using var document = new PdfDocument();
         using var paint = new Paint(PaintFlags.AntiAlias);
@@ -88,8 +90,8 @@ internal static class AndroidReportPdfRenderer
             Rectangle(Margin, y, PageWidth - Margin, y + 30, BlingPalette.HeaderDarkHex);
             Text("DATA", Margin + 6, y + 20, 8, BlingPalette.CardBackgroundHex, bold: true);
             Text("DESCRIÇÃO", Margin + 78, y + 20, 8, BlingPalette.CardBackgroundHex, bold: true);
-            Text("ORIGEM", Margin + 270, y + 20, 8, BlingPalette.CardBackgroundHex, bold: true);
-            Text("TIPO", Margin + 390, y + 20, 8, BlingPalette.CardBackgroundHex, bold: true);
+            Text("CATEGORIA", Margin + 270, y + 20, 8, BlingPalette.CardBackgroundHex, bold: true);
+            Text("STATUS", Margin + 390, y + 20, 8, BlingPalette.CardBackgroundHex, bold: true);
             Text("VALOR", PageWidth - Margin - 6, y + 20, 8, BlingPalette.CardBackgroundHex, Paint.Align.Right, true);
             y += 30;
         }
@@ -104,9 +106,11 @@ internal static class AndroidReportPdfRenderer
         StartPage();
         SummaryCard(Margin, "RECEITAS", income, BlingPalette.CardBackgroundHex, BlingPalette.PrimaryHex);
         var cardWidth = (PageWidth - Margin * 2 - 16) / 3;
-        SummaryCard(Margin + cardWidth + 8, "DESPESAS", expenses, BlingPalette.CardBackgroundHex, BlingPalette.HeaderDarkHex);
-        SummaryCard(Margin + (cardWidth + 8) * 2, "SALDO", balance, BlingPalette.CardBackgroundHex, BlingPalette.PrimaryHex);
+        SummaryCard(Margin + cardWidth + 8, "DESP. PAGAS", paidExpenses, BlingPalette.CardBackgroundHex, BlingPalette.HeaderDarkHex);
+        SummaryCard(Margin + (cardWidth + 8) * 2, "PENDENTES", pendingExpenses, BlingPalette.CardBackgroundHex, BlingPalette.HeaderDarkHex);
         y += 74;
+        Text($"SALDO REALIZADO: {balance.ToString("C2", culture)}", PageWidth - Margin, y - 8,
+            9, BlingPalette.PrimaryHex, Paint.Align.Right, true);
         TableHeader();
 
         if (items.Count == 0)
@@ -130,11 +134,11 @@ internal static class AndroidReportPdfRenderer
                     Text(item.Date.ToString("dd/MM/yyyy"), Margin + 5, y + 19, 8, BlingPalette.TextDarkHex);
                     var description = item.Description.Length > 30 ? item.Description[..27] + "..." : item.Description;
                     Text(description, Margin + 78, y + 19, 8, BlingPalette.TextDarkHex);
-                    var source = item.Source.Length > 18 ? item.Source[..15] + "..." : item.Source;
-                    Text(source, Margin + 270, y + 19, 8, BlingPalette.TextDarkHex);
+                    var category = item.Category.Length > 18 ? item.Category[..15] + "..." : item.Category;
+                    Text(category, Margin + 270, y + 19, 8, BlingPalette.TextDarkHex);
                     var incomeItem = item.Type == "receita";
-                    Text(incomeItem ? "Receita" : "Despesa", Margin + 390, y + 19, 8,
-                        incomeItem ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex);
+                    Text(item.Paid ? "Realizado" : "Pendente", Margin + 390, y + 19, 8,
+                        item.Paid ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex);
                     Text(item.Amount.ToString("C2", culture), PageWidth - Margin - 5, y + 19, 8,
                         incomeItem ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex, Paint.Align.Right, true);
                     Rectangle(Margin, y + 29, PageWidth - Margin, y + 30, BlingPalette.BorderColorHex);
@@ -152,9 +156,28 @@ internal static class AndroidReportPdfRenderer
         }
 
         FinishPage();
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        using var stream = File.Create(path);
-        document.WriteTo(stream);
+        var directory = Path.GetDirectoryName(path)
+            ?? throw new IOException("A pasta temporária do relatório é inválida.");
+        Directory.CreateDirectory(directory);
+        var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
+        try
+        {
+            using (var stream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write,
+                       FileShare.None, 64 * 1024, FileOptions.SequentialScan))
+            {
+                document.WriteTo(stream);
+                stream.Flush(true);
+            }
+            File.Move(temporaryPath, path, true);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new IOException("O Android não permitiu gravar o arquivo temporário do PDF.", ex);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+        }
     });
 }
 #endif

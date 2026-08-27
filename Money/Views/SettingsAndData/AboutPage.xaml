@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             x:Class="Money.Views.SettingsAndData.AboutPage" Shell.NavBarIsVisible="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}">
+    <Grid Padding="18">
+        <Border Style="{StaticResource ContentCard}" MaximumWidthRequest="520" VerticalOptions="Center" Padding="24" StrokeShape="RoundRectangle 20">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Border WidthRequest="64" HeightRequest="64" Padding="5" StrokeThickness="0" BackgroundColor="{StaticResource BlingPrimary}" StrokeShape="RoundRectangle 16">
+                        <Grid>
+                            <Image Source="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=BlingTextLight, IconSize=36}" WidthRequest="36" HeightRequest="36"/>
+                            <Image Source="icon.svg" Aspect="AspectFit"/>
+                        </Grid>
+                    </Border>
+                    <Label Text="Money" FontSize="28" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{StaticResource BlingPrimary}"/>
+                </HorizontalStackLayout>
+                <Label Text="Sobre o sistema" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"/>
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                    <Label Text="Versão:" FontAttributes="Bold"/><Label x:Name="VersionLabel" Grid.Column="1"/>
+                    <Label Grid.Row="1" Text="Desenvolvedor:" FontAttributes="Bold"/><Label Grid.Row="1" Grid.Column="1" Text="WR Services Serviços Online"/>
+                    <Label Grid.Row="2" Text="Plataforma:" FontAttributes="Bold"/><Label x:Name="PlatformLabel" Grid.Row="2" Grid.Column="1"/>
+                    <Label Grid.Row="3" Grid.ColumnSpan="2" Text="© 2026 WR Services. Todos os direitos reservados." FontSize="12" HorizontalTextAlignment="Center"/>
+                </Grid>
+                <Button Text="Fechar" Style="{StaticResource PrimaryButton}" Clicked="OnCloseClicked"/>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

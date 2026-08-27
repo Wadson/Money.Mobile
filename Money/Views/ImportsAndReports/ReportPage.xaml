@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             xmlns:controls="clr-namespace:Money.Controls"
+             x:Class="Money.Views.ImportsAndReports.ReportPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="44,*" ColumnSpacing="12">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}"
+                             BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44"
+                             Padding="10" CornerRadius="12" Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="1">
+                    <Label Text="Relatórios PDF" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"/>
+                    <Label Text="Lançamentos por mês e categoria" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,16,16,40" Spacing="14" MaximumWidthRequest="900" HorizontalOptions="Fill">
+                <Border Style="{StaticResource ContentCard}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Filtros do relatório" Style="{StaticResource SectionTitle}"/>
+                        <Label Text="Escolha o período e, opcionalmente, uma categoria."
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12"/>
+
+                        <Label Text="MÊS E ANO" Style="{StaticResource CardCaption}"/>
+                        <Border Style="{StaticResource InputContainer}">
+                            <controls:LeftAlignedFieldButton x:Name="PeriodButton" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=CalendarMonth, ColorResource=BlingPrimary, IconSize=20}"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderWidth="0" FontAttributes="Bold"
+                                    Clicked="OnSelectPeriodClicked"/>
+                        </Border>
+
+                        <Label Text="CATEGORIA" Style="{StaticResource CardCaption}"/>
+                        <Border Style="{StaticResource InputContainer}">
+                            <controls:LeftAlignedFieldButton x:Name="CategoryButton" Text="Todas as categorias" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=BlingPrimary, IconSize=20}"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderWidth="0" FontAttributes="Bold"
+                                    Clicked="OnSelectCategoryClicked"/>
+                        </Border>
+
+                        <Label Text="FORNECEDOR" Style="{StaticResource CardCaption}"/>
+                        <Border Style="{StaticResource InputContainer}">
+                            <controls:LeftAlignedFieldButton x:Name="SupplierButton" Text="Todos os fornecedores" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=Storefront, ColorResource=BlingPrimary, IconSize=20}"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderWidth="0" FontAttributes="Bold"
+                                    Clicked="OnSelectSupplierClicked"/>
+                        </Border>
+
+                        <Label Text="CARTÃO" Style="{StaticResource CardCaption}"/>
+                        <Border Style="{StaticResource InputContainer}">
+                            <controls:LeftAlignedFieldButton x:Name="CardButton" Text="Todos os cartões" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=CreditCard, ColorResource=BlingPrimary, IconSize=20}"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderWidth="0" FontAttributes="Bold" Clicked="OnSelectCardClicked"/>
+                        </Border>
+
+                        <Label Text="SITUAÇÃO" Style="{StaticResource CardCaption}"/>
+                        <Border Style="{StaticResource InputContainer}">
+                            <controls:LeftAlignedFieldButton x:Name="PaymentStatusButton" Text="Todas (abertas e pagas)" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=CheckCircleOutline, ColorResource=BlingPrimary, IconSize=20}"
+                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderWidth="0" FontAttributes="Bold"
+                                    Clicked="OnSelectPaymentStatusClicked"/>
+                        </Border>
+
+                        <Button x:Name="GenerateButton" Text="Gerar relatório PDF"
+                                ImageSource="{icons:MaterialIconSource Icon=RequestQuote, ColorResource=BlingTextLight, IconSize=20}"
+                                Style="{StaticResource PrimaryButton}" HeightRequest="50" Clicked="OnGenerateClicked"/>
+                        <ActivityIndicator x:Name="GenerateActivity" IsVisible="False" IsRunning="False"
+                                           Color="{StaticResource BlingPrimary}" HorizontalOptions="Center"/>
+                        <Label x:Name="GenerateStatusLabel" IsVisible="False"
+                               Text="Gerando o arquivo PDF..."
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12"
+                               HorizontalTextAlignment="Center"/>
+                        <Label x:Name="ErrorLabel" IsVisible="False" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border x:Name="ResultCard" IsVisible="False" Style="{StaticResource ContentCard}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="PDF pronto" TextColor="{StaticResource BlingPrimary}" FontSize="18" FontAttributes="Bold"/>
+                        <Label x:Name="ResultLabel" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Salvar no dispositivo"
+                                    ImageSource="{icons:MaterialIconSource Icon=Save, ColorResource=BlingPrimary, IconSize=20}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}"
+                                    BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" Clicked="OnSaveClicked"/>
+                            <Button Grid.Column="1" Text="Compartilhar"
+                                    ImageSource="{icons:MaterialIconSource Icon=Share, ColorResource=BlingTextLight, IconSize=20}"
+                                    BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}"
+                                    Clicked="OnShareClicked"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

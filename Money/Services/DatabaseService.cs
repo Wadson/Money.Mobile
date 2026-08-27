@@ -6,6 +6,7 @@ namespace Money.Services;
 /// <summary>Manages the local SQLite database and all financial operations.</summary>
 public sealed class DatabaseService
 {
+    private static readonly SemaphoreSlim InitializationGate = new(1, 1);
     private readonly string _path = Path.Combine(FileSystem.AppDataDirectory, "financeiro.db");
     private string ConnectionString => $"Data Source={_path};Foreign Keys=True";
     public string DatabasePath => _path;
@@ -14,6 +15,9 @@ public sealed class DatabaseService
     /// <summary>Creates and migrates the database on first use.</summary>
     public async Task InitializeAsync()
     {
+        await InitializationGate.WaitAsync();
+        try
+        {
         SQLitePCL.Batteries_V2.Init();
         Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
         await using var db = new SqliteConnection(ConnectionString);
@@ -241,7 +245,7 @@ public sealed class DatabaseService
                   SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) total_despesas,
                   SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)-
                   SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) saldo_mes
-                FROM Transacoes WHERE pago=1
+                FROM Transacoes WHERE pago=1 AND tipo IN('receita','despesa')
                   AND NOT(parcelado=1 AND id_transacao_pai IS NULL)
                 GROUP BY id_usuario,
                   strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END);
@@ -263,7 +267,7 @@ public sealed class DatabaseService
                   CASE WHEN SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)=0 THEN 0
                     ELSE ROUND(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END)*100.0/
                     SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END),2) END percentual_gastos
-                FROM Transacoes GROUP BY id_usuario;
+                FROM Transacoes WHERE tipo IN('receita','despesa') GROUP BY id_usuario;
                 DROP VIEW IF EXISTS vw_contas_pagar;
                 CREATE VIEW vw_contas_pagar AS
                 SELECT t.id_usuario,t.id_transacao,t.descricao,t.valor,
@@ -403,7 +407,7 @@ public sealed class DatabaseService
                   SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) total_despesas,
                   SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)-
                   SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) saldo_mes
-                FROM Transacoes WHERE pago=1
+                FROM Transacoes WHERE pago=1 AND tipo IN('receita','despesa')
                   AND NOT(parcelado=1 AND id_transacao_pai IS NULL)
                 GROUP BY id_usuario,
                   strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END);
@@ -431,9 +435,126 @@ public sealed class DatabaseService
                 PRAGMA user_version=14;
                 """);
         }
+        if (version < 15)
+        {
+            await ExecuteAsync(db, """
+                DROP TRIGGER IF EXISTS trg_transacoes_transferencia_insert;
+                DROP TRIGGER IF EXISTS trg_transacoes_transferencia_update;
+                CREATE TRIGGER trg_transacoes_transferencia_insert BEFORE INSERT ON Transacoes
+                WHEN LOWER(NEW.tipo)='transferencia' AND
+                  (NEW.valor<=0 OR NEW.id_conta IS NULL OR NEW.id_conta_destino IS NULL
+                   OR NEW.id_conta=NEW.id_conta_destino)
+                BEGIN SELECT RAISE(ABORT,'Transferência inválida.'); END;
+                CREATE TRIGGER trg_transacoes_transferencia_update BEFORE UPDATE ON Transacoes
+                WHEN LOWER(NEW.tipo)='transferencia' AND
+                  (NEW.valor<=0 OR NEW.id_conta IS NULL OR NEW.id_conta_destino IS NULL
+                   OR NEW.id_conta=NEW.id_conta_destino)
+                BEGIN SELECT RAISE(ABORT,'Transferência inválida.'); END;
+                DROP VIEW IF EXISTS vw_resumo_mensal;
+                CREATE VIEW vw_resumo_mensal AS
+                SELECT id_usuario,
+                  strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END) mes_ano,
+                  SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END) total_receitas,
+                  SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) total_despesas,
+                  SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)-
+                  SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) saldo_mes
+                FROM Transacoes WHERE pago=1 AND tipo IN('receita','despesa')
+                  AND NOT(parcelado=1 AND id_transacao_pai IS NULL)
+                GROUP BY id_usuario,
+                  strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data END);
+                DROP VIEW IF EXISTS vw_saude_financeira;
+                CREATE VIEW vw_saude_financeira AS
+                SELECT id_usuario,
+                  SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END) total_receitas,
+                  SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) total_despesas,
+                  SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)-
+                  SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END) saldo_geral,
+                  CASE WHEN SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END)=0 THEN 0
+                    ELSE ROUND(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END)*100.0/
+                    SUM(CASE WHEN tipo='receita' AND pago=1 THEN valor ELSE 0 END),2) END percentual_gastos
+                FROM Transacoes WHERE tipo IN('receita','despesa') GROUP BY id_usuario;
+                PRAGMA user_version=15;
+                """);
+        }
 
+        if (version < 16)
+        {
+            // Migração aditiva e idempotente: mantém os dados de recuperação legados.
+            await EnsureColumnAsync(db, "Usuarios", "palavra_chave_hash", "TEXT");
+            await EnsureColumnAsync(db, "Usuarios", "dica_palavra_chave", "TEXT");
+            await ExecuteAsync(db, """
+                UPDATE Usuarios
+                SET palavra_chave_hash=COALESCE(palavra_chave_hash,resposta_recuperacao_hash),
+                    dica_palavra_chave=COALESCE(dica_palavra_chave,pergunta_recuperacao,'Palavra-chave cadastrada no perfil')
+                WHERE palavra_chave_hash IS NULL OR dica_palavra_chave IS NULL;
+                PRAGMA user_version=16;
+                """);
+        }
+
+        if (version < 17)
+        {
+            await EnsureFinancialCompetenceSchemaAsync(db);
+            await ExecuteAsync(db, "PRAGMA user_version=17;");
+        }
+
+        // Reparação final idempotente para bancos restaurados com versão inconsistente.
+        await EnsureColumnAsync(db, "Usuarios", "data_nascimento", "TEXT");
+        await EnsureColumnAsync(db, "Usuarios", "pergunta_recuperacao", "TEXT");
+        await EnsureColumnAsync(db, "Usuarios", "resposta_recuperacao_hash", "TEXT");
+        await EnsureColumnAsync(db, "Usuarios", "palavra_chave_hash", "TEXT");
+        await EnsureColumnAsync(db, "Usuarios", "dica_palavra_chave", "TEXT");
+        await ExecuteAsync(db, """
+            UPDATE Usuarios
+            SET palavra_chave_hash=COALESCE(palavra_chave_hash,resposta_recuperacao_hash),
+                dica_palavra_chave=COALESCE(dica_palavra_chave,pergunta_recuperacao)
+            WHERE palavra_chave_hash IS NULL OR dica_palavra_chave IS NULL;
+            """);
         await EnsureSupplierSchemaAsync(db);
+        await EnsureFinancialCompetenceSchemaAsync(db);
+        }
+        finally
+        {
+            InitializationGate.Release();
+        }
     }
+
+    private static Task EnsureFinancialCompetenceSchemaAsync(SqliteConnection db) => ExecuteAsync(db, """
+        CREATE INDEX IF NOT EXISTS idx_transacoes_usuario_tipo_pago_vencimento ON Transacoes(id_usuario,tipo,pago,data_vencimento);
+        CREATE INDEX IF NOT EXISTS idx_transacoes_usuario_tipo_pago_pagamento ON Transacoes(id_usuario,tipo,pago,data_pagamento);
+        DROP VIEW IF EXISTS vw_resumo_mensal;
+        CREATE VIEW vw_resumo_mensal AS SELECT id_usuario,
+          strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data_pagamento END) mes_ano,
+          COALESCE(SUM(CASE WHEN tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL THEN valor ELSE 0 END),0) total_receitas,
+          COALESCE(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END),0) total_despesas,
+          COALESCE(SUM(CASE WHEN tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL THEN valor ELSE 0 END),0)-COALESCE(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END),0) saldo_mes
+        FROM Transacoes WHERE ((tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL) OR (tipo='despesa' AND pago=1))
+          AND NOT(parcelado=1 AND id_transacao_pai IS NULL AND EXISTS(SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=Transacoes.id_transacao))
+        GROUP BY id_usuario,strftime('%Y-%m',CASE WHEN tipo='despesa' THEN COALESCE(data_vencimento,data) ELSE data_pagamento END);
+        DROP VIEW IF EXISTS vw_gastos_categoria;
+        CREATE VIEW vw_gastos_categoria AS SELECT t.id_usuario,c.nome_categoria,c.tipo,c.cor,strftime('%Y-%m',COALESCE(t.data_vencimento,t.data)) mes_ano,COALESCE(SUM(t.valor),0) total
+        FROM Transacoes t JOIN Categorias c ON c.id_categoria=t.id_categoria WHERE t.pago=1 AND t.tipo='despesa'
+          AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao))
+        GROUP BY t.id_usuario,c.id_categoria,strftime('%Y-%m',COALESCE(t.data_vencimento,t.data));
+        DROP VIEW IF EXISTS vw_saude_financeira;
+        CREATE VIEW vw_saude_financeira AS SELECT id_usuario,
+          COALESCE(SUM(CASE WHEN tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL THEN valor ELSE 0 END),0) total_receitas,
+          COALESCE(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END),0) total_despesas,
+          COALESCE(SUM(CASE WHEN tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL THEN valor ELSE 0 END),0)-COALESCE(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END),0) saldo_geral,
+          CASE WHEN COALESCE(SUM(CASE WHEN tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL THEN valor ELSE 0 END),0)=0 THEN 0 ELSE ROUND(COALESCE(SUM(CASE WHEN tipo='despesa' AND pago=1 THEN valor ELSE 0 END),0)*100.0/SUM(CASE WHEN tipo='receita' AND pago=1 AND data_pagamento IS NOT NULL THEN valor ELSE 0 END),2) END percentual_gastos
+        FROM Transacoes WHERE tipo IN('receita','despesa') AND NOT(parcelado=1 AND id_transacao_pai IS NULL AND EXISTS(SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=Transacoes.id_transacao)) GROUP BY id_usuario;
+        DROP VIEW IF EXISTS vw_contas_pagar;
+        CREATE VIEW vw_contas_pagar AS SELECT t.id_usuario,t.id_transacao,t.descricao,t.valor,COALESCE(t.data_vencimento,t.data) data_vencimento,c.nome_categoria categoria,
+          CASE WHEN date(COALESCE(t.data_vencimento,t.data))<date('now','localtime') THEN 'vencida' WHEN date(COALESCE(t.data_vencimento,t.data))=date('now','localtime') THEN 'hoje' WHEN date(COALESCE(t.data_vencimento,t.data))<=date('now','localtime','+7 days') THEN 'proxima_semana' ELSE 'futura' END status_vencimento
+        FROM Transacoes t JOIN Categorias c ON c.id_categoria=t.id_categoria WHERE t.tipo='despesa' AND t.pago=0
+          AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao));
+        DROP VIEW IF EXISTS vw_orcamento_mensal;
+        CREATE VIEW vw_orcamento_mensal AS SELECT o.id_usuario,o.mes,o.ano,o.id_categoria,c.nome_categoria,c.cor,o.valor_limite,COALESCE(SUM(t.valor),0) valor_realizado,
+          CASE WHEN o.valor_limite=0 THEN 0 ELSE ROUND(COALESCE(SUM(t.valor),0)*100.0/o.valor_limite,2) END percentual_utilizado,
+          CASE WHEN COALESCE(SUM(t.valor),0)>o.valor_limite THEN 'estourado' WHEN COALESCE(SUM(t.valor),0)>o.valor_limite*.9 THEN 'atencao' WHEN COALESCE(SUM(t.valor),0)>o.valor_limite*.75 THEN 'cuidado' ELSE 'ok' END status
+        FROM Orcamentos o JOIN Categorias c ON c.id_categoria=o.id_categoria LEFT JOIN Transacoes t ON t.id_usuario=o.id_usuario AND t.id_categoria=o.id_categoria AND t.tipo='despesa' AND t.pago=1
+          AND CAST(strftime('%m',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=o.mes AND CAST(strftime('%Y',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=o.ano
+          AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao)) GROUP BY o.id_orcamento;
+        """);
 
     private static async Task EnsureSupplierSchemaAsync(SqliteConnection db)
     {
@@ -575,29 +696,35 @@ public sealed class DatabaseService
           WHERE c.id_usuario=@user
         )
         SELECT t.id_transacao,
-               date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END),
+               date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data_pagamento END),
                t.descricao,t.tipo,t.valor,c.id_categoria,
-               c.nome_categoria,COALESCE(a.nome_conta,cc.nome_cartao,'—'),COALESCE(t.pago,0)
+               c.nome_categoria,COALESCE(a.nome_conta,cc.nome_cartao,'—'),COALESCE(t.pago,0),
+               COALESCE(t.numero_parcela,1),COALESCE(t.total_parcelas,1)
         FROM Transacoes t
         LEFT JOIN Categorias c ON c.id_categoria=t.id_categoria
         LEFT JOIN Contas a ON a.id_conta=t.id_conta
         LEFT JOIN CartoesCredito cc ON cc.id_cartao=t.id_cartao
         WHERE t.id_usuario=@user
-          AND date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END)>=date(@start)
-          AND date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END)<date(@end)
+          AND t.tipo IN('receita','despesa')
+          AND NOT (COALESCE(t.parcelado,0)=1 AND t.id_transacao_pai IS NULL
+                   AND EXISTS(SELECT 1 FROM Transacoes filha
+                              WHERE filha.id_transacao_pai=t.id_transacao))
+          AND (t.tipo<>'receita' OR (t.pago=1 AND t.data_pagamento IS NOT NULL))
+          AND date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data_pagamento END)>=date(@start)
+          AND date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data_pagamento END)<date(@end)
           AND (@category IS NULL OR t.id_categoria=@category)
           AND (@supplier IS NULL OR t.id_fornecedor=@supplier)
           AND (@card IS NULL OR t.id_cartao=@card)
           AND (@status='todas' OR (@status='pagas' AND COALESCE(t.pago,0)=1)
                OR (@status='abertas' AND COALESCE(t.pago,0)=0))
         ORDER BY COALESCE(c.nome_categoria,'Sem categoria'),
-                 date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data END),
+                 date(CASE WHEN t.tipo='despesa' THEN COALESCE(t.data_vencimento,t.data) ELSE t.data_pagamento END),
                  t.id_transacao
         """,
         r => new FinancialReportItem(
             r.GetInt64(0), r.GetDateTime(1), r.GetString(2), r.GetString(3), r.GetDecimal(4),
             r.IsDBNull(5) ? null : r.GetInt64(5), r.IsDBNull(6) ? "Sem categoria" : r.GetString(6),
-            r.GetString(7), r.GetInt32(8) == 1),
+            r.GetString(7), r.GetInt32(8) == 1, r.GetInt32(9), r.GetInt32(10)),
         ("@user", CurrentUserId), ("@start", $"{year:D4}-{month:D2}-01"),
         ("@end", new DateTime(year, month, 1).AddMonths(1).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)),
         ("@category", categoryId), ("@status", paymentStatus), ("@supplier", supplierId),
@@ -776,6 +903,80 @@ public sealed class DatabaseService
     // DASHBOARD
     // ============================================================
 
+    /// <summary>Returns the current balance of all active accounts owned by the signed-in user.</summary>
+    public async Task<decimal> GetTotalActiveAccountsBalanceAsync()
+    {
+        await using var db = new SqliteConnection(ConnectionString);
+        await db.OpenAsync();
+        return await GetTotalActiveAccountsBalanceAsync(db, CurrentUserId);
+    }
+
+    private static Task<decimal> GetTotalActiveAccountsBalanceAsync(SqliteConnection db, long userId) =>
+        DecimalAsync(db,
+            "SELECT COALESCE(SUM(COALESCE(saldo_atual,0.00)),0.00) FROM Contas WHERE ativo=1 AND id_usuario=@user",
+            ("@user", userId));
+
+    public Task<List<FinancialProjectionEvent>> GetFinancialProjectionEventsAsync(DateTime start, DateTime end) =>
+        QueryAsync("""
+            SELECT t.id_transacao,
+              date(CASE WHEN t.tipo='receita' AND t.pago=1 THEN t.data_pagamento
+                        WHEN t.tipo='receita' THEN t.data
+                        ELSE COALESCE(t.data_vencimento,t.data) END),
+              t.descricao,t.tipo,COALESCE(t.valor,0),COALESCE(t.pago,0),t.id_conta,t.id_cartao
+            FROM Transacoes t
+            WHERE t.id_usuario=@user AND t.tipo IN('receita','despesa')
+              AND ((t.tipo='receita' AND ((t.pago=1 AND t.data_pagamento IS NOT NULL) OR t.pago=0))
+                   OR t.tipo='despesa')
+              AND date(CASE WHEN t.tipo='receita' AND t.pago=1 THEN t.data_pagamento
+                            WHEN t.tipo='receita' THEN t.data
+                            ELSE COALESCE(t.data_vencimento,t.data) END)>=date(@start)
+              AND date(CASE WHEN t.tipo='receita' AND t.pago=1 THEN t.data_pagamento
+                            WHEN t.tipo='receita' THEN t.data
+                            ELSE COALESCE(t.data_vencimento,t.data) END)<date(@end)
+              AND NOT(COALESCE(t.parcelado,0)=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
+            ORDER BY 2,t.id_transacao
+            """, r => new FinancialProjectionEvent(r.GetInt64(0),r.GetDateTime(1),r.GetString(2),
+                r.GetString(3),r.GetDecimal(4),r.GetInt32(5)==1,
+                r.IsDBNull(6)?null:r.GetInt64(6),r.IsDBNull(7)?null:r.GetInt64(7)),
+            ("@user",CurrentUserId),("@start",start.Date),("@end",end.Date));
+
+    /// <summary>
+    /// Returns only realized income and paid expenses whose due date belongs to the
+    /// selected month. This is the single source for the three values in MainPage's hero card.
+    /// SQL and reader-level fallbacks keep an empty period safely represented by zeroes.
+    /// </summary>
+    public async Task<MonthlyRealizedTotals> GetMonthlyRealizedTotalsAsync(int month, int year)
+    {
+        await using var db = new SqliteConnection(ConnectionString);
+        await db.OpenAsync();
+        return await GetMonthlyRealizedTotalsAsync(db, CurrentUserId, month, year);
+    }
+
+    private static async Task<MonthlyRealizedTotals> GetMonthlyRealizedTotalsAsync(
+        SqliteConnection db, long userId, int month, int year)
+    {
+        var selectedPeriod = $"{year:D4}-{month:D2}";
+        await using var command = CreateCommand(db, """
+            SELECT
+              COALESCE(SUM(CASE WHEN tipo='receita' AND COALESCE(pago,0)=1
+                AND data_pagamento IS NOT NULL AND strftime('%Y-%m',data_pagamento)=@selectedPeriod
+                THEN COALESCE(valor,0.00) ELSE 0.00 END),0.00),
+              COALESCE(SUM(CASE WHEN tipo='despesa' AND COALESCE(pago,0)=1
+                AND strftime('%Y-%m',COALESCE(data_vencimento,data))=@selectedPeriod
+                THEN COALESCE(valor,0.00) ELSE 0.00 END),0.00)
+            FROM Transacoes WHERE id_usuario=@user
+              AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=Transacoes.id_transacao))
+            """, ("@selectedPeriod", selectedPeriod), ("@user", userId));
+        await using var reader = await command.ExecuteReaderAsync();
+        if (!await reader.ReadAsync()) return new(0.00m, 0.00m);
+
+        var totalReceitas = reader.IsDBNull(0) ? 0.00m : Convert.ToDecimal(reader.GetValue(0));
+        var totalDespesas = reader.IsDBNull(1) ? 0.00m : Convert.ToDecimal(reader.GetValue(1));
+        return new(totalReceitas, totalDespesas);
+    }
+
     /// <summary>Loads consolidated dashboard metrics for the current month.</summary>
     public async Task<DashboardSummary> GetDashboardAsync(int? month = null, int? year = null)
     {
@@ -786,14 +987,10 @@ public sealed class DatabaseService
         var start = new DateTime(selectedYear, selectedMonth, 1);
         var end = start.AddMonths(1);
         var userId = CurrentUserId;
-        var balance = await DecimalAsync(db, "SELECT COALESCE(SUM(saldo_atual),0) FROM Contas WHERE id_usuario=@user AND ativo=1", ("@user", userId));
-        var periodKey = $"{selectedYear:D4}-{selectedMonth:D2}";
-        var income = await DecimalAsync(db,
-            "SELECT COALESCE(total_receitas,0) FROM vw_resumo_mensal WHERE id_usuario=@user AND mes_ano=@period",
-            ("@user", userId), ("@period", periodKey));
-        var expenses = await DecimalAsync(db,
-            "SELECT COALESCE(total_despesas,0) FROM vw_resumo_mensal WHERE id_usuario=@user AND mes_ano=@period",
-            ("@user", userId), ("@period", periodKey));
+        var balance = await GetTotalActiveAccountsBalanceAsync(db, userId);
+        var realized = await GetMonthlyRealizedTotalsAsync(db, userId, selectedMonth, selectedYear);
+        var income = realized.TotalReceitas;
+        var expenses = realized.TotalDespesas;
         var cardDebt = await DecimalAsync(db, "SELECT COALESCE(SUM(limite_utilizado),0) FROM CartoesCredito WHERE id_usuario=@user AND ativo=1", ("@user", userId));
         var reserve = await DecimalAsync(db, "SELECT COALESCE(SUM(saldo_atual),0) FROM Contas WHERE id_usuario=@user AND ativo=1 AND tipo_conta IN('poupanca','investimento')", ("@user", userId));
 
@@ -801,15 +998,20 @@ public sealed class DatabaseService
         await using (var command = db.CreateCommand())
         {
             command.CommandText = """
-                SELECT t.id_transacao,t.descricao,t.valor,t.data,t.tipo,c.nome_categoria,
+                SELECT t.id_transacao,t.descricao,t.valor,
+                       CASE WHEN t.tipo='receita' THEN t.data_pagamento ELSE COALESCE(t.data_vencimento,t.data) END,
+                       t.tipo,c.nome_categoria,
                        COALESCE(a.nome_conta,cc.nome_cartao,'—')
                 FROM Transacoes t JOIN Categorias c ON c.id_categoria=t.id_categoria
                 LEFT JOIN Contas a ON a.id_conta=t.id_conta LEFT JOIN CartoesCredito cc ON cc.id_cartao=t.id_cartao
-                WHERE t.id_usuario=@user AND t.data>=@start AND t.data<@end
-                  AND (t.tipo='receita' OR t.pago=1)
-                  AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL)
-                  AND t.pago=1
-                ORDER BY t.data DESC,t.id_transacao DESC LIMIT 10
+                WHERE t.id_usuario=@user AND t.pago=1
+                  AND ((t.tipo='receita' AND t.data_pagamento IS NOT NULL
+                        AND date(t.data_pagamento)>=date(@start) AND date(t.data_pagamento)<date(@end))
+                    OR (t.tipo='despesa' AND date(COALESCE(t.data_vencimento,t.data))>=date(@start)
+                        AND date(COALESCE(t.data_vencimento,t.data))<date(@end)))
+                  AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                    SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao))
+                ORDER BY 4 DESC,t.id_transacao DESC LIMIT 10
                 """;
             command.Parameters.AddWithValue("@user", userId);
             command.Parameters.AddWithValue("@start", start);
@@ -859,22 +1061,31 @@ public sealed class DatabaseService
     // TRANSAÇÕES
     // ============================================================
 
-    public Task<List<ReceitaListItem>> GetReceitasAsync(int? mes, int? ano) => QueryAsync(
+    public async Task<List<ReceitaListItem>> GetReceitasAsync(int? mes, int? ano)
+    {
+        var items = await QueryAsync(
         """
-        SELECT t.id_transacao,t.descricao,c.nome_categoria,t.data,t.valor,
-               COALESCE(a.nome_conta,'—')
+        SELECT t.id_transacao,t.descricao,c.nome_categoria,
+               CASE WHEN t.pago=1 THEN t.data_pagamento ELSE t.data END,t.valor,
+               COALESCE(a.nome_conta,'—'),COALESCE(t.pago,0),t.data_pagamento,COALESCE(t.recorrente,0)
         FROM Transacoes t
         JOIN Categorias c ON c.id_categoria=t.id_categoria
         LEFT JOIN Contas a ON a.id_conta=t.id_conta
         WHERE t.id_usuario=@user AND t.tipo='receita'
-          AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL)
-          AND (@month IS NULL OR CAST(strftime('%m',t.data) AS INTEGER)=@month)
-          AND (@year IS NULL OR CAST(strftime('%Y',t.data) AS INTEGER)=@year)
-        ORDER BY t.data DESC,t.id_transacao DESC
+          AND ((t.pago=1 AND t.data_pagamento IS NOT NULL) OR t.pago=0)
+          AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+            SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao))
+          AND (@month IS NULL OR CAST(strftime('%m',CASE WHEN t.pago=1 THEN t.data_pagamento ELSE t.data END) AS INTEGER)=@month)
+          AND (@year IS NULL OR CAST(strftime('%Y',CASE WHEN t.pago=1 THEN t.data_pagamento ELSE t.data END) AS INTEGER)=@year)
+        ORDER BY CASE WHEN t.pago=1 THEN t.data_pagamento ELSE t.data END DESC,t.id_transacao DESC
         """,
         r => new ReceitaListItem(r.GetInt64(0), r.GetString(1), r.GetString(2),
-            r.GetDateTime(3), r.GetDecimal(4), r.GetString(5)),
+            r.GetDateTime(3), r.GetDecimal(4), r.GetString(5),r.GetInt32(6)==1,
+            r.IsDBNull(7)?null:r.GetDateTime(7),r.GetInt32(8)==1),
         ("@user", CurrentUserId), ("@month", mes), ("@year", ano));
+        var tags = await GetTransactionTagsLookupAsync();
+        return items.Select(item => item with { Tags = tags.GetValueOrDefault(item.Id, []) }).ToList();
+    }
 
     public async Task<ResumoReceitas> GetResumoReceitasAsync(int? mes, int? ano)
     {
@@ -948,6 +1159,155 @@ public sealed class DatabaseService
         DataChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    public async Task SetIncomePaidStatusAsync(long id, bool paid, DateTime? paymentDate = null)
+    {
+        await using var db = new SqliteConnection(ConnectionString); await db.OpenAsync();
+        await using var transaction = await db.BeginTransactionAsync();
+        try
+        {
+            await using var command = CreateCommand(db,"""
+                SELECT valor,id_conta,COALESCE(pago,0) FROM Transacoes
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='receita'
+                """,("@id",id),("@user",CurrentUserId));
+            await using var reader = await command.ExecuteReaderAsync();
+            if (!await reader.ReadAsync()) throw new InvalidOperationException("A receita não foi encontrada.");
+            var amount=reader.GetDecimal(0); var accountId=reader.IsDBNull(1)?(long?)null:reader.GetInt64(1);
+            var wasPaid=reader.GetInt32(2)==1; await reader.DisposeAsync();
+            if (paid==wasPaid) return;
+            if (accountId is null) throw new InvalidOperationException("A receita precisa possuir uma conta de destino.");
+            if (paid && paymentDate is null) throw new ArgumentException("Informe a data efetiva do recebimento.");
+            await ExecuteAsync(db,"""
+                UPDATE Contas SET saldo_atual=saldo_atual+@delta
+                WHERE id_conta=@account AND id_usuario=@user AND ativo=1
+                """,("@delta",paid?amount:-amount),("@account",accountId),("@user",CurrentUserId));
+            await ExecuteAsync(db,"""
+                UPDATE Transacoes SET pago=@paid,data_pagamento=@payment,data_atualizacao=CURRENT_TIMESTAMP
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='receita'
+                """,("@paid",paid?1:0),("@payment",paid?paymentDate!.Value.Date:null),
+                ("@id",id),("@user",CurrentUserId));
+            await WriteLogAsync(db,paid?"RECEBER":"ESTORNAR_RECEITA","Transacoes",id,
+                paid?$"recebimento={paymentDate:yyyy-MM-dd}":"receita voltou a pendente");
+            await transaction.CommitAsync();
+        }
+        catch { await transaction.RollbackAsync(); throw; }
+        DataChanged?.Invoke(this,EventArgs.Empty);
+    }
+
+    public async Task UpdateInstallmentScheduleAsync(long transactionId,
+        IReadOnlyList<InstallmentPreview> schedule)
+    {
+        if (schedule.Count < 2 || schedule.Any(item => item.Amount <= 0))
+            throw new ArgumentException("Informe ao menos duas parcelas/ocorrências com valores válidos.");
+        await using var db = new SqliteConnection(ConnectionString);
+        await db.OpenAsync();
+        await using var transaction = await db.BeginTransactionAsync();
+        try
+        {
+            var seriesValue = await ScalarAsync(db, """
+                SELECT COALESCE(id_transacao_pai,id_transacao) FROM Transacoes
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='despesa' AND parcelado=1
+                """, ("@id", transactionId), ("@user", CurrentUserId));
+            if (seriesValue is null) throw new InvalidOperationException("Série não encontrada.");
+            var seriesId = Convert.ToInt64(seriesValue);
+            var rows = await QueryAsync(db, """
+                SELECT id_transacao FROM Transacoes
+                WHERE id_usuario=@user AND id_transacao_pai=@series
+                ORDER BY COALESCE(numero_parcela,1),id_transacao
+                """, reader => reader.GetInt64(0), ("@user", CurrentUserId), ("@series", seriesId));
+            if (rows.Count != schedule.Count)
+                throw new InvalidOperationException("Altere a quantidade antes de editar os itens da série.");
+            for (var index = 0; index < rows.Count; index++)
+                await ExecuteAsync(db, """
+                    UPDATE Transacoes SET valor=@amount,data_vencimento=@date,
+                      data_atualizacao=CURRENT_TIMESTAMP
+                    WHERE id_transacao=@id AND id_usuario=@user AND pago=0
+                    """, ("@amount", schedule[index].Amount), ("@date", schedule[index].Date.Date),
+                    ("@id", rows[index]), ("@user", CurrentUserId));
+            await ExecuteAsync(db, """
+                UPDATE Transacoes SET valor=@total,data_vencimento=@date,
+                  data_atualizacao=CURRENT_TIMESTAMP
+                WHERE id_transacao=@series AND id_usuario=@user
+                """, ("@total", schedule.Sum(item => item.Amount)),
+                ("@date", schedule[0].Date.Date), ("@series", seriesId), ("@user", CurrentUserId));
+            await transaction.CommitAsync();
+        }
+        catch { await transaction.RollbackAsync(); throw; }
+        DataChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task ResizeInstallmentSeriesAsync(long transactionId, int installmentCount,
+        DateTime firstInstallmentDate)
+    {
+        if (installmentCount is < 2 or > 36)
+            throw new ArgumentException("Informe entre 2 e 36 parcelas.");
+        await using var db = new SqliteConnection(ConnectionString);
+        await db.OpenAsync();
+        await using var transaction = await db.BeginTransactionAsync();
+        try
+        {
+            var seriesValue = await ScalarAsync(db, """
+                SELECT COALESCE(id_transacao_pai,id_transacao) FROM Transacoes
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='despesa' AND parcelado=1
+                """, ("@id", transactionId), ("@user", CurrentUserId));
+            if (seriesValue is null) throw new InvalidOperationException("Parcelamento não encontrado.");
+            var seriesId = Convert.ToInt64(seriesValue);
+            var paidCount = Convert.ToInt32(await ScalarAsync(db, """
+                SELECT COUNT(*) FROM Transacoes WHERE id_usuario=@user AND pago=1
+                  AND (id_transacao=@series OR id_transacao_pai=@series)
+                """, ("@user", CurrentUserId), ("@series", seriesId)) ?? 0);
+            if (paidCount > 0)
+                throw new InvalidOperationException("Não é possível alterar a quantidade porque já existe parcela paga.");
+
+            await using var source = CreateCommand(db, """
+                SELECT descricao,valor,id_conta,id_cartao,id_categoria,observacoes,
+                       COALESCE(recorrente,0),frequencia,id_fornecedor
+                      ,data
+                FROM Transacoes WHERE id_transacao=@series AND id_usuario=@user
+                """, ("@series", seriesId), ("@user", CurrentUserId));
+            await using var reader = await source.ExecuteReaderAsync();
+            if (!await reader.ReadAsync()) throw new InvalidOperationException("Série de parcelas não encontrada.");
+            var description = reader.GetString(0);
+            var totalAmount = reader.GetDecimal(1);
+            long? accountId = reader.IsDBNull(2) ? null : reader.GetInt64(2);
+            long? cardId = reader.IsDBNull(3) ? null : reader.GetInt64(3);
+            var categoryId = reader.GetInt64(4);
+            var notes = reader.IsDBNull(5) ? null : reader.GetString(5);
+            var recurring = reader.GetInt32(6) == 1;
+            var frequency = reader.IsDBNull(7) ? null : reader.GetString(7);
+            long? supplierId = reader.IsDBNull(8) ? null : reader.GetInt64(8);
+            var purchaseDate = reader.GetDateTime(9).Date;
+            await reader.DisposeAsync();
+
+            var installments = TransactionSchedulePlanner.Build(totalAmount, installmentCount,
+                firstInstallmentDate.Date, recurring ? TransactionScheduleMode.Recurrence : TransactionScheduleMode.Installment);
+            await ExecuteAsync(db, "DELETE FROM Transacoes WHERE id_transacao_pai=@series AND id_usuario=@user",
+                ("@series", seriesId), ("@user", CurrentUserId));
+            await ExecuteAsync(db, """
+                UPDATE Transacoes SET numero_parcelas=@count,total_parcelas=@count,numero_parcela=1,
+                    data_vencimento=@first,data_atualizacao=CURRENT_TIMESTAMP
+                WHERE id_transacao=@series AND id_usuario=@user
+                """, ("@count", installmentCount), ("@first", firstInstallmentDate.Date),
+                ("@series", seriesId), ("@user", CurrentUserId));
+            foreach (var item in installments)
+                await ExecuteAsync(db, """
+                    INSERT INTO Transacoes(id_conta,id_cartao,id_categoria,id_usuario,valor,data,descricao,tipo,
+                      parcelado,numero_parcelas,id_transacao_pai,observacoes,data_vencimento,pago,
+                      numero_parcela,total_parcelas,recorrente,frequencia,id_fornecedor)
+                    VALUES(@account,@card,@category,@user,@amount,@purchaseDate,@description,'despesa',
+                      1,@count,@parent,@notes,@dueDate,0,@number,@count,@recurring,@frequency,@supplier)
+                    """, ("@account", accountId), ("@card", cardId), ("@category", categoryId),
+                    ("@user", CurrentUserId), ("@amount", item.Amount), ("@purchaseDate", purchaseDate),
+                    ("@dueDate", item.Date),
+                    ("@description", $"{description} - Parcela {item.Number}/{item.Total}"),
+                    ("@count", installmentCount), ("@parent", seriesId), ("@notes", notes),
+                    ("@number", item.Number), ("@recurring", recurring ? 1 : 0),
+                    ("@frequency", frequency), ("@supplier", supplierId));
+            await transaction.CommitAsync();
+        }
+        catch { await transaction.RollbackAsync(); throw; }
+        DataChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public async Task UpdateListedTransactionAsync(long id, string expectedType, string description,
         decimal amount, DateTime date, long categoryId, string? notes,
         DateTime? dueDate = null, bool recurring = false, string? frequency = null,
@@ -972,7 +1332,7 @@ public sealed class DatabaseService
             // Desfaz o efeito financeiro anterior antes de validar/aplicar a nova origem.
             if (expectedType == "receita")
             {
-                if (current.AccountId is not null)
+                if (current.AccountId is not null && current.Paid)
                     await ExecuteAsync(db, """
                         UPDATE Contas SET saldo_atual=saldo_atual-@amount
                         WHERE id_conta=@account AND id_usuario=@user
@@ -980,12 +1340,13 @@ public sealed class DatabaseService
                         ("@user", CurrentUserId));
                 if (accountId is null)
                     throw new ArgumentException("Receitas devem estar vinculadas a uma conta.");
-                await ExecuteAsync(db, """
-                    UPDATE Contas SET saldo_atual=saldo_atual+@amount
-                    WHERE id_conta=@account AND id_usuario=@user
-                    """, ("@amount", amount), ("@account", accountId), ("@user", CurrentUserId));
-                paid = true;
-                paymentDate ??= date.Date;
+                if (paid && paymentDate is null)
+                    throw new ArgumentException("Informe a data efetiva de recebimento da receita.");
+                if (paid)
+                    await ExecuteAsync(db, """
+                        UPDATE Contas SET saldo_atual=saldo_atual+@amount
+                        WHERE id_conta=@account AND id_usuario=@user
+                        """, ("@amount", amount), ("@account", accountId), ("@user", CurrentUserId));
             }
             else
             {
@@ -1037,8 +1398,9 @@ public sealed class DatabaseService
                 WHERE id_transacao=@id AND id_usuario=@user AND tipo=@type
                 """, ("@description", description), ("@amount", amount), ("@date", date.Date),
                 ("@account", accountId), ("@card", cardId),
-                ("@category", categoryId), ("@notes", notes), ("@due", dueDate),
-                ("@paid", paid ? 1 : 0), ("@payment", paid ? paymentDate ?? date.Date : null),
+                ("@category", categoryId), ("@notes", notes),
+                ("@due", expectedType == "despesa" ? dueDate ?? date.Date : null),
+                ("@paid", paid ? 1 : 0), ("@payment", paid ? paymentDate : null),
                 ("@recurring", recurring ? 1 : 0), ("@frequency", recurring ? frequency : null),
                 ("@supplier", expectedType == "despesa" ? supplierId : null),
                 ("@id", id),
@@ -1070,7 +1432,8 @@ public sealed class DatabaseService
     public async Task ConvertTransactionToInstallmentsAsync(long id, string description,
         decimal totalAmount, long categoryId, string? notes, int installmentCount,
         DateTime firstInstallmentDate, bool recurring, string? frequency,
-        IReadOnlyCollection<long>? tagIds, long? supplierId)
+        IReadOnlyCollection<long>? tagIds, long? supplierId,
+        IReadOnlyList<InstallmentPreview>? editedSchedule = null)
     {
         description = description.Trim();
         if (description.Length < 2) throw new ArgumentException("Informe uma descrição válida.");
@@ -1097,7 +1460,14 @@ public sealed class DatabaseService
             if (paid) throw new InvalidOperationException("Uma conta paga não pode ser parcelada.");
             if (alreadyInstallment) throw new InvalidOperationException("Esta conta já pertence a um parcelamento.");
 
-            var installments = BuildInstallments(totalAmount, installmentCount, firstInstallmentDate.Date);
+            var installments = editedSchedule is { Count: > 0 }
+                ? editedSchedule
+                : TransactionSchedulePlanner.Build(totalAmount, installmentCount,
+                    firstInstallmentDate.Date, recurring
+                        ? TransactionScheduleMode.Recurrence
+                        : TransactionScheduleMode.Installment);
+            if (installments.Count != installmentCount || installments.Any(item => item.Amount <= 0))
+                throw new ArgumentException("A programação informada é inválida.");
             var updated = await ExecuteCountAsync(db, """
                 UPDATE Transacoes SET descricao=@description,valor=@amount,data=@date,
                   id_categoria=@category,observacoes=@notes,data_vencimento=@date,
@@ -1123,7 +1493,9 @@ public sealed class DatabaseService
                       1,@count,@parent,@notes,@date,0,@number,@count,@recurring,@frequency,@supplier)
                     """, ("@account", accountId), ("@card", cardId), ("@category", categoryId),
                     ("@user", CurrentUserId), ("@amount", item.Amount), ("@date", item.Date),
-                    ("@description", $"{description} - Parcela {item.Number}/{item.Total}"),
+                    ("@description", recurring
+                        ? $"{description} - Ocorrência {item.Number}/{item.Total}"
+                        : $"{description} - Parcela {item.Number}/{item.Total}"),
                     ("@count", installmentCount), ("@parent", id), ("@notes", notes),
                     ("@number", item.Number), ("@recurring", recurring ? 1 : 0),
                     ("@frequency", recurring ? frequency : null), ("@supplier", supplierId));
@@ -1158,7 +1530,7 @@ public sealed class DatabaseService
             if (expectedType == "despesa" && current.Paid)
                 throw new InvalidOperationException("Uma conta já paga não pode ser excluída nesta tela.");
 
-            if (expectedType == "receita" && current.AccountId is not null)
+            if (expectedType == "receita" && current.AccountId is not null && current.Paid)
                 await ExecuteAsync(db, """
                     UPDATE Contas SET saldo_atual=saldo_atual-@amount
                     WHERE id_conta=@account AND id_usuario=@user
@@ -1200,8 +1572,10 @@ public sealed class DatabaseService
             reader.IsDBNull(2) ? null : reader.GetInt64(2), reader.GetInt32(3) == 1);
     }
 
-    public Task<List<ContaPagar>> GetContasPagarAsync(int? mes, int? ano, bool? pagas = false,
-        long? supplierId = null, long? cardId = null, long? categoryId = null) => QueryAsync(
+    public async Task<List<ContaPagar>> GetContasPagarAsync(int? mes, int? ano, bool? pagas = false,
+        long? supplierId = null, long? cardId = null, long? categoryId = null)
+    {
+        var items = await QueryAsync(
         """
         WITH RECURSIVE categorias_selecionadas(id_categoria) AS (
           SELECT @category WHERE @category IS NOT NULL
@@ -1225,7 +1599,8 @@ public sealed class DatabaseService
         LEFT JOIN Fornecedores f ON f.id_fornecedor=t.id_fornecedor
         WHERE t.id_usuario=@user AND t.tipo='despesa'
           AND (@paid IS NULL OR COALESCE(t.pago,0)=@paid)
-          AND NOT (COALESCE(t.parcelado,0)=1 AND t.id_transacao_pai IS NULL)
+          AND NOT (COALESCE(t.parcelado,0)=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+            SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
           AND (@month IS NULL OR CAST(strftime('%m',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=@month)
           AND (@year IS NULL OR CAST(strftime('%Y',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=@year)
           AND (@supplier IS NULL OR t.id_fornecedor=@supplier)
@@ -1244,6 +1619,17 @@ public sealed class DatabaseService
         }, ("@user", CurrentUserId), ("@month", mes), ("@year", ano),
         ("@paid", pagas is null ? null : pagas.Value ? 1 : 0), ("@supplier", supplierId),
         ("@card", cardId), ("@category", categoryId));
+        var tags = await GetTransactionTagsLookupAsync();
+        return items.Select(item => new ContaPagar
+        {
+            Id = item.Id, Descricao = item.Descricao, Categoria = item.Categoria,
+            DataVencimento = item.DataVencimento, Valor = item.Valor, Status = item.Status,
+            ContaNome = item.ContaNome, IdFornecedor = item.IdFornecedor,
+            FornecedorNome = item.FornecedorNome, NumeroParcela = item.NumeroParcela,
+            TotalParcelas = item.TotalParcelas, Selecionado = item.Selecionado,
+            Tags = tags.GetValueOrDefault(item.Id, [])
+        }).ToList();
+    }
 
     public async Task<ResumoContasPagar> GetResumoContasPagarAsync(int? mes, int? ano)
     {
@@ -1254,7 +1640,7 @@ public sealed class DatabaseService
     public Task<List<ContaPagar>> GetRecentPaidExpensesAsync(int limit = 3) => QueryAsync(
         """
         SELECT t.id_transacao,t.descricao,c.nome_categoria,
-               COALESCE(t.data_pagamento,t.data),t.valor,'Paga',
+               COALESCE(t.data_vencimento,t.data),t.valor,'Paga',
                 COALESCE(a.nome_conta,cc.nome_cartao,'—'),
                 COALESCE(t.numero_parcela,1),COALESCE(t.total_parcelas,1)
         FROM Transacoes t
@@ -1262,8 +1648,9 @@ public sealed class DatabaseService
         LEFT JOIN Contas a ON a.id_conta=t.id_conta
         LEFT JOIN CartoesCredito cc ON cc.id_cartao=t.id_cartao
         WHERE t.id_usuario=@user AND t.tipo='despesa' AND t.pago=1
-          AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL)
-        ORDER BY COALESCE(t.data_pagamento,t.data) DESC,t.id_transacao DESC
+          AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+            SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
+        ORDER BY COALESCE(t.data_vencimento,t.data) DESC,t.id_transacao DESC
         LIMIT @limit
         """, r => new ContaPagar
         {
@@ -1282,14 +1669,18 @@ public sealed class DatabaseService
         var total = Convert.ToInt32(await ScalarAsync(db, """
             SELECT COUNT(*) FROM Transacoes
             WHERE id_usuario=@user AND tipo='despesa'
-              AND NOT (parcelado=1 AND id_transacao_pai IS NULL)
-              AND data>=@start AND data<@end
+              AND NOT (parcelado=1 AND id_transacao_pai IS NULL AND EXISTS(
+                SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
+              AND date(COALESCE(data_vencimento,data))>=date(@start)
+              AND date(COALESCE(data_vencimento,data))<date(@end)
             """, ("@user", CurrentUserId), ("@start", start), ("@end", end)) ?? 0);
         var paid = Convert.ToInt32(await ScalarAsync(db, """
             SELECT COUNT(*) FROM Transacoes
             WHERE id_usuario=@user AND tipo='despesa' AND pago=1
-              AND NOT (parcelado=1 AND id_transacao_pai IS NULL)
-              AND data>=@start AND data<@end
+              AND NOT (parcelado=1 AND id_transacao_pai IS NULL AND EXISTS(
+                SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
+              AND date(COALESCE(data_vencimento,data))>=date(@start)
+              AND date(COALESCE(data_vencimento,data))<date(@end)
             """, ("@user", CurrentUserId), ("@start", start), ("@end", end)) ?? 0);
         return new(paid, total);
     }
@@ -1302,19 +1693,36 @@ public sealed class DatabaseService
         {
             var categories = await QueryAsync(
                 """
-                SELECT c.nome_categoria,c.cor,COALESCE(SUM(t.valor),0)
-                FROM Transacoes t JOIN Categorias c ON c.id_categoria=t.id_categoria
+                SELECT COALESCE(c.nome_categoria,'Sem categoria'),COALESCE(c.cor,'#6B7280'),
+                       COALESCE(SUM(t.valor),0)
+                FROM Transacoes t
+                LEFT JOIN Categorias c ON c.id_categoria=t.id_categoria
                 WHERE t.id_usuario=@user AND t.id_cartao=@card AND t.tipo='despesa'
-                  AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL)
-                  AND CAST(strftime('%m',t.data) AS INTEGER)=@month
-                  AND CAST(strftime('%Y',t.data) AS INTEGER)=@year
-                GROUP BY c.id_categoria,c.nome_categoria,c.cor
+                  AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                    SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
+                  -- A competência da análise de cartões é sempre o vencimento do lançamento.
+                  -- Não usa data da compra, fechamento ou data registrada na fatura.
+                  AND CAST(strftime('%m',t.data_vencimento) AS INTEGER)=@month
+                  AND CAST(strftime('%Y',t.data_vencimento) AS INTEGER)=@year
+                GROUP BY COALESCE(c.id_categoria,0),
+                         COALESCE(c.nome_categoria,'Sem categoria'),
+                         COALESCE(c.cor,'#6B7280')
                 ORDER BY SUM(t.valor) DESC
                 """, r => new CardCategorySpend(r.GetString(0), r.GetString(1), r.GetDecimal(2)),
                 ("@user", CurrentUserId), ("@card", card.Id), ("@month", month), ("@year", year));
             var invoice = categories.Sum(x => x.Amount);
+            var used = (await QueryAsync(
+                """
+                SELECT COALESCE(SUM(t.valor),0)
+                FROM Transacoes t
+                WHERE t.id_usuario=@user AND t.id_cartao=@card AND t.tipo='despesa'
+                  AND COALESCE(t.pago,0)=0
+                  AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                    SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
+                """, r => r.GetDecimal(0),
+                ("@user", CurrentUserId), ("@card", card.Id))).Single();
             result.Add(new(card.Id, card.Name, invoice, card.CreditLimit,
-                Math.Max(0, card.CreditLimit - card.Used), card.ClosingDay, card.DueDay, categories));
+                Math.Max(0, card.CreditLimit - used), card.ClosingDay, card.DueDay, categories));
         }
         return result;
     }
@@ -1329,33 +1737,40 @@ public sealed class DatabaseService
         await using (var command = CreateCommand(db, """
             SELECT
               COALESCE(SUM(CASE WHEN tipo='receita' AND COALESCE(pago,0)=1
-                AND date(data)>=date(@start) AND date(data)<date(@end)
-                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                AND data_pagamento IS NOT NULL
+                AND date(data_pagamento)>=date(@start) AND date(data_pagamento)<date(@end)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                  SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
                 THEN valor ELSE 0 END),0) income,
               COALESCE(SUM(CASE WHEN tipo='despesa' AND COALESCE(pago,0)=1
                 AND date(COALESCE(data_vencimento,data))>=date(@start)
                 AND date(COALESCE(data_vencimento,data))<date(@end)
-                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                  SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
                 THEN valor ELSE 0 END),0) paid_expenses,
               COALESCE(SUM(CASE WHEN tipo='despesa' AND COALESCE(pago,0)=0
                 AND date(COALESCE(data_vencimento,data))>=date(@start)
                 AND date(COALESCE(data_vencimento,data))<date(@end)
-                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                  SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
                 THEN valor ELSE 0 END),0) pending_expenses,
               COALESCE(SUM(CASE WHEN tipo='despesa' AND id_conta IS NOT NULL
                 AND date(COALESCE(data_vencimento,data))>=date(@start)
                 AND date(COALESCE(data_vencimento,data))<date(@end)
-                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                  SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
                 THEN valor ELSE 0 END),0) account_expenses,
               COALESCE(SUM(CASE WHEN tipo='despesa' AND id_cartao IS NOT NULL
                 AND date(COALESCE(data_vencimento,data))>=date(@start)
                 AND date(COALESCE(data_vencimento,data))<date(@end)
-                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                  SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
                 THEN valor ELSE 0 END),0) card_expenses,
               COALESCE(SUM(CASE WHEN tipo='despesa'
                 AND date(COALESCE(data_vencimento,data))>=date(@start)
                 AND date(COALESCE(data_vencimento,data))<date(@end)
-                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL)
+                AND NOT(COALESCE(parcelado,0)=1 AND id_transacao_pai IS NULL AND EXISTS(
+                  SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
                 THEN valor ELSE 0 END),0) total_expenses
             FROM Transacoes WHERE id_usuario=@user
             """, ("@start", start.Date), ("@end", end.Date), ("@user", CurrentUserId)))
@@ -1366,10 +1781,11 @@ public sealed class DatabaseService
             pendingExpenses = reader.GetDecimal(2); accountExpenses = reader.GetDecimal(3);
             cardInvoices = reader.GetDecimal(4); total = reader.GetDecimal(5);
         }
-        var bankBalance = await DecimalAsync(db,
-            "SELECT COALESCE(SUM(saldo_atual),0) FROM Contas WHERE id_usuario=@user AND ativo=1",
-            ("@user", CurrentUserId));
-        var remaining = income - total;
+        var realized = await GetMonthlyRealizedTotalsAsync(db, CurrentUserId, month, year);
+        income = realized.TotalReceitas;
+        paidExpenses = realized.TotalDespesas;
+        var bankBalance = await GetTotalActiveAccountsBalanceAsync(db, CurrentUserId);
+        var remaining = realized.ResultadoMes;
         var commitment = income <= 0 ? (total > 0 ? 100 : 0) : total / income * 100;
         var today = DateTime.Today;
         var isCurrentMonth = month == today.Month && year == today.Year;
@@ -1500,7 +1916,7 @@ public sealed class DatabaseService
             ("@id", id), ("@details", linked > 0 ? "Fornecedor vinculado; desativado." : "Fornecedor excluído."));
     }
 
-    public async Task MarcarMultiplasComoPagaAsync(IReadOnlyCollection<long> listaIds)
+    public async Task MarcarMultiplasComoPagaAsync(IReadOnlyCollection<long> listaIds, long? paymentAccountId = null)
     {
         var ids = listaIds.Distinct().ToArray();
         if (ids.Length == 0)
@@ -1529,21 +1945,23 @@ public sealed class DatabaseService
                     description = reader.GetString(2);
                 }
 
-                if (accountId is not null)
+                var accountToDebit = paymentAccountId ?? accountId;
+                if (accountToDebit is not null)
                 {
                     await using var debit = CreateCommand(db, """
                         UPDATE Contas SET saldo_atual=saldo_atual-@amount
                         WHERE id_conta=@account AND id_usuario=@user AND saldo_atual>=@amount
-                        """, ("@amount", amount), ("@account", accountId), ("@user", CurrentUserId));
+                        """, ("@amount", amount), ("@account", accountToDebit), ("@user", CurrentUserId));
                     if (await debit.ExecuteNonQueryAsync() != 1)
                         throw new InvalidOperationException($"Saldo insuficiente para pagar “{description}”.");
                 }
 
                 await ExecuteAsync(db, """
-                    UPDATE Transacoes SET pago=1,data_pagamento=date('now','localtime'),
+                    UPDATE Transacoes SET id_conta=COALESCE(@account,id_conta),
+                      pago=1,data_pagamento=date('now','localtime'),
                       data_atualizacao=CURRENT_TIMESTAMP
                     WHERE id_transacao=@id AND id_usuario=@user AND pago=0
-                    """, ("@id", id), ("@user", CurrentUserId));
+                    """, ("@account", paymentAccountId), ("@id", id), ("@user", CurrentUserId));
                 await ExecuteAsync(db, """
                     INSERT INTO Logs(id_usuario,acao,tabela,registro_id,dados_novos,origem)
                     VALUES(@user,'PAGAR','Transacoes',@id,@data,'AccountsPayablePage')
@@ -1574,10 +1992,10 @@ public sealed class DatabaseService
                 draft.Amount, draft.Date, draft.Description, draft.Notes);
             return;
         }
-        if (draft.AccountId is null && draft.CardId is null)
-            throw new ArgumentException("Selecione uma conta ou cartão.");
         if (draft.AccountId is not null && draft.CardId is not null)
             throw new ArgumentException("Selecione apenas uma origem.");
+        if (draft.Type == "receita" && draft.AccountId is null)
+            throw new ArgumentException("Selecione a conta que receberá a receita.");
 
         if (draft.Type == "receita" && draft.Recurring)
         {
@@ -1595,7 +2013,13 @@ public sealed class DatabaseService
         await using var transaction = await db.BeginTransactionAsync();
         try
         {
-            if (draft.Type == "despesa" && (draft.Paid || draft.CardId is not null))
+            var dueDate = draft.Type == "despesa" ? (draft.DueDate ?? draft.Date).Date : (DateTime?)null;
+            // Uma despesa futura só entra no caixa quando for efetivamente baixada.
+            var effectiveExpensePayment = draft.Type == "despesa" && draft.Paid && draft.AccountId is not null;
+            var realizedIncome = draft.Type == "receita" && draft.Paid;
+            if (realizedIncome && draft.PaymentDate is null)
+                throw new ArgumentException("Informe a data efetiva de recebimento da receita.");
+            if (draft.Type == "despesa" && (effectiveExpensePayment || draft.CardId is not null))
                 await ValidateSourceFundsAsync(db, draft);
             var inserted = await ExecuteCountAsync(db, """
                 INSERT INTO Transacoes(id_conta,id_cartao,id_categoria,id_usuario,valor,data,descricao,tipo,
@@ -1606,23 +2030,22 @@ public sealed class DatabaseService
                 ("@user", CurrentUserId),
                 ("@amount", draft.Amount), ("@date", draft.Date), ("@description", draft.Description.Trim()),
                 ("@type", draft.Type), ("@notes", draft.Notes),
-                ("@due", draft.Type == "despesa" ? draft.DueDate ?? draft.Date.Date : null),
-                ("@paid", draft.Type == "receita" || draft.Paid ? 1 : 0),
-                ("@payment", draft.Type == "receita" || draft.Paid
-                    ? draft.PaymentDate ?? draft.Date.Date : null),
+                ("@due", dueDate),
+                ("@paid", realizedIncome || effectiveExpensePayment ? 1 : 0),
+                ("@payment", realizedIncome || effectiveExpensePayment ? draft.PaymentDate : null),
                 ("@recurring", draft.Recurring ? 1 : 0), ("@frequency", draft.Frequency),
                 ("@supplier", draft.Type == "despesa" ? draft.SupplierId : null));
             if (inserted != 1)
                 throw new InvalidOperationException("O lançamento não foi gravado no banco de dados.");
-            if (draft.AccountId is not null && draft.Type == "receita")
-                await ExecuteAsync(db, "UPDATE Contas SET saldo_atual=saldo_atual+@delta WHERE id_conta=@id",
-                    ("@delta", draft.Amount), ("@id", draft.AccountId));
-            else if (draft.AccountId is not null && draft.Type == "despesa" && draft.Paid)
-                await ExecuteAsync(db, "UPDATE Contas SET saldo_atual=saldo_atual-@delta WHERE id_conta=@id",
-                    ("@delta", draft.Amount), ("@id", draft.AccountId));
+            if (draft.AccountId is not null && realizedIncome)
+                await ExecuteAsync(db, "UPDATE Contas SET saldo_atual=saldo_atual+@delta WHERE id_conta=@id AND id_usuario=@user",
+                    ("@delta", draft.Amount), ("@id", draft.AccountId), ("@user", CurrentUserId));
+            else if (draft.AccountId is not null && draft.Type == "despesa" && effectiveExpensePayment)
+                await ExecuteAsync(db, "UPDATE Contas SET saldo_atual=saldo_atual-@delta WHERE id_conta=@id AND id_usuario=@user",
+                    ("@delta", draft.Amount), ("@id", draft.AccountId), ("@user", CurrentUserId));
             else if (draft.CardId is not null)
-                await ExecuteAsync(db, "UPDATE CartoesCredito SET limite_utilizado=limite_utilizado+@amount WHERE id_cartao=@id",
-                    ("@amount", draft.Amount), ("@id", draft.CardId));
+                await ExecuteAsync(db, "UPDATE CartoesCredito SET limite_utilizado=limite_utilizado+@amount WHERE id_cartao=@id AND id_usuario=@user",
+                    ("@amount", draft.Amount), ("@id", draft.CardId), ("@user", CurrentUserId));
             var transactionId = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid();"));
             var persisted = Convert.ToInt64(await ScalarAsync(db,
                 "SELECT COUNT(*) FROM Transacoes WHERE id_transacao=@id AND id_usuario=@user",
@@ -1654,7 +2077,8 @@ public sealed class DatabaseService
     /// an audit/grouping row; balances and dashboard totals use the child rows.
     /// </summary>
     public async Task<InstallmentSaveResult> SaveInstallmentTransactionAsync(
-        TransactionDraft draft, int installmentCount, DateTime firstInstallmentDate)
+        TransactionDraft draft, int installmentCount, DateTime firstInstallmentDate,
+        IReadOnlyList<InstallmentPreview>? editedSchedule = null)
     {
         ValidateDraft(draft);
         if (draft.Type != "despesa")
@@ -1663,20 +2087,28 @@ public sealed class DatabaseService
             throw new ArgumentException("O número de parcelas deve estar entre 2 e 36.");
         // Parcelamentos importados ou cadastrados posteriormente podem começar em meses passados.
 
-        var installments = BuildInstallments(draft.Amount, installmentCount, firstInstallmentDate);
+        var installments = editedSchedule is { Count: > 0 }
+            ? editedSchedule
+            : TransactionSchedulePlanner.Build(draft.Amount, installmentCount,
+                firstInstallmentDate, TransactionScheduleMode.Installment);
+        if (installments.Count != installmentCount || installments.Any(item => item.Amount <= 0) ||
+            installments.Sum(item => item.Amount) != draft.Amount)
+            throw new ArgumentException("As parcelas devem ser positivas e somar exatamente o valor total.");
         await using var db = new SqliteConnection(ConnectionString);
         await db.OpenAsync();
         await using var transaction = await db.BeginTransactionAsync();
         try
         {
-            await ValidateSourceFundsAsync(db, draft);
+            if (draft.CardId is not null)
+                await ValidateSourceFundsAsync(db, draft);
             await ExecuteAsync(db, """
                 INSERT INTO Transacoes(id_conta,id_cartao,id_categoria,id_usuario,valor,data,descricao,tipo,
                   parcelado,numero_parcelas,observacoes,data_vencimento,pago,numero_parcela,total_parcelas,id_fornecedor)
-                VALUES(@account,@card,@category,@user,@amount,@date,@description,@type,1,@count,@notes,
-                  @date,0,1,@count,@supplier)
+                VALUES(@account,@card,@category,@user,@amount,@purchaseDate,@description,@type,1,@count,@notes,
+                  @dueDate,0,1,@count,@supplier)
                 """, ("@account", draft.AccountId), ("@card", draft.CardId), ("@category", draft.CategoryId),
-                ("@user", CurrentUserId), ("@amount", draft.Amount), ("@date", firstInstallmentDate.Date),
+                ("@user", CurrentUserId), ("@amount", draft.Amount), ("@purchaseDate", draft.Date.Date),
+                ("@dueDate", firstInstallmentDate.Date),
                 ("@description", draft.Description.Trim()), ("@type", draft.Type),
                 ("@count", installmentCount), ("@notes", draft.Notes), ("@supplier", draft.SupplierId));
             var parentId = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid();"));
@@ -1686,10 +2118,11 @@ public sealed class DatabaseService
                     INSERT INTO Transacoes(id_conta,id_cartao,id_categoria,id_usuario,valor,data,descricao,tipo,
                       parcelado,numero_parcelas,id_transacao_pai,observacoes,data_vencimento,pago,
                       numero_parcela,total_parcelas,id_fornecedor)
-                    VALUES(@account,@card,@category,@user,@amount,@date,@description,@type,1,@count,@parent,
-                      @notes,@date,0,@number,@count,@supplier)
+                    VALUES(@account,@card,@category,@user,@amount,@purchaseDate,@description,@type,1,@count,@parent,
+                      @notes,@dueDate,0,@number,@count,@supplier)
                     """, ("@account", draft.AccountId), ("@card", draft.CardId), ("@category", draft.CategoryId),
-                    ("@user", CurrentUserId), ("@amount", item.Amount), ("@date", item.Date),
+                    ("@user", CurrentUserId), ("@amount", item.Amount), ("@purchaseDate", draft.Date.Date),
+                    ("@dueDate", item.Date),
                     ("@description", $"{draft.Description.Trim()} - Parcela {item.Number}/{item.Total}"),
                     ("@type", draft.Type), ("@count", installmentCount), ("@parent", parentId),
                     ("@notes", draft.Notes), ("@number", item.Number), ("@supplier", draft.SupplierId));
@@ -1731,8 +2164,10 @@ public sealed class DatabaseService
             throw new ArgumentException("Informe a descrição.");
         if (draft.Amount <= 0)
             throw new ArgumentException("O valor deve ser maior que zero.");
-        if ((draft.AccountId is null) == (draft.CardId is null))
-            throw new ArgumentException("Selecione uma conta ou cartão.");
+        if (draft.AccountId is not null && draft.CardId is not null)
+            throw new ArgumentException("Selecione apenas uma origem.");
+        if (draft.Type == "receita" && draft.AccountId is null)
+            throw new ArgumentException("Selecione a conta que receberá a receita.");
     }
 
     private async Task ValidateSourceFundsAsync(SqliteConnection db, TransactionDraft draft)
@@ -1834,7 +2269,7 @@ public sealed class DatabaseService
 
         var frequency = string.Equals(draft.Frequency, "anual", StringComparison.OrdinalIgnoreCase)
             ? "anual" : "mensal";
-        var occurrenceCount = frequency == "anual" ? 5 : 12;
+        var occurrenceCount = Math.Clamp(draft.RecurrenceCount ?? (frequency == "anual" ? 5 : 12), 1, 36);
 
         await using var db = new SqliteConnection(ConnectionString);
         await db.OpenAsync();
@@ -1847,7 +2282,10 @@ public sealed class DatabaseService
                 var receiptDate = frequency == "anual"
                     ? draft.Date.Date.AddYears(index)
                     : draft.Date.Date.AddMonths(index);
-                var received = index == 0;
+                var received = index == 0 && draft.Paid;
+                var paymentDate = received ? draft.PaymentDate : null;
+                if (received && paymentDate is null)
+                    throw new ArgumentException("Informe a data efetiva de recebimento da receita.");
                 var inserted = await ExecuteCountAsync(db, """
                     INSERT INTO Transacoes(id_conta,id_categoria,id_usuario,valor,data,descricao,tipo,
                       observacoes,pago,data_pagamento,recorrente,frequencia)
@@ -1856,7 +2294,7 @@ public sealed class DatabaseService
                     """, ("@account", draft.AccountId), ("@category", draft.CategoryId),
                     ("@user", CurrentUserId), ("@amount", draft.Amount), ("@date", receiptDate),
                     ("@description", draft.Description.Trim()), ("@notes", draft.Notes),
-                    ("@paid", received ? 1 : 0), ("@payment", received ? receiptDate : null),
+                    ("@paid", received ? 1 : 0), ("@payment", paymentDate),
                     ("@frequency", frequency));
                 if (inserted != 1)
                     throw new InvalidOperationException($"Não foi possível criar a recorrência de {receiptDate:MM/yyyy}.");
@@ -1871,9 +2309,10 @@ public sealed class DatabaseService
                         """, ("@transaction", transactionId), ("@tag", tagId), ("@user", CurrentUserId));
             }
 
-            await ExecuteAsync(db,
-                "UPDATE Contas SET saldo_atual=saldo_atual+@amount WHERE id_conta=@account AND id_usuario=@user",
-                ("@amount", draft.Amount), ("@account", draft.AccountId), ("@user", CurrentUserId));
+            if (draft.Paid)
+                await ExecuteAsync(db,
+                    "UPDATE Contas SET saldo_atual=saldo_atual+@amount WHERE id_conta=@account AND id_usuario=@user",
+                    ("@amount", draft.Amount), ("@account", draft.AccountId), ("@user", CurrentUserId));
             await ExecuteAsync(db, """
                 INSERT INTO Logs(id_usuario,acao,tabela,registro_id,dados_novos,origem)
                 VALUES(@user,'CRIAR_RECORRENCIA','Transacoes',@id,@data,'TransactionFormPage')
@@ -1893,7 +2332,7 @@ public sealed class DatabaseService
     {
         var frequency = string.Equals(draft.Frequency, "anual", StringComparison.OrdinalIgnoreCase)
             ? "anual" : "mensal";
-        var occurrenceCount = frequency == "anual" ? 5 : 12;
+        var occurrenceCount = Math.Clamp(draft.RecurrenceCount ?? (frequency == "anual" ? 5 : 12), 1, 36);
         var firstDueDate = (draft.DueDate ?? draft.Date).Date;
 
         await using var db = new SqliteConnection(ConnectionString);
@@ -1901,7 +2340,7 @@ public sealed class DatabaseService
         await using var transaction = await db.BeginTransactionAsync();
         try
         {
-            if (draft.Paid || draft.CardId is not null)
+            if (draft.CardId is not null)
                 await ValidateSourceFundsAsync(db, draft);
 
             long? firstId = null;
@@ -1910,10 +2349,9 @@ public sealed class DatabaseService
                 var transactionDate = frequency == "anual"
                     ? draft.Date.Date.AddYears(index)
                     : draft.Date.Date.AddMonths(index);
-                var dueDate = frequency == "anual"
-                    ? firstDueDate.AddYears(index)
-                    : firstDueDate.AddMonths(index);
-                var paid = index == 0 && draft.Paid;
+                var dueDate = draft.RecurrenceDueDates is { Count: > 0 } && index < draft.RecurrenceDueDates.Count
+                    ? draft.RecurrenceDueDates[index].Date
+                    : frequency == "anual" ? firstDueDate.AddYears(index) : firstDueDate.AddMonths(index);
                 var inserted = await ExecuteCountAsync(db, """
                     INSERT INTO Transacoes(id_conta,id_cartao,id_categoria,id_usuario,valor,data,
                       descricao,tipo,observacoes,data_vencimento,pago,data_pagamento,recorrente,
@@ -1922,10 +2360,10 @@ public sealed class DatabaseService
                       @notes,@due,@paid,@payment,1,@frequency,@supplier)
                     """, ("@account", draft.AccountId), ("@card", draft.CardId),
                     ("@category", draft.CategoryId), ("@user", CurrentUserId),
-                    ("@amount", draft.Amount), ("@date", transactionDate),
+                    ("@amount", draft.RecurrenceAmounts is { Count: > 0 } && index < draft.RecurrenceAmounts.Count
+                        ? draft.RecurrenceAmounts[index] : draft.Amount), ("@date", transactionDate),
                     ("@description", draft.Description.Trim()), ("@notes", draft.Notes),
-                    ("@due", dueDate), ("@paid", paid ? 1 : 0),
-                    ("@payment", paid ? draft.PaymentDate ?? transactionDate : null),
+                    ("@due", dueDate), ("@paid", 0), ("@payment", null),
                     ("@frequency", frequency), ("@supplier", draft.SupplierId));
                 if (inserted != 1)
                     throw new InvalidOperationException($"Não foi possível criar a conta de {dueDate:MM/yyyy}.");
@@ -1940,13 +2378,7 @@ public sealed class DatabaseService
                         """, ("@transaction", transactionId), ("@tag", tagId), ("@user", CurrentUserId));
             }
 
-            if (draft.AccountId is not null && draft.Paid)
-                await ExecuteAsync(db, """
-                    UPDATE Contas SET saldo_atual=saldo_atual-@amount
-                    WHERE id_conta=@account AND id_usuario=@user
-                    """, ("@amount", draft.Amount), ("@account", draft.AccountId),
-                    ("@user", CurrentUserId));
-            else if (draft.CardId is not null)
+            if (draft.CardId is not null)
                 await ExecuteAsync(db, """
                     UPDATE CartoesCredito SET limite_utilizado=limite_utilizado+@amount
                     WHERE id_cartao=@card AND id_usuario=@user
@@ -1988,6 +2420,16 @@ public sealed class DatabaseService
         r => new TagItem(r.GetInt64(0), r.GetInt64(1), r.GetString(2), r.GetString(3), r.GetString(4)),
         ("@user", CurrentUserId));
 
+    public Task<List<Tag>> GetTagsAsync(long idUsuario)
+    {
+        if (idUsuario != CurrentUserId) return Task.FromResult(new List<Tag>());
+        return QueryAsync(
+            "SELECT id_tag,id_usuario,nome_tag,COALESCE(cor,@color),COALESCE(icone,'tag') FROM Tags WHERE id_usuario=@user ORDER BY nome_tag",
+            reader => new Tag(reader.GetInt64(0), reader.GetInt64(1), reader.GetString(2),
+                reader.GetString(3), reader.GetString(4)),
+            ("@color", BlingPalette.PrimaryHex), ("@user", idUsuario));
+    }
+
     /// <summary>Cria ou atualiza uma tag.</summary>
     public async Task SaveTagAsync(long? id, string name, string color, string icon = "tag")
     {
@@ -2000,6 +2442,15 @@ public sealed class DatabaseService
             await ExecuteAsync(db, "UPDATE Tags SET nome_tag=@name,cor=@color,icone=@icon WHERE id_tag=@id AND id_usuario=@user",
                 ("@name", name.Trim()), ("@color", color), ("@icon", icon), ("@id", id), ("@user", CurrentUserId));
         await WriteLogAsync(db, id is null ? "CRIAR" : "EDITAR", "Tags", id, $"tag={name}");
+    }
+
+    public Task SaveTagAsync(Tag tag)
+    {
+        if (tag.IdUsuario != CurrentUserId)
+            throw new InvalidOperationException("A tag não pertence ao usuário autenticado.");
+        return SaveTagAsync(tag.Id <= 0 ? null : tag.Id, tag.Nome,
+            string.IsNullOrWhiteSpace(tag.Cor) ? BlingPalette.PrimaryHex : tag.Cor,
+            string.IsNullOrWhiteSpace(tag.Icone) ? "tag" : tag.Icone);
     }
 
     /// <summary>Exclui uma tag e seus vínculos N:N.</summary>
@@ -2103,18 +2554,19 @@ public sealed class DatabaseService
     {
         if (sourceAccountId == destinationAccountId) throw new ArgumentException("Selecione contas diferentes.");
         if (amount <= 0) throw new ArgumentException("O valor deve ser maior que zero.");
+        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Informe a descrição.");
         await using var db = new SqliteConnection(ConnectionString); await db.OpenAsync();
         await using var tx = await db.BeginTransactionAsync();
         try
         {
             await using var debit = CreateCommand(db, """
                 UPDATE Contas SET saldo_atual=saldo_atual-@amount
-                WHERE id_conta=@source AND id_usuario=@user AND saldo_atual>=@amount
+                WHERE id_conta=@source AND id_usuario=@user AND ativo=1 AND saldo_atual>=@amount
                 """, ("@amount", amount), ("@source", sourceAccountId), ("@user", CurrentUserId));
             if (await debit.ExecuteNonQueryAsync() != 1) throw new InvalidOperationException("Saldo insuficiente.");
             await using var credit = CreateCommand(db, """
                 UPDATE Contas SET saldo_atual=saldo_atual+@amount
-                WHERE id_conta=@destination AND id_usuario=@user
+                WHERE id_conta=@destination AND id_usuario=@user AND ativo=1
                 """, ("@amount", amount), ("@destination", destinationAccountId), ("@user", CurrentUserId));
             if (await credit.ExecuteNonQueryAsync() != 1) throw new InvalidOperationException("Conta destino inválida.");
             await ExecuteAsync(db, """
@@ -2126,6 +2578,113 @@ public sealed class DatabaseService
                 ("@description", description.Trim()), ("@notes", notes));
             var id = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid();"));
             await WriteLogAsync(db, "TRANSFERIR", "Transacoes", id, $"valor={amount:0.00}");
+            await tx.CommitAsync();
+        }
+        catch { await tx.RollbackAsync(); throw; }
+    }
+
+    public async Task<List<Tag>> GetTagsByTransacaoAsync(long idTransacao)
+    {
+        var tags = await QueryAsync("""
+            SELECT t.id_tag,t.id_usuario,t.nome_tag,COALESCE(t.cor,@color),COALESCE(t.icone,'tag')
+            FROM TransacoesTags tt
+            JOIN Tags t ON t.id_tag=tt.id_tag
+            JOIN Transacoes x ON x.id_transacao=tt.id_transacao
+            WHERE tt.id_transacao=@transaction AND x.id_usuario=@user AND t.id_usuario=@user
+            ORDER BY t.nome_tag
+            """, reader => new Tag(reader.GetInt64(0), reader.GetInt64(1), reader.GetString(2),
+                reader.GetString(3), reader.GetString(4)),
+            ("@color", BlingPalette.PrimaryHex), ("@transaction", idTransacao), ("@user", CurrentUserId));
+        return tags ?? [];
+    }
+
+    public Task SaveTransacaoTagsAsync(long idTransacao, List<long> tagIds) =>
+        SetTransactionTagsAsync(idTransacao, tagIds ?? []);
+
+    /// <summary>Altera uma transferência revertendo o impacto anterior e aplicando o novo, atomicamente.</summary>
+    public async Task UpdateTransferAsync(long id, long sourceAccountId, long destinationAccountId,
+        decimal amount, DateTime date, string description, string? notes = null)
+    {
+        if (sourceAccountId == destinationAccountId) throw new ArgumentException("Selecione contas diferentes.");
+        if (amount <= 0) throw new ArgumentException("O valor deve ser maior que zero.");
+        if (string.IsNullOrWhiteSpace(description)) throw new ArgumentException("Informe a descrição.");
+        await using var db = new SqliteConnection(ConnectionString); await db.OpenAsync();
+        await using var tx = await db.BeginTransactionAsync();
+        try
+        {
+            await using var select = CreateCommand(db, """
+                SELECT id_conta,id_conta_destino,valor FROM Transacoes
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='transferencia'
+                """, ("@id", id), ("@user", CurrentUserId));
+            await using var reader = await select.ExecuteReaderAsync();
+            if (!await reader.ReadAsync()) throw new InvalidOperationException("A transferência não foi encontrada.");
+            var oldSource = reader.GetInt64(0); var oldDestination = reader.GetInt64(1); var oldAmount = reader.GetDecimal(2);
+            await reader.DisposeAsync();
+
+            if (await ExecuteCountAsync(db, """
+                UPDATE Contas SET saldo_atual=saldo_atual+@amount
+                WHERE id_conta=@account AND id_usuario=@user
+                """, ("@amount", oldAmount), ("@account", oldSource), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("Conta de origem anterior inválida.");
+            if (await ExecuteCountAsync(db, """
+                UPDATE Contas SET saldo_atual=saldo_atual-@amount
+                WHERE id_conta=@account AND id_usuario=@user AND saldo_atual>=@amount
+                """, ("@amount", oldAmount), ("@account", oldDestination), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("A conta de destino anterior não possui saldo para o estorno.");
+            if (await ExecuteCountAsync(db, """
+                UPDATE Contas SET saldo_atual=saldo_atual-@amount
+                WHERE id_conta=@account AND id_usuario=@user AND ativo=1 AND saldo_atual>=@amount
+                """, ("@amount", amount), ("@account", sourceAccountId), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("Saldo insuficiente na nova conta de origem.");
+            if (await ExecuteCountAsync(db, """
+                UPDATE Contas SET saldo_atual=saldo_atual+@amount
+                WHERE id_conta=@account AND id_usuario=@user AND ativo=1
+                """, ("@amount", amount), ("@account", destinationAccountId), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("Nova conta de destino inválida.");
+            if (await ExecuteCountAsync(db, """
+                UPDATE Transacoes SET id_conta=@source,id_conta_destino=@destination,valor=@amount,
+                  data=@date,data_pagamento=@date,descricao=@description,observacoes=@notes
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='transferencia'
+                """, ("@source", sourceAccountId), ("@destination", destinationAccountId),
+                ("@amount", amount), ("@date", Iso(date)), ("@description", description.Trim()),
+                ("@notes", notes), ("@id", id), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("Não foi possível alterar a transferência.");
+            await WriteLogAsync(db, "ALTERAR_TRANSFERENCIA", "Transacoes", id, $"valor={amount:0.00}");
+            await tx.CommitAsync();
+        }
+        catch { await tx.RollbackAsync(); throw; }
+    }
+
+    /// <summary>Exclui uma transferência e estorna os dois saldos na mesma transação de banco.</summary>
+    public async Task DeleteTransferAsync(long id)
+    {
+        await using var db = new SqliteConnection(ConnectionString); await db.OpenAsync();
+        await using var tx = await db.BeginTransactionAsync();
+        try
+        {
+            await using var select = CreateCommand(db, """
+                SELECT id_conta,id_conta_destino,valor FROM Transacoes
+                WHERE id_transacao=@id AND id_usuario=@user AND tipo='transferencia'
+                """, ("@id", id), ("@user", CurrentUserId));
+            await using var reader = await select.ExecuteReaderAsync();
+            if (!await reader.ReadAsync()) throw new InvalidOperationException("A transferência não foi encontrada.");
+            var source = reader.GetInt64(0); var destination = reader.GetInt64(1); var amount = reader.GetDecimal(2);
+            await reader.DisposeAsync();
+            if (await ExecuteCountAsync(db, """
+                UPDATE Contas SET saldo_atual=saldo_atual+@amount
+                WHERE id_conta=@account AND id_usuario=@user
+                """, ("@amount", amount), ("@account", source), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("Conta de origem inválida para o estorno.");
+            if (await ExecuteCountAsync(db, """
+                UPDATE Contas SET saldo_atual=saldo_atual-@amount
+                WHERE id_conta=@account AND id_usuario=@user AND saldo_atual>=@amount
+                """, ("@amount", amount), ("@account", destination), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("A conta de destino não possui saldo para o estorno.");
+            await WriteLogAsync(db, "EXCLUIR_TRANSFERENCIA", "Transacoes", id, $"valor={amount:0.00}");
+            if (await ExecuteCountAsync(db, """
+                DELETE FROM Transacoes WHERE id_transacao=@id AND id_usuario=@user AND tipo='transferencia'
+                """, ("@id", id), ("@user", CurrentUserId)) != 1)
+                throw new InvalidOperationException("Não foi possível excluir a transferência.");
             await tx.CommitAsync();
         }
         catch { await tx.RollbackAsync(); throw; }
@@ -2160,13 +2719,17 @@ public sealed class DatabaseService
                     """, ("@card", card.Id), ("@month", month), ("@year", year)));
                 await ExecuteAsync(db, """
                     UPDATE Transacoes SET id_fatura=@invoice
-                    WHERE id_cartao=@card AND id_fatura IS NULL
-                      AND CAST(strftime('%m',data) AS INTEGER)=@month
-                      AND CAST(strftime('%Y',data) AS INTEGER)=@year
+                    WHERE id_cartao=@card
+                      AND CAST(strftime('%m',data_vencimento) AS INTEGER)=@month
+                      AND CAST(strftime('%Y',data_vencimento) AS INTEGER)=@year
+                      AND (id_fatura IS NULL OR id_fatura IN(
+                        SELECT id_fatura FROM FaturasCartao WHERE status<>'paga'))
                     """, ("@invoice", invoiceId), ("@card", card.Id), ("@month", month), ("@year", year));
                 await ExecuteAsync(db, """
                     UPDATE FaturasCartao SET valor_total=(
-                      SELECT COALESCE(SUM(valor),0) FROM Transacoes WHERE id_fatura=@invoice)
+                      SELECT COALESCE(SUM(t.valor),0) FROM Transacoes t WHERE t.id_fatura=@invoice
+                        AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                          SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao)))
                     WHERE id_fatura=@invoice AND status<>'paga'
                     """, ("@invoice", invoiceId));
             }
@@ -2179,7 +2742,15 @@ public sealed class DatabaseService
     /// <summary>Lista faturas de cartão de um período.</summary>
     public Task<List<FaturaCartaoItem>> GetCardInvoicesAsync(int month, int year) => QueryAsync(
         """
-        SELECT f.id_fatura,f.id_cartao,f.mes_referencia,f.ano_referencia,f.valor_total,
+        SELECT f.id_fatura,f.id_cartao,f.mes_referencia,f.ano_referencia,
+          COALESCE((
+            SELECT SUM(t.valor) FROM Transacoes t
+            WHERE t.id_cartao=f.id_cartao AND t.tipo='despesa'
+              AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
+              AND CAST(strftime('%m',t.data_vencimento) AS INTEGER)=f.mes_referencia
+              AND CAST(strftime('%Y',t.data_vencimento) AS INTEGER)=f.ano_referencia
+          ),0),
           f.data_vencimento,f.status,f.data_pagamento,c.nome_cartao
         FROM FaturasCartao f JOIN CartoesCredito c ON c.id_cartao=f.id_cartao
         WHERE c.id_usuario=@user AND f.mes_referencia=@month AND f.ano_referencia=@year
@@ -2196,10 +2767,15 @@ public sealed class DatabaseService
         try
         {
             var invoice = (await QueryAsync(db, """
-                SELECT f.valor_total,f.status,f.id_cartao
+                SELECT COALESCE((SELECT SUM(t.valor) FROM Transacoes t
+                                  WHERE t.id_fatura=f.id_fatura
+                                    AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                                      SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))),0),
+                       f.status,f.id_cartao,f.mes_referencia,f.ano_referencia
                 FROM FaturasCartao f JOIN CartoesCredito c ON c.id_cartao=f.id_cartao
                 WHERE f.id_fatura=@invoice AND c.id_usuario=@user
-                """, r => (Total: r.GetDecimal(0), Status: r.GetString(1), CardId: r.GetInt64(2)),
+                """, r => (Total: r.GetDecimal(0), Status: r.GetString(1), CardId: r.GetInt64(2),
+                    Month: r.GetInt32(3), Year: r.GetInt32(4)),
                 ("@invoice", invoiceId), ("@user", CurrentUserId))).SingleOrDefault();
             if (invoice == default) throw new InvalidOperationException("Fatura não encontrada.");
             if (invoice.Status == "paga") throw new InvalidOperationException("Esta fatura já foi paga.");
@@ -2217,9 +2793,11 @@ public sealed class DatabaseService
                 WHERE id_fatura=@invoice
                 """, ("@today", today), ("@invoice", invoiceId));
             await ExecuteAsync(db, """
-                UPDATE Transacoes SET pago=1,data_pagamento=@today
+                UPDATE Transacoes SET pago=1,data_pagamento=CURRENT_TIMESTAMP
                 WHERE id_fatura=@invoice AND tipo='despesa'
-                """, ("@today", today), ("@invoice", invoiceId));
+                  AND NOT(parcelado=1 AND id_transacao_pai IS NULL AND EXISTS(
+                    SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=Transacoes.id_transacao))
+                """, ("@invoice", invoiceId));
             await ExecuteAsync(db, """
                 UPDATE CartoesCredito SET limite_utilizado=MAX(0,limite_utilizado-@total)
                 WHERE id_cartao=@card
@@ -2239,11 +2817,16 @@ public sealed class DatabaseService
         """
         SELECT t.id_transacao,t.descricao,COALESCE(c.nome_categoria,'Sem categoria'),t.valor,
           t.data,COALESCE(t.numero_parcela,1),COALESCE(t.total_parcelas,1)
-        FROM Transacoes t LEFT JOIN Categorias c ON c.id_categoria=t.id_categoria
-        JOIN FaturasCartao f ON f.id_fatura=t.id_fatura
+        FROM FaturasCartao f
         JOIN CartoesCredito cc ON cc.id_cartao=f.id_cartao
-        WHERE t.id_fatura=@invoice AND cc.id_usuario=@user
-        ORDER BY t.data,t.id_transacao
+        JOIN Transacoes t ON t.id_cartao=f.id_cartao
+        LEFT JOIN Categorias c ON c.id_categoria=t.id_categoria
+        WHERE f.id_fatura=@invoice AND cc.id_usuario=@user AND t.tipo='despesa'
+          AND NOT (t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+            SELECT 1 FROM Transacoes filha WHERE filha.id_transacao_pai=t.id_transacao))
+          AND CAST(strftime('%m',t.data_vencimento) AS INTEGER)=f.mes_referencia
+          AND CAST(strftime('%Y',t.data_vencimento) AS INTEGER)=f.ano_referencia
+        ORDER BY t.data_vencimento,t.id_transacao
         """, r => new InvoiceTransactionItem(r.GetInt64(0), r.GetString(1), r.GetString(2),
             r.GetDecimal(3), r.GetDateTime(4), r.GetInt32(5), r.GetInt32(6)),
         ("@invoice", invoiceId), ("@user", CurrentUserId));
@@ -2298,6 +2881,23 @@ public sealed class DatabaseService
             r.GetDecimal(4), r.GetInt32(5), r.GetInt32(6), r.GetDecimal(7), r.GetString(8),
             r.IsDBNull(9) ? null : r.GetString(9)),
         ("@user", CurrentUserId), ("@month", month), ("@year", year));
+
+    public Task<List<BudgetProjectionItem>> GetBudgetProjectionAsync(int month, int year) => QueryAsync("""
+        SELECT o.id_orcamento,o.id_categoria,c.nome_categoria,o.valor_limite,
+          COALESCE(SUM(CASE WHEN t.pago=1 THEN t.valor ELSE 0 END),0),
+          COALESCE(SUM(CASE WHEN t.pago=0 THEN t.valor ELSE 0 END),0)
+        FROM Orcamentos o JOIN Categorias c ON c.id_categoria=o.id_categoria
+        LEFT JOIN Transacoes t ON t.id_usuario=o.id_usuario AND t.id_categoria=o.id_categoria
+          AND t.tipo='despesa'
+          AND CAST(strftime('%m',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=o.mes
+          AND CAST(strftime('%Y',COALESCE(t.data_vencimento,t.data)) AS INTEGER)=o.ano
+          AND NOT(COALESCE(t.parcelado,0)=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+            SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao))
+        WHERE o.id_usuario=@user AND o.mes=@month AND o.ano=@year
+        GROUP BY o.id_orcamento ORDER BY c.nome_categoria
+        """,r=>new BudgetProjectionItem(r.GetInt64(0),r.GetInt64(1),r.GetString(2),
+            r.GetDecimal(3),r.GetDecimal(4),r.GetDecimal(5)),
+        ("@user",CurrentUserId),("@month",month),("@year",year));
 
     public async Task SaveBudgetAsync(long? id, long categoryId, decimal limit, int month,
         int year, string? notes)
@@ -2535,9 +3135,29 @@ public sealed class DatabaseService
             if (categoryId is null) throw new InvalidOperationException("Cadastre ao menos uma categoria de despesa antes da importação.");
 
             long? firstTransactionId = null;
-            foreach (var item in installments)
+            var importedItems = installments.ToList();
+            for (var itemIndex = 0; itemIndex < importedItems.Count; itemIndex++)
             {
-                if (item.Number == 1) firstTransactionId = null;
+                var item = importedItems[itemIndex];
+                if (item.Number == 1 && item.Total > 1)
+                {
+                    var series = importedItems.Skip(itemIndex).TakeWhile((candidate, offset) =>
+                        offset == 0 || candidate.Number != 1).Take(item.Total).ToList();
+                    var seriesTotal = series.Sum(candidate => candidate.Amount);
+                    await ExecuteAsync(db, """
+                        INSERT INTO Transacoes(id_cartao,id_categoria,id_usuario,valor,data,descricao,tipo,
+                          parcelado,numero_parcelas,observacoes,data_vencimento,pago,numero_parcela,total_parcelas)
+                        VALUES(@card,@category,@user,@amount,@date,@description,'despesa',1,@total,@notes,@due,0,1,@total)
+                        """, ("@card", cardId), ("@category", Convert.ToInt64(categoryId)),
+                        ("@user", CurrentUserId), ("@amount", seriesTotal), ("@date", item.PurchaseDate.Date),
+                        ("@description", item.Description), ("@total", item.Total),
+                        ("@notes", $"Agrupador da importação CSV: {fileName}"), ("@due", item.InvoiceDueDate.Date));
+                    firstTransactionId = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid()"));
+                }
+                else if (item.Total == 1)
+                {
+                    firstTransactionId = null;
+                }
                 var duplicate = Convert.ToInt64(await ScalarAsync(db, """
                     SELECT COUNT(*) FROM Transacoes WHERE id_usuario=@user AND id_cartao=@card
                       AND descricao=@description AND date(data)=date(@date)
@@ -2574,12 +3194,15 @@ public sealed class DatabaseService
                     ("@due", item.InvoiceDueDate.Date), ("@number", item.Number));
                 if (inserted != 1) throw new InvalidOperationException($"Não foi possível gravar {item.Description}.");
                 var insertedId = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid()"));
-                if (firstTransactionId is null) firstTransactionId = insertedId;
+                _ = insertedId;
             }
 
             await ExecuteAsync(db, """
                 UPDATE FaturasCartao SET valor_total=(
-                  SELECT COALESCE(SUM(t.valor),0) FROM Transacoes t WHERE t.id_fatura=FaturasCartao.id_fatura)
+                  SELECT COALESCE(SUM(t.valor),0) FROM Transacoes t
+                  WHERE t.id_fatura=FaturasCartao.id_fatura
+                    AND NOT(t.parcelado=1 AND t.id_transacao_pai IS NULL AND EXISTS(
+                      SELECT 1 FROM Transacoes f WHERE f.id_transacao_pai=t.id_transacao)))
                 WHERE id_cartao=@card
                 """, ("@card", cardId));
             await ExecuteAsync(db,
@@ -2601,11 +3224,20 @@ public sealed class DatabaseService
     private async Task WriteLogAsync(SqliteConnection db, string action, string table,
         long? recordId, string? data)
     {
-        await ExecuteAsync(db, """
-            INSERT INTO Logs(id_usuario,acao,tabela,registro_id,dados_novos,origem)
-            VALUES(@user,@action,@table,@record,@data,'DatabaseService')
-            """, ("@user", CurrentUserId), ("@action", action), ("@table", table),
-            ("@record", recordId), ("@data", data));
+        try
+        {
+            await ExecuteAsync(db, """
+                INSERT INTO Logs(id_usuario,acao,tabela,registro_id,dados_novos,origem)
+                VALUES(@user,@action,@table,@record,@data,'DatabaseService')
+                """, ("@user", CurrentUserId), ("@action", action), ("@table", table),
+                ("@record", recordId), ("@data", data));
+        }
+        catch (Exception ex)
+        {
+            // Auditoria é defensiva: uma indisponibilidade do log não pode desfazer
+            // a operação financeira principal que já foi validada.
+            System.Diagnostics.Debug.WriteLine($"[AuditLog] {action}/{table}: {ex.Message}");
+        }
     }
 
     private static string Iso(DateTime date) => date.ToString("yyyy-MM-dd",
@@ -2614,6 +3246,25 @@ public sealed class DatabaseService
     // ============================================================
     // MÉTODOS PRIVADOS DE BANCO DE DADOS
     // ============================================================
+
+    private async Task<Dictionary<long, IReadOnlyList<TagItem>>> GetTransactionTagsLookupAsync()
+    {
+        var rows = await QueryAsync("""
+            SELECT tt.id_transacao,t.id_tag,t.id_usuario,t.nome_tag,
+                   COALESCE(t.cor,@color),COALESCE(t.icone,'tag')
+            FROM TransacoesTags tt
+            JOIN Tags t ON t.id_tag=tt.id_tag
+            JOIN Transacoes x ON x.id_transacao=tt.id_transacao
+            WHERE x.id_usuario=@user AND t.id_usuario=@user
+            ORDER BY t.nome_tag
+            """, reader => (TransactionId: reader.GetInt64(0),
+                Tag: new TagItem(reader.GetInt64(1), reader.GetInt64(2), reader.GetString(3),
+                    reader.GetString(4), reader.GetString(5))),
+            ("@color", BlingPalette.PrimaryHex), ("@user", CurrentUserId));
+        return (rows ?? []).GroupBy(row => row.TransactionId)
+            .ToDictionary(group => group.Key,
+                group => (IReadOnlyList<TagItem>)group.Select(row => row.Tag).ToList());
+    }
 
     private async Task<List<T>> QueryAsync<T>(string sql, Func<SqliteDataReader, T> map, params (string, object?)[] args)
     {

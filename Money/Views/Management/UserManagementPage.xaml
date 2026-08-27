@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ xmlns:icons="clr-namespace:Money.Helpers" x:Class="Money.Views.Management.UserManagementPage" Shell.NavBarIsVisible="False"
+ BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}">
+ <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="14">
+  <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="10">
+   <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingPrimary, IconSize=22}" WidthRequest="44" HeightRequest="44" CornerRadius="12" Clicked="OnBackClicked"/>
+   <VerticalStackLayout Grid.Column="1" Spacing="1"><Label Text="Usuários" Style="{StaticResource SectionTitle}"/><Label Text="Cadastro e controle de acesso" Style="{StaticResource SectionSubtitle}"/></VerticalStackLayout>
+   <Button Grid.Column="2" Text="Novo" Style="{StaticResource PrimaryButton}" HeightRequest="44" Padding="16,0" Clicked="OnNewClicked"/>
+  </Grid>
+  <Border Grid.Row="1" Style="{StaticResource ContentCard}" Padding="12"><Label x:Name="SummaryLabel" Text="Carregando usuários..."/></Border>
+  <RefreshView Grid.Row="2" x:Name="RefreshControl" Refreshing="OnRefreshing" RefreshColor="{StaticResource BlingPrimary}">
+   <CollectionView x:Name="UsersList" SelectionMode="None" EmptyView="Nenhum usuário cadastrado.">
+    <CollectionView.ItemTemplate><DataTemplate>
+     <Border Style="{StaticResource ContentCard}" Margin="0,0,0,10" Padding="14">
+      <Grid ColumnDefinitions="*,40,40" ColumnSpacing="8">
+       <VerticalStackLayout Spacing="3"><Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold"/><Label Text="{Binding Email}" Style="{StaticResource SectionSubtitle}"/><Label Text="{Binding RecoveryQuestion}" FontSize="11" LineBreakMode="TailTruncation"/></VerticalStackLayout>
+       <ImageButton Grid.Column="1" Source="{icons:MaterialIconSource Icon=Edit, ColorResource=BlingPrimary, IconSize=19}" WidthRequest="38" HeightRequest="38" Padding="9" CornerRadius="10" CommandParameter="{Binding .}" Clicked="OnEditClicked"/>
+       <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=Delete, ColorResource=BlingDanger, IconSize=19}" WidthRequest="38" HeightRequest="38" Padding="9" CornerRadius="10" BorderColor="{StaticResource BlingDanger}" CommandParameter="{Binding .}" Clicked="OnDeleteClicked"/>
+      </Grid>
+     </Border>
+    </DataTemplate></CollectionView.ItemTemplate>
+   </CollectionView>
+  </RefreshView>
+ </Grid>
+</ContentPage>

@@ -62,7 +62,6 @@ public partial class App : Application
 
             await _auth.InitializeAsync();
             // Modo local de usuário único. O fluxo de login permanece disponível para reativação futura.
-            var restoredSession = await _auth.TryRestoreSessionAsync();
             var settings = await _database.GetSettingsAsync();
             UserAppTheme = settings.Theme switch
             {
@@ -71,9 +70,9 @@ public partial class App : Application
                 _ => AppTheme.Unspecified
             };
 
-            window.Page = restoredSession
-                ? CreateAuthenticatedShell()
-                : CreateLoginNavigation();
+            // Cada nova abertura exige autenticação; a sessão vale apenas para a janela atual.
+            _auth.Logout();
+            window.Page = CreateLoginNavigation();
         }
         catch (Exception ex)
         {

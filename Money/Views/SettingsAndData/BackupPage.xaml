@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             x:Class="Money.Views.SettingsAndData.BackupPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="44,*" ColumnSpacing="12">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                    <Label Text="Backup e restauração" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"/>
+                    <Label Text="Proteja ou recupere seus dados" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,20" Spacing="14">
+                <Border Style="{StaticResource ContentCard}" Padding="18">
+                    <Grid ColumnDefinitions="52,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="5">
+                        <Border Grid.RowSpan="2" WidthRequest="48" HeightRequest="48" BackgroundColor="#E8F7F1" StrokeThickness="0" StrokeShape="RoundRectangle 14"><mi:MauiIcon Icon="{mi:Material Icon=Backup}" IconSize="25" IconColor="{StaticResource BlingPrimary}" HorizontalOptions="Center" VerticalOptions="Center"/></Border>
+                        <Label Grid.Column="1" Text="Realizar backup" Style="{StaticResource SectionTitle}"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="Exporte uma cópia completa do banco para uma pasta ou compartilhe o arquivo." Style="{StaticResource SectionSubtitle}"/>
+                        <Button Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,0,0" Text="Realizar Backup" Style="{StaticResource PrimaryButton}" Clicked="OnCreateBackupClicked"/>
+                    </Grid>
+                </Border>
+                <Border Style="{StaticResource ContentCard}" Padding="18">
+                    <Grid ColumnDefinitions="52,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="5">
+                        <Border Grid.RowSpan="2" WidthRequest="48" HeightRequest="48" BackgroundColor="#E8F7F1" StrokeThickness="0" StrokeShape="RoundRectangle 14"><mi:MauiIcon Icon="{mi:Material Icon=Restore}" IconSize="25" IconColor="{StaticResource BlingPrimary}" HorizontalOptions="Center" VerticalOptions="Center"/></Border>
+                        <Label Grid.Column="1" Text="Restaurar backup" Style="{StaticResource SectionTitle}"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="Importe um backup anterior. Uma cópia de segurança dos dados atuais será preservada." Style="{StaticResource SectionSubtitle}"/>
+                        <Button Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,0,0" Text="Restaurar Backup" Style="{StaticResource PrimaryButton}" Clicked="OnRestoreBackupClicked"/>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

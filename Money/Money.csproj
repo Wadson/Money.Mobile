@@ -57,6 +57,8 @@
 
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#00A859" />
+		<!-- Mantém a marca disponível como imagem interna nas telas de login e menu. -->
+		<MauiImage Update="Resources\Images\icon.svg" BaseSize="512,512" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#00A859" BaseSize="128,128" />

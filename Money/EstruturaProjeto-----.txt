@@ -1,0 +1,115 @@
+﻿+ Controls
+  - VectorIcon.cs
++ Models
+  - CardInvoiceImportModels.cs
+  - DataCleanupItem.cs
+  - FinanceModels.cs
+  - Fornecedor.cs
+  - PayableImportRow.cs
++ Platforms
+  + Android
+    + Resources
+      + values
+    - AndroidBackupFileService.cs
+    - AndroidReportPdfRenderer.cs
+    - MainActivity.cs
+    - MainApplication.cs
+  + iOS
+    + Resources
+    - AppDelegate.cs
+    - Program.cs
+  + MacCatalyst
+    - AppDelegate.cs
+    - Program.cs
+  + Windows
+    - App.xaml
+    - App.xaml.cs
++ Properties
++ Resources
+  + AppIcon
+  + Fonts
+  + Images
+  + Raw
+  + Splash
+  + Styles
+    - Colors.xaml
+    - Colors.xaml.cs
+    - Styles.xaml
+    - Styles.xaml.cs
++ Services
+  - AuthService.cs
+  - BackupService.cs
+  - CardInvoiceCsvParser.cs
+  - CsvTemplateService.cs
+  - DatabaseService.cs
+  - ReportPdfService.cs
+  - SqliteErrorMessage.cs
+- AccountManagementPage.xaml
+- AccountManagementPage.xaml.cs
+- AccountsPayablePage.xaml
+- AccountsPayablePage.xaml.cs
+- App.xaml
+- App.xaml.cs
+- AppShell.xaml
+- AppShell.xaml.cs
+- BackupPage.xaml
+- BackupPage.xaml.cs
+- BudgetManagementPage.xaml
+- BudgetManagementPage.xaml.cs
+- CalendarDateSelectionPage.xaml
+- CalendarDateSelectionPage.xaml.cs
+- CardManagementPage.xaml
+- CardManagementPage.xaml.cs
+- CategoryManagementPage.xaml
+- CategoryManagementPage.xaml.cs
+- CategoryVisualResolver.cs
+- CreditCardAnalysisPage.xaml
+- CreditCardAnalysisPage.xaml.cs
+- DataCleanupPage.xaml
+- DataCleanupPage.xaml.cs
+- DataOperationsPage.xaml
+- DataOperationsPage.xaml.cs
+- ImportCardInvoicePage.xaml
+- ImportCardInvoicePage.xaml.cs
+- IncomeListPage.xaml
+- IncomeListPage.xaml.cs
+- LoginPage.xaml
+- LoginPage.xaml.cs
+- MainPage.xaml
+- MainPage.xaml.cs
+- MaterialIconSourceExtension.cs
+- MauiProgram.cs
+- MonthlyOverviewPage.xaml
+- MonthlyOverviewPage.xaml.cs
+- MonthYearSelectionPage.xaml
+- MonthYearSelectionPage.xaml.cs
+- MorePage.xaml
+- MorePage.xaml.cs
+- OptionSelectionPage.xaml
+- OptionSelectionPage.xaml.cs
+- PayablesCsvImportPage.xaml
+- PayablesCsvImportPage.xaml.cs
+- PaymentReversalPage.xaml
+- PaymentReversalPage.xaml.cs
+- PlanningPage.xaml
+- PlanningPage.xaml.cs
+- ProfilePage.xaml
+- ProfilePage.xaml.cs
+- RecoveryPage.xaml
+- RecoveryPage.xaml.cs
+- RegisterPage.xaml
+- RegisterPage.xaml.cs
+- ReportPage.xaml
+- ReportPage.xaml.cs
+- SettingsPage.xaml
+- SettingsPage.xaml.cs
+- SupplierEditPage.xaml
+- SupplierEditPage.xaml.cs
+- SupplierManagementPage.xaml
+- SupplierManagementPage.xaml.cs
+- ThemeColor.cs
+- ThemedDialog.cs
+- TransactionEditPage.xaml
+- TransactionEditPage.xaml.cs
+- TransactionFormPage.xaml
+- TransactionFormPage.xaml.cs

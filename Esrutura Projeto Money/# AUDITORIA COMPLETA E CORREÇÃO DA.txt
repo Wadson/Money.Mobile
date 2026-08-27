@@ -1,0 +1,1422 @@
+# AUDITORIA COMPLETA E CORREÇÃO DA REGRA DE COMPETÊNCIA FINANCEIRA — MONEY
+
+Atue como **Arquiteto de Software, Desenvolvedor C#/.NET MAUI Sênior, especialista em SQLite, SQL, sistemas financeiros e auditoria de integridade contábil**.
+
+Você está trabalhando no projeto:
+
+**Money — Controle Financeiro Pessoal**
+
+Analise o projeto inteiro antes de modificar qualquer arquivo.
+
+Não faça uma correção superficial.
+
+O objetivo é realizar uma **auditoria completa do código-fonte, banco SQLite, SQLs, Views, serviços, regras de negócio, ViewModels, páginas, Dashboard, relatórios, PDFs, cartões, contas a pagar, receitas, parcelamentos, importações e cálculos financeiros**, corrigindo todas as inconsistências encontradas.
+
+---
+
+# 1. REGRA FINANCEIRA OFICIAL DO SISTEMA
+
+Esta regra é obrigatória e deve ser tratada como regra central do domínio financeiro.
+
+## 1.1 CONTAS A PAGAR / DESPESAS
+
+Toda despesa deve ser classificada financeiramente pela:
+
+**DATA DE VENCIMENTO**
+
+Campos:
+
+```text
+data                 = data do lançamento/compra
+data_vencimento      = data de competência financeira da despesa
+pago                 = indica se foi efetivamente paga
+data_pagamento       = data em que foi efetivamente paga
+```
+
+Exemplo:
+
+```text
+Compra:              20/07/2026
+Vencimento:          10/08/2026
+Pagamento:           08/08/2026
+```
+
+Essa despesa pertence à competência:
+
+```text
+AGOSTO/2026
+```
+
+e nunca a julho.
+
+Outro exemplo:
+
+```text
+Compra:              20/07/2026
+Vencimento:          10/08/2026
+Pagamento:           15/08/2026
+```
+
+Continua pertencendo à competência:
+
+```text
+AGOSTO/2026
+```
+
+A data de pagamento NÃO deve alterar a competência da despesa.
+
+---
+
+# 2. REGRA PARA RECEITAS
+
+Toda receita realizada deve ser classificada financeiramente pela:
+
+**DATA DE RECEBIMENTO**
+
+Campos:
+
+```text
+data                 = data do lançamento/origem da receita
+data_pagamento       = data em que a receita foi efetivamente recebida
+pago                 = 1 somente quando efetivamente recebida
+```
+
+Exemplo:
+
+```text
+Lançamento:          25/07/2026
+Recebimento:         05/08/2026
+```
+
+A receita pertence à competência:
+
+```text
+AGOSTO/2026
+```
+
+e não julho.
+
+Portanto:
+
+```text
+RECEITAS REALIZADAS
+→ pago = 1
+→ data financeira = data_pagamento
+```
+
+Receita ainda não recebida:
+
+```text
+pago = 0
+data_pagamento = NULL
+```
+
+não deve ser contabilizada como receita realizada.
+
+---
+
+# 3. REGRA RESUMIDA DE COMPETÊNCIA
+
+Crie internamente uma regra conceitual única:
+
+```text
+Despesa:
+    DataFinanceira = COALESCE(data_vencimento, data)
+
+Receita:
+    DataFinanceira = data_pagamento
+```
+
+Nunca use simplesmente:
+
+```text
+t.data
+```
+
+para calcular receitas realizadas.
+
+Nunca use:
+
+```text
+t.data
+```
+
+como competência de uma despesa quando existir `data_vencimento`.
+
+---
+
+# 4. AUDITORIA OBRIGATÓRIA DO PROJETO INTEIRO
+
+Antes de alterar qualquer código:
+
+1. Leia todos os arquivos da solução.
+2. Identifique todas as consultas SQL.
+3. Identifique todas as Views SQLite.
+4. Identifique todas as operações `INSERT`.
+5. Identifique todas as operações `UPDATE`.
+6. Identifique todas as operações `DELETE`.
+7. Identifique todos os cálculos envolvendo:
+
+   * receitas;
+   * despesas;
+   * saldo;
+   * contas a pagar;
+   * contas pagas;
+   * vencidas;
+   * próximas;
+   * orçamento;
+   * cartão;
+   * faturas;
+   * dashboard;
+   * relatórios;
+   * gráficos;
+   * saúde financeira;
+   * margem;
+   * economia;
+   * previsão;
+   * médias;
+   * percentuais;
+   * fluxo financeiro;
+   * saldo de contas;
+   * limite utilizado de cartões.
+
+Não considere que um código está correto apenas porque existe comentário dizendo que ele segue a regra.
+
+Verifique a implementação real.
+
+---
+
+# 5. AUDITORIA DO BANCO DE DADOS
+
+Compare o código com a estrutura real do banco.
+
+Tabelas principais:
+
+```text
+Usuarios
+Tags
+Notificacoes
+Metas
+Logs
+Importacoes
+Fornecedores
+Contas
+Configuracoes
+Categorias
+Orcamentos
+Receitas
+CartoesCredito
+FaturasCartao
+Transacoes
+TransacoesTags
+Lembretes
+Backups
+```
+
+Audite especialmente:
+
+```text
+Transacoes.data
+Transacoes.data_vencimento
+Transacoes.data_pagamento
+Transacoes.pago
+Transacoes.tipo
+Transacoes.parcelado
+Transacoes.id_transacao_pai
+Transacoes.numero_parcela
+Transacoes.total_parcelas
+```
+
+Verifique:
+
+* tipos;
+* NULLs;
+* defaults;
+* foreign keys;
+* índices;
+* triggers;
+* Views;
+* migrações;
+* compatibilidade com bancos antigos;
+* restauração de backup;
+* importação;
+* integridade referencial.
+
+Não remova dados existentes.
+
+Não recrie o banco de maneira destrutiva.
+
+---
+
+# 6. AUDITAR GetReceitasAsync
+
+Corrija para que a competência e ordenação das receitas realizadas utilizem:
+
+```sql
+data_pagamento
+```
+
+e não:
+
+```sql
+data
+```
+
+A consulta deve diferenciar:
+
+### Receita recebida
+
+```text
+pago = 1
+data_pagamento IS NOT NULL
+```
+
+### Receita não recebida
+
+```text
+pago = 0
+```
+
+Não atribua uma receita não recebida a um mês como se ela já tivesse sido realizada.
+
+---
+
+# 7. AUDITAR GetResumoReceitasAsync
+
+O resumo deve obedecer exatamente ao período de recebimento.
+
+Exemplo:
+
+```text
+Receita:
+data = 25/07
+data_pagamento = 05/08
+pago = 1
+valor = 5.000
+```
+
+Ao consultar:
+
+```text
+Julho/2026
+```
+
+não pode aparecer como receita realizada.
+
+Ao consultar:
+
+```text
+Agosto/2026
+```
+
+deve aparecer.
+
+---
+
+# 8. AUDITAR GetMonthlyOverviewAsync
+
+Corrigir obrigatoriamente:
+
+### Receita
+
+```sql
+tipo='receita'
+AND pago=1
+AND date(data_pagamento)>=date(@start)
+AND date(data_pagamento)<date(@end)
+```
+
+### Despesa paga
+
+```sql
+tipo='despesa'
+AND pago=1
+AND date(COALESCE(data_vencimento,data))>=date(@start)
+AND date(COALESCE(data_vencimento,data))<date(@end)
+```
+
+### Despesa pendente
+
+Usar a mesma competência da despesa:
+
+```sql
+COALESCE(data_vencimento,data)
+```
+
+Nunca usar `data` isoladamente para competência de contas a pagar.
+
+---
+
+# 9. AUDITAR DASHBOARD
+
+Audite todos os indicadores do Dashboard.
+
+Especialmente:
+
+```text
+Receitas
+Despesas
+Saldo
+Economia
+Taxa de economia
+Comprometimento
+Média diária
+Previsão
+Saúde financeira
+Saldo disponível
+Contas pendentes
+Contas vencidas
+Pagamentos do mês
+```
+
+Cada indicador deve possuir uma definição financeira clara.
+
+Não misture:
+
+```text
+data do lançamento
+data de vencimento
+data de pagamento
+data de recebimento
+```
+
+---
+
+# 10. AUDITAR GetHomePaymentStatsAsync
+
+Atualmente existem consultas utilizando:
+
+```sql
+data>=@start
+AND data<@end
+```
+
+para despesas.
+
+Corrigir para:
+
+```sql
+date(COALESCE(data_vencimento,data))>=date(@start)
+AND date(COALESCE(data_vencimento,data))<date(@end)
+```
+
+Aplicar tanto para:
+
+```text
+total de contas
+contas pagas
+```
+
+---
+
+# 11. AUDITAR CONTAS A PAGAR
+
+Toda a tela de Contas a Pagar deve utilizar:
+
+```text
+data_vencimento
+```
+
+para:
+
+* período;
+* mês;
+* ano;
+* vencidas;
+* hoje;
+* próximos vencimentos;
+* futuras;
+* total;
+* filtros;
+* ordenação;
+* resumo;
+* relatórios;
+* dashboard.
+
+Status:
+
+```text
+Vencida:
+pago = 0
+e data_vencimento < hoje
+
+Hoje:
+pago = 0
+e data_vencimento = hoje
+
+Próxima:
+pago = 0
+e data_vencimento > hoje
+
+Paga:
+pago = 1
+```
+
+Não utilizar `data_pagamento` para definir a competência da despesa.
+
+---
+
+# 12. AUDITAR VW_CONTAS_PAGAR
+
+A View deve continuar baseada em:
+
+```sql
+COALESCE(data_vencimento,data)
+```
+
+para despesas.
+
+Verifique se todas as consultas que usam essa View preservam essa regra.
+
+---
+
+# 13. AUDITAR VW_RESUMO_MENSAL
+
+Corrigir a competência.
+
+A lógica deve ser equivalente a:
+
+```sql
+CASE
+    WHEN tipo='despesa'
+        THEN COALESCE(data_vencimento,data)
+
+    WHEN tipo='receita'
+        THEN data_pagamento
+END
+```
+
+E:
+
+```text
+receita:
+    pago = 1
+    data_pagamento IS NOT NULL
+
+despesa:
+    pago = 1
+    competência pelo vencimento
+```
+
+Não contabilizar receita não recebida no resultado realizado.
+
+---
+
+# 14. AUDITAR VW_GASTOS_CATEGORIA
+
+Manter a competência das despesas por:
+
+```sql
+COALESCE(data_vencimento,data)
+```
+
+e:
+
+```text
+pago = 1
+```
+
+Não alterar essa regra para `data_pagamento`.
+
+---
+
+# 15. AUDITAR VW_SAUDE_FINANCEIRA
+
+Verifique se os números utilizados na saúde financeira representam efetivamente:
+
+```text
+Receitas recebidas
+menos
+Despesas pagas
+```
+
+E não simplesmente todos os lançamentos.
+
+Caso seja utilizada para uma visão mensal, aplicar:
+
+```text
+Receita → data_pagamento
+Despesa → data_vencimento
+```
+
+---
+
+# 16. AUDITAR ORÇAMENTOS
+
+O orçamento deve considerar despesas realizadas pela competência do vencimento.
+
+Exemplo:
+
+```text
+Compra: 28/07
+Vencimento: 05/08
+Pagamento: 04/08
+Categoria: Alimentação
+Valor: 500
+```
+
+O orçamento de agosto deve considerar:
+
+```text
+R$ 500
+```
+
+e julho:
+
+```text
+R$ 0
+```
+
+Não usar `data_pagamento` para mudar a competência do orçamento.
+
+---
+
+# 17. AUDITAR CARTÕES DE CRÉDITO
+
+Preservar a regra já existente:
+
+```text
+competência da despesa do cartão = data de vencimento
+```
+
+Auditar:
+
+* limite utilizado;
+* compras;
+* parcelas;
+* faturas;
+* faturas abertas;
+* faturas pagas;
+* faturas vencidas;
+* análise por categoria;
+* previsão;
+* saldo disponível.
+
+Verificar também se:
+
+```text
+limite_utilizado
+```
+
+não está sendo duplicado quando uma compra parcelada possui registro pai + filhos.
+
+A transação pai de agrupamento nunca deve ser contabilizada junto com suas parcelas.
+
+---
+
+# 18. AUDITAR PARCELAMENTOS
+
+Manter a estrutura:
+
+```text
+id_transacao_pai
+numero_parcela
+total_parcelas
+data_vencimento
+```
+
+As parcelas devem possuir suas próprias datas de vencimento.
+
+Exemplo:
+
+```text
+Parcela 1 → 10/08
+Parcela 2 → 10/09
+Parcela 3 → 10/10
+```
+
+Cada parcela deve pertencer à competência do seu próprio vencimento.
+
+Nunca usar a data da compra para todas as parcelas.
+
+---
+
+# 19. AUDITAR RECEITAS PARCELADAS/RECORRENTES
+
+Caso existam receitas recorrentes, cada recebimento deve possuir sua própria:
+
+```text
+data_pagamento
+```
+
+e ser contabilizado somente quando efetivamente recebido.
+
+Não assumir que:
+
+```text
+data = data_pagamento
+```
+
+sem verificar a regra de negócio.
+
+---
+
+# 20. AUDITAR CRIAÇÃO DE TRANSAÇÕES
+
+Ao criar uma receita:
+
+```text
+tipo = receita
+```
+
+garantir:
+
+```text
+pago = 1
+data_pagamento = data efetiva de recebimento
+```
+
+quando o lançamento representar uma receita já recebida.
+
+Se for permitido cadastrar receita futura:
+
+```text
+pago = 0
+data_pagamento = NULL
+```
+
+e ela não pode entrar nos totais realizados.
+
+Ao criar despesa:
+
+```text
+data_vencimento = vencimento informado
+pago = 0
+data_pagamento = NULL
+```
+
+até que o usuário efetue o pagamento.
+
+---
+
+# 21. AUDITAR PAGAMENTO DE DESPESA
+
+Quando uma despesa for paga:
+
+```text
+pago = 1
+data_pagamento = data real do pagamento
+```
+
+O pagamento deve:
+
+```text
+reduzir saldo da conta
+```
+
+ou:
+
+```text
+atualizar utilização do cartão
+```
+
+conforme a origem.
+
+Mas a competência da despesa continua sendo:
+
+```text
+data_vencimento
+```
+
+---
+
+# 22. AUDITAR RECEBIMENTO DE RECEITA
+
+Quando uma receita for recebida:
+
+```text
+pago = 1
+data_pagamento = data real do recebimento
+```
+
+O saldo da conta deve ser atualizado nessa realização.
+
+A receita deve aparecer nos cálculos do mês de:
+
+```text
+data_pagamento
+```
+
+---
+
+# 23. AUDITAR EDIÇÃO DE TRANSAÇÕES
+
+Ao editar uma despesa:
+
+```text
+data
+data_vencimento
+pago
+data_pagamento
+```
+
+devem continuar semanticamente independentes.
+
+Ao editar uma receita:
+
+```text
+data
+data_pagamento
+pago
+```
+
+também devem permanecer independentes.
+
+Não preencher automaticamente `data_pagamento` com `data` sem uma regra explícita de negócio.
+
+---
+
+# 24. AUDITAR EXCLUSÃO
+
+Ao excluir:
+
+### Receita recebida
+
+Reverter o impacto no saldo da conta.
+
+### Despesa paga
+
+Reverter o impacto no saldo da conta.
+
+### Despesa pendente
+
+Não alterar saldo que nunca foi debitado.
+
+### Cartão
+
+Reverter corretamente `limite_utilizado`.
+
+Auditar todos esses caminhos em:
+
+```text
+Delete
+Edit
+Undo payment
+Payment
+Installment
+Import
+Restore
+Cleanup
+```
+
+---
+
+# 25. AUDITAR RELATÓRIOS
+
+Todos os relatórios financeiros devem respeitar:
+
+```text
+Receita:
+    data_pagamento
+
+Despesa:
+    data_vencimento
+```
+
+Isso inclui:
+
+* PDF;
+* relatório detalhado;
+* relatório mensal;
+* relatório por categoria;
+* relatório por fornecedor;
+* relatório por cartão;
+* relatório de contas pagas;
+* relatório de contas pendentes;
+* gráficos;
+* subtotais;
+* totais;
+* saldos.
+
+---
+
+# 26. AUDITAR PROFESSIONALREPORTPDFRENDERER
+
+O renderer não deve possuir lógica financeira própria.
+
+Ele deve receber dados já calculados corretamente pelo serviço de dados.
+
+Verificar principalmente:
+
+```text
+FinancialReportItem.Date
+FinancialReportItem.Type
+FinancialReportItem.Amount
+FinancialReportItem.Paid
+```
+
+Se `Date` representa a data financeira do relatório, ela deve ser:
+
+```text
+receita → data_pagamento
+despesa → data_vencimento
+```
+
+---
+
+# 27. AUDITAR ANDROID REPORT PDF
+
+Aplicar a mesma regra ao:
+
+```text
+AndroidReportPdfRenderer
+ProfessionalReportPdfRenderer
+```
+
+Não permitir que dois renderizadores apresentem resultados diferentes para o mesmo período.
+
+---
+
+# 28. AUDITAR IMPORTAÇÃO DE CONTAS A PAGAR
+
+A importação CSV já possui `DueDate`.
+
+Garantir que:
+
+```text
+Data do lançamento
+=
+Data de vencimento
+```
+
+somente quando isso for realmente o modelo importado.
+
+A coluna de vencimento deve alimentar:
+
+```text
+data_vencimento
+```
+
+e não apenas `data`.
+
+As contas importadas devem começar como:
+
+```text
+pago = 0
+data_pagamento = NULL
+```
+
+---
+
+# 29. AUDITAR IMPORTAÇÃO DE CARTÃO
+
+Para cada parcela importada:
+
+```text
+data = data da compra
+data_vencimento = vencimento da parcela
+```
+
+A competência financeira deve ser o vencimento.
+
+Nunca usar a data da compra para determinar o mês financeiro da parcela.
+
+---
+
+# 30. AUDITAR VIEWS E MIGRAÇÕES
+
+Existem migrações históricas até a versão atual.
+
+Não apagar migrações existentes sem necessidade.
+
+Criar uma nova migração corretiva somente se for necessário.
+
+A correção deve ser idempotente.
+
+Bancos antigos restaurados devem continuar funcionando.
+
+Verificar:
+
+```text
+PRAGMA user_version
+```
+
+e todas as Views recriadas pelas migrações.
+
+---
+
+# 31. AUDITAR ÍNDICES
+
+Verificar se existem índices adequados para consultas financeiras, principalmente:
+
+```text
+Transacoes(id_usuario)
+Transacoes(id_usuario,tipo)
+Transacoes(id_usuario,data)
+Transacoes(id_usuario,data_vencimento)
+Transacoes(id_usuario,data_pagamento)
+Transacoes(id_usuario,pago)
+Transacoes(id_usuario,tipo,pago)
+Transacoes(id_usuario,tipo,data_vencimento)
+Transacoes(id_usuario,tipo,data_pagamento)
+```
+
+Criar somente índices realmente necessários.
+
+---
+
+# 32. ISOLAMENTO POR USUÁRIO
+
+Todas as consultas financeiras devem obrigatoriamente respeitar:
+
+```text
+id_usuario = CurrentUserId
+```
+
+Auditar todas as consultas para evitar vazamento de dados entre usuários.
+
+---
+
+# 33. PRECISÃO MONETÁRIA
+
+Auditar todos os valores financeiros.
+
+Preferir:
+
+```csharp
+decimal
+```
+
+no domínio C#.
+
+Verificar SQL e SQLite para evitar conversões indevidas entre:
+
+```text
+REAL
+NUMERIC
+INTEGER
+decimal
+double
+float
+```
+
+Não introduzir `double` para cálculos monetários.
+
+Parcelamentos devem continuar fechando exatamente:
+
+```text
+SUM(parcelas) == valor_total
+```
+
+---
+
+# 34. TESTES OBRIGATÓRIOS
+
+Depois das alterações, criar/usar testes automatizados ou um utilitário de auditoria para validar os seguintes cenários.
+
+## TESTE 1 — Receita recebida em mês posterior
+
+```text
+Data lançamento: 25/07/2026
+Data recebimento: 05/08/2026
+Valor: 1000
+pago = 1
+```
+
+Resultado esperado:
+
+```text
+Julho = 0
+Agosto = 1000
+```
+
+---
+
+## TESTE 2 — Despesa com vencimento em mês posterior
+
+```text
+Data compra: 25/07/2026
+Vencimento: 05/08/2026
+Pagamento: 04/08/2026
+Valor: 500
+pago = 1
+```
+
+Resultado:
+
+```text
+Julho = 0
+Agosto = 500
+```
+
+---
+
+## TESTE 3 — Despesa paga depois do vencimento
+
+```text
+Compra: 25/07
+Vencimento: 05/08
+Pagamento: 15/08
+Valor: 500
+```
+
+Resultado:
+
+```text
+Agosto = 500
+```
+
+Não criar competência em julho nem setembro.
+
+---
+
+## TESTE 4 — Conta ainda não paga
+
+```text
+Vencimento: 10/08
+pago = 0
+```
+
+Resultado:
+
+```text
+Contas a pagar agosto = 500
+Despesas pagas agosto = 0
+```
+
+---
+
+## TESTE 5 — Receita futura
+
+```text
+Data prevista: 20/08
+pago = 0
+data_pagamento = NULL
+```
+
+Resultado:
+
+```text
+Receitas realizadas agosto = 0
+```
+
+---
+
+## TESTE 6 — Receita recebida
+
+```text
+data = 01/08
+data_pagamento = 10/08
+pago = 1
+```
+
+Resultado:
+
+```text
+Receitas realizadas agosto = valor
+```
+
+---
+
+## TESTE 7 — Parcelamento
+
+```text
+Total = 1200
+
+Parcela 1 = 400 → vencimento agosto
+Parcela 2 = 400 → vencimento setembro
+Parcela 3 = 400 → vencimento outubro
+```
+
+Resultado:
+
+```text
+Agosto = 400
+Setembro = 400
+Outubro = 400
+```
+
+Nunca:
+
+```text
+Agosto = 1200
+```
+
+---
+
+## TESTE 8 — Cartão
+
+Compra:
+
+```text
+Compra = 20/07
+Parcela 1 vencimento = 10/08
+Parcela 2 vencimento = 10/09
+```
+
+Resultado:
+
+```text
+Agosto = parcela 1
+Setembro = parcela 2
+```
+
+---
+
+# 35. AUDITORIA DE DUPLICIDADE
+
+Verificar se nenhuma tela ou View contabiliza:
+
+```text
+transação pai + parcelas filhas
+```
+
+simultaneamente.
+
+A regra deve ser:
+
+```text
+Se existe parcelamento com filhos:
+    pai = agrupador
+    filhos = lançamentos financeiros
+```
+
+O pai não entra nos totais financeiros.
+
+---
+
+# 36. NÃO CRIAR REGRA DUPLICADA
+
+Centralize a definição da data financeira sempre que possível.
+
+Criar helper/serviço interno equivalente a:
+
+```csharp
+GetFinancialDate(transaction)
+```
+
+com comportamento:
+
+```text
+despesa:
+    data_vencimento ?? data
+
+receita:
+    data_pagamento
+```
+
+Porém não use esse helper para esconder situações inválidas.
+
+Se uma receita realizada possuir:
+
+```text
+pago = 1
+data_pagamento = NULL
+```
+
+isso deve ser identificado como inconsistência de dados.
+
+---
+
+# 37. REPARAÇÃO DE DADOS EXISTENTES
+
+Não alterar dados financeiros históricos automaticamente sem uma estratégia segura.
+
+Primeiro:
+
+1. detectar inconsistências;
+2. gerar relatório;
+3. contabilizar quantos registros estão afetados;
+4. identificar quais registros possuem:
+
+   * receita paga sem data_pagamento;
+   * despesa sem data_vencimento;
+   * pago=1 sem data_pagamento;
+   * pago=0 com data_pagamento;
+   * valores incompatíveis;
+   * parcelas inconsistentes.
+
+Somente depois aplicar correção determinística.
+
+Nunca inventar uma data financeira.
+
+Quando não houver informação suficiente, registrar a inconsistência para tratamento.
+
+---
+
+# 38. AUDITORIA DE CÓDIGO
+
+Além das regras financeiras, verificar:
+
+* NullReferenceException;
+* async/await;
+* SQLite locks;
+* transações;
+* concorrência;
+* exceções;
+* SQL injection;
+* parâmetros;
+* Dispose;
+* conexões abertas;
+* comandos sem transaction;
+* operações fora da thread apropriada;
+* duplicidade de métodos;
+* código morto;
+* consultas redundantes;
+* Views desatualizadas;
+* inconsistências entre Model e banco;
+* inconsistências entre Model e XAML;
+* inconsistências entre serviços e ViewModels.
+
+---
+
+# 39. NÃO ALTERAR A INTERFACE SEM NECESSIDADE
+
+O objetivo principal desta tarefa é:
+
+**CORREÇÃO DA LÓGICA E INTEGRIDADE FINANCEIRA.**
+
+Não modificar o layout das telas sem necessidade.
+
+Não trocar cores.
+
+Não remover funcionalidades.
+
+Não alterar textos sem necessidade.
+
+Não substituir bibliotecas.
+
+Não migrar a arquitetura.
+
+Não introduzir EF Core se o projeto atual utiliza acesso SQLite direto.
+
+Preserve a arquitetura existente.
+
+---
+
+# 40. RESULTADO ESPERADO
+
+Depois da auditoria:
+
+1. Corrija todos os bugs encontrados.
+2. Corrija todas as consultas SQL.
+3. Corrija Views.
+4. Corrija cálculos.
+5. Corrija Dashboard.
+6. Corrija relatórios.
+7. Corrija PDFs.
+8. Corrija orçamento.
+9. Corrija cartões.
+10. Corrija contas a pagar.
+11. Corrija receitas.
+12. Corrija parcelamentos.
+13. Corrija importações.
+14. Preserve dados existentes.
+15. Preserve compatibilidade com bancos existentes.
+16. Compile o projeto.
+17. Execute os testes financeiros.
+18. Verifique se não existem erros de compilação.
+19. Verifique se não existem warnings introduzidos pela alteração.
+
+---
+
+# 41. RELATÓRIO FINAL OBRIGATÓRIO
+
+Ao finalizar, não responda apenas "corrigido".
+
+Informe:
+
+## Arquivos analisados
+
+Liste os principais arquivos analisados.
+
+## Arquivos modificados
+
+Liste exatamente cada arquivo alterado.
+
+## Correções realizadas
+
+Para cada correção informe:
+
+```text
+Arquivo:
+Método:
+Problema:
+Correção:
+Regra financeira aplicada:
+```
+
+## Banco de dados
+
+Informe:
+
+```text
+Views alteradas
+Triggers alterados
+Índices criados
+Migrações criadas
+Correções de dados realizadas
+```
+
+## Testes
+
+Informe cada teste:
+
+```text
+Teste:
+Resultado esperado:
+Resultado obtido:
+Status: PASS/FAIL
+```
+
+## Compilação
+
+Informe:
+
+```text
+Build:
+Erros:
+Warnings:
+Status:
+```
+
+---
+
+# 42. CRITÉRIO FINAL DE ACEITAÇÃO
+
+O sistema somente poderá ser considerado corrigido se esta regra for verdadeira em TODO o aplicativo:
+
+```text
+┌──────────────────────────────────────────────┐
+│ DESPESAS / CONTAS A PAGAR                    │
+│                                              │
+│ Competência = DATA DE VENCIMENTO             │
+│                                              │
+│ Não importa quando foi paga.                 │
+└──────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────┐
+│ RECEITAS                                     │
+│                                              │
+│ Competência = DATA DE RECEBIMENTO            │
+│                                              │
+│ Somente entra como realizada quando recebida.│
+└──────────────────────────────────────────────┘
+```
+
+Nenhuma tela, View, relatório, gráfico, Dashboard ou serviço poderá utilizar outra regra.
+
+Antes de concluir, procure novamente no código por:
+
+```text
+t.data
+data>=
+data<
+strftime('%m',t.data
+strftime('%Y',t.data
+strftime('%Y-%m',t.data
+```
+
+e analise cada ocorrência para garantir que ela não esteja violando as regras acima.
+
+Também procure por:
+
+```text
+data_vencimento
+data_pagamento
+pago
+```
+
+e confirme que cada uso possui semântica correta.
+
+Não considere a tarefa concluída até que todo o projeto esteja consistente com essas regras.

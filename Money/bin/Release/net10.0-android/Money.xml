@@ -4,12 +4,26 @@
         <name>Money</name>
     </assembly>
     <members>
-        <member name="T:Money.MaterialIconSourceExtension">
+        <member name="T:Money.Controls.LeftAlignedFieldButton">
+            <summary>Campo de seleção com conteúdo fixado ao início no controle nativo.</summary>
+        </member>
+        <member name="T:Money.Controls.TransactionGenerationPlan">
+            <summary>Shared calculation model used by both transaction generation panels.</summary>
+        </member>
+        <member name="T:Money.Helpers.MaterialIconSourceExtension">
             <summary>
             Creates a Material icon image source with a semantic, explicit color.
             This prevents the icon from changing to white when the device uses dark theme
             while the application control is rendered on a fixed light surface.
             </summary>
+        </member>
+        <member name="T:Money.Helpers.ThemeColor">
+            <summary>
+            Resolve as cores Bling para controles construídos programaticamente.
+            </summary>
+        </member>
+        <member name="T:Money.Helpers.ThemeVisual">
+            <summary>Único ponto para aplicar cores semânticas a controles criados ou ajustados em código.</summary>
         </member>
         <member name="T:Money.Services.AuthService">
             <summary>Provides local account authentication, lockout, and encrypted session persistence.</summary>
@@ -104,13 +118,23 @@
         <member name="M:Money.Services.DatabaseService.AddCategoryAsync(System.String,System.String,System.String,System.String,System.Nullable{System.Int64})">
             <summary>Cria uma categoria simples. A hierarquia legada não é utilizada pela interface.</summary>
         </member>
+        <member name="M:Money.Services.DatabaseService.GetTotalActiveAccountsBalanceAsync">
+            <summary>Returns the current balance of all active accounts owned by the signed-in user.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetMonthlyRealizedTotalsAsync(System.Int32,System.Int32)">
+            <summary>
+            Returns only realized income and paid expenses whose due date belongs to the
+            selected month. This is the single source for the three values in MainPage's hero card.
+            SQL and reader-level fallbacks keep an empty period safely represented by zeroes.
+            </summary>
+        </member>
         <member name="M:Money.Services.DatabaseService.GetDashboardAsync(System.Nullable{System.Int32},System.Nullable{System.Int32})">
             <summary>Loads consolidated dashboard metrics for the current month.</summary>
         </member>
         <member name="M:Money.Services.DatabaseService.AddTransactionAsync(Money.Models.TransactionDraft)">
             <summary>Adds a transaction and updates its funding source atomically.</summary>
         </member>
-        <member name="M:Money.Services.DatabaseService.SaveInstallmentTransactionAsync(Money.Models.TransactionDraft,System.Int32,System.DateTime)">
+        <member name="M:Money.Services.DatabaseService.SaveInstallmentTransactionAsync(Money.Models.TransactionDraft,System.Int32,System.DateTime,System.Collections.Generic.IReadOnlyList{Money.Models.InstallmentPreview})">
             <summary>
             Saves a grouping transaction and all installments atomically. The parent is
             an audit/grouping row; balances and dashboard totals use the child rows.
@@ -146,6 +170,12 @@
         <member name="M:Money.Services.DatabaseService.AddTransferAsync(System.Int64,System.Int64,System.Decimal,System.DateTime,System.String,System.String)">
             <summary>Registra uma transferência entre duas contas e atualiza saldos atomicamente.</summary>
         </member>
+        <member name="M:Money.Services.DatabaseService.UpdateTransferAsync(System.Int64,System.Int64,System.Int64,System.Decimal,System.DateTime,System.String,System.String)">
+            <summary>Altera uma transferência revertendo o impacto anterior e aplicando o novo, atomicamente.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.DeleteTransferAsync(System.Int64)">
+            <summary>Exclui uma transferência e estorna os dois saldos na mesma transação de banco.</summary>
+        </member>
         <member name="M:Money.Services.DatabaseService.GenerateCardInvoicesAsync(System.Int32,System.Int32)">
             <summary>Gera ou recalcula as faturas mensais de todos os cartões ativos.</summary>
         </member>
@@ -161,10 +191,26 @@
         <member name="M:Money.Services.DatabaseService.ImportTransactionsAsync(System.Collections.Generic.IEnumerable{Money.Models.TransactionDraft},System.String,System.String)">
             <summary>Importa rascunhos sequencialmente e registra o resultado da importação.</summary>
         </member>
-        <member name="T:Money.ThemeColor">
+        <member name="T:Money.Services.FinancialForecastService">
+            <summary>Centraliza realizado, comprometido e projeção acumulada sem alterar saldos reais.</summary>
+        </member>
+        <member name="M:Money.Services.FinancialForecastService.#ctor(Money.Services.DatabaseService)">
+            <summary>Centraliza realizado, comprometido e projeção acumulada sem alterar saldos reais.</summary>
+        </member>
+        <member name="M:Money.Views.Dashboard.MainPage.ApplyThemeMetrics">
             <summary>
-            Resolve as cores Bling para controles construídos programaticamente.
+            Mantém as métricas específicas do tema claro em um único ponto e restaura
+            explicitamente as medidas originais quando o tema escuro é ativado.
             </summary>
+        </member>
+        <member name="M:Money.Views.Transactions.AccountsPayablePage.AppendNextPage">
+            <summary>
+            Materializa os cartões em lotes. A consulta continua completa para preservar os
+            totais, enquanto a árvore visual cria apenas o que está próximo da viewport.
+            </summary>
+        </member>
+        <member name="M:Money.Views.Transactions.AccountsPayablePage.UpdateSummaryCards(System.Collections.Generic.IEnumerable{Money.Models.ContaPagar})">
+            <summary>Atualiza o resumo usando exclusivamente os itens exibidos pela lista.</summary>
         </member>
         <member name="T:Money.Resource">
             <summary>

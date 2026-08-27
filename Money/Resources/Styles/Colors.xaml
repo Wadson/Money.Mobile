@@ -8,13 +8,29 @@
     <Color x:Key="BlingPrimary">#00A859</Color>
     <Color x:Key="BlingPrimaryHover">#008542</Color>
 
-    <!-- TEMA CLARO (LIGHT) - SEM CINZA -->
+    <!-- COR DE ALERTA (VERMELHO) -->
+    <Color x:Key="BlingDanger">#DC2626</Color>
+    <Color x:Key="BlingWarning">#F59E0B</Color>
+    <Color x:Key="BlingDangerSoft">#18DC2626</Color>
+    <Color x:Key="IncomeProgressFill">#10B981</Color>
+    <Color x:Key="ExpenseProgressFill">#EF4444</Color>
+    <Color x:Key="CategoryProgressFill">#00A859</Color>
+
+    <!-- TEMA CLARO (LIGHT) -->
     <Color x:Key="BlingHeaderDarkLight">#0B281E</Color>
     <Color x:Key="BlingBackgroundLight">#FFFFFF</Color>
     <Color x:Key="BlingCardLight">#FFFFFF</Color>
     <Color x:Key="BlingTextDarkLight">#1E293B</Color>
     <Color x:Key="BlingTextMutedLight">#1E293B</Color>
     <Color x:Key="BlingBorderLight">#00A859</Color>
+    <Color x:Key="IncomeProgressTrackLight">#E6F4EA</Color>
+    <Color x:Key="ExpenseProgressTrackLight">#FCE8E6</Color>
+    <Color x:Key="CategoryProgressTrackLight">#E5E7EB</Color>
+
+    <!-- COR DE ALERTA APENAS NO TEMA CLARO -->
+    <Color x:Key="BlingDangerLight">#DC2626</Color>
+    <!-- COR DE ALERTA NO TEMA ESCURO (MANTÉM BRANCO) -->
+    <Color x:Key="BlingDangerDark">#FFFFFF</Color>
 
     <!-- TEMA ESCURO (DARK) -->
     <Color x:Key="BlingHeaderDarkDark">#061711</Color>
@@ -23,10 +39,23 @@
     <Color x:Key="BlingTextDarkDark">#FFFFFF</Color>
     <Color x:Key="BlingTextMutedDark">#FFFFFF</Color>
     <Color x:Key="BlingBorderDark">#00A859</Color>
+    <Color x:Key="IncomeProgressTrackDark">#1E3A29</Color>
+    <Color x:Key="ExpenseProgressTrackDark">#3A1E1E</Color>
+    <Color x:Key="CategoryProgressTrackDark">#374151</Color>
     <Color x:Key="BlingTextLight">#FFFFFF</Color>
+
+    <!-- CORES SEMÂNTICAS: os componentes escolhem a função, não uma cor isolada. -->
+    <Color x:Key="StatusPositiveBackgroundLight">#ECFDF3</Color>
+    <Color x:Key="StatusPositiveBackgroundDark">#123524</Color>
+    <Color x:Key="StatusCriticalBackgroundLight">#FEF2F2</Color>
+    <Color x:Key="StatusCriticalBackgroundDark">#3B1717</Color>
+    <Color x:Key="StatusWarningBackgroundLight">#FFF7E6</Color>
+    <Color x:Key="StatusWarningBackgroundDark">#3A2A12</Color>
 
     <!-- BRUSHES GLOBAIS -->
     <SolidColorBrush x:Key="BlingPrimaryBrush" Color="{StaticResource BlingPrimary}" />
+    <SolidColorBrush x:Key="BlingDangerBrush" Color="{StaticResource BlingDanger}" />
+
     <SolidColorBrush x:Key="BlingHeaderBrush"
                      Color="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" />
     <SolidColorBrush x:Key="BlingBackgroundBrush"

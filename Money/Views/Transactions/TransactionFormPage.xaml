@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             xmlns:controls="clr-namespace:Money.Controls"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="Money.Views.Transactions.TransactionFormPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+             Title="Novo lançamento"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Border Grid.Row="0" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="8,4">
+            <Grid ColumnDefinitions="Auto,*" VerticalOptions="Center">
+
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" 
+                             BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" 
+                             Padding="10" CornerRadius="12" Aspect="AspectFit" Clicked="OnCancelClicked"/>
+
+                <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="6">
+                        <mi:MauiIcon x:Name="HeaderIcon" Icon="{mi:Material Icon=Add}" IconSize="24" IconColor="{StaticResource BlingTextLight}" WidthRequest="28" HeightRequest="28"/>
+                        <Label x:Name="PageTitleLabel" Text="Novo lançamento" TextColor="{StaticResource BlingTextLight}" FontSize="18" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                    <Label x:Name="PageSubtitleLabel" Text="Registre sua movimentação financeira" TextColor="{StaticResource BlingTextLight}" FontSize="11" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+            </Grid>
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <ScrollView Grid.Row="1" Padding="8,10,8,80">
+            <VerticalStackLayout Spacing="12" MaximumWidthRequest="900" HorizontalOptions="Fill">
+
+                <!-- Card: Tipo e Valores -->
+                <Border Style="{StaticResource ContentCard}" Padding="12" StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+
+                        <!-- Seletor de Tipo -->
+                        <VerticalStackLayout Spacing="6" IsVisible="False">
+                            <Label Text="TIPO DO LANÇAMENTO" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                                <Button x:Name="TypeExpense" Text="Despesa"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                        BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1" CornerRadius="10"
+                                        HeightRequest="36" Padding="8,2" FontSize="14" FontAttributes="Bold" Clicked="OnTypeExpenseClicked"/>
+
+                                <Button x:Name="TypeIncome" Grid.Column="1" Text="Receita"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                        BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1" CornerRadius="10"
+                                        HeightRequest="36" Padding="8,2" FontSize="14" FontAttributes="Bold" Clicked="OnTypeIncomeClicked"/>
+
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <!-- Descrição -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Descrição" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Border x:Name="DescriptionBorder" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                    StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                    Padding="16,0" HeightRequest="48">
+                                <Entry x:Name="DescriptionEntry" Placeholder="Ex: Supermercado, Salário, etc."
+                                       FontSize="14" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" HorizontalTextAlignment="Start" VerticalOptions="Center"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Valor e Data -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Valor" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                                <Border x:Name="AmountBorder" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                        StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                        Padding="16,0" HeightRequest="48">
+                                    <Entry x:Name="AmountEntry" Placeholder="R$ 0,00" Keyboard="Numeric"
+                                           TextChanged="OnInstallmentInputChanged" FontSize="14" 
+                                           BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
+                                           PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" HorizontalTextAlignment="Start" VerticalOptions="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="Data" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                                <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                        StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                        Padding="16,0" HeightRequest="48">
+                                    <DatePicker x:Name="DatePicker" Format="dd/MM/yyyy"
+                                                FontSize="14" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Classificação -->
+                <Border Style="{StaticResource ContentCard}" Padding="12" StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+
+                        <!-- Categoria -->
+                        <VerticalStackLayout x:Name="CategoryPanel" Spacing="4">
+                            <Label Text="Categoria" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <controls:LeftAlignedFieldButton x:Name="CategorySelectionButton" Text="Selecione uma categoria" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=LightFieldIcon, IconSize=20}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    BorderWidth="1" CornerRadius="10" HeightRequest="48"
+                                    Clicked="OnSelectCategoryClicked"/>
+                            <Picker x:Name="CategoryPicker" IsVisible="False" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout x:Name="SupplierPanel" Spacing="4">
+                            <Label Text="Fornecedor (opcional)" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" StrokeShape="RoundRectangle 8" Padding="8,0">
+                                <controls:LeftAlignedFieldButton x:Name="SupplierSelectionButton" Text="Nenhum fornecedor" Style="{StaticResource LeftAlignedFieldButton}"
+                                        ImageSource="{icons:MaterialIconSource Icon=Storefront, ColorResource=LightFieldIcon, IconSize=20}"
+                                        HeightRequest="48" BackgroundColor="Transparent"
+                                        TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                        BorderWidth="0" HorizontalOptions="Fill"
+                                        Clicked="OnSelectSupplierClicked"/>
+                            </Border>
+                            <Picker x:Name="SupplierPicker" IsVisible="False"/>
+                        </VerticalStackLayout>
+
+                        <!-- Origem/Destino -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Origem / Destino" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <controls:LeftAlignedFieldButton x:Name="SourceTypeSelectionButton" Text="Selecione conta ou cartão" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=SwapHoriz, ColorResource=LightFieldIcon, IconSize=20}" ContentLayout="Left,12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1" FontSize="14"
+                                    Clicked="OnSelectSourceTypeClicked"/>
+                            <Picker x:Name="SourceTypePicker" IsVisible="False" SelectedIndexChanged="OnSourceTypeChanged"/>
+                        </VerticalStackLayout>
+
+                        <!-- Conta -->
+                        <VerticalStackLayout x:Name="AccountPanel" IsVisible="False" Spacing="4">
+                            <Label Text="Selecione a conta" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <controls:LeftAlignedFieldButton x:Name="AccountSelectionButton" Text="Selecione a conta" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=LightFieldIcon, IconSize=20}" ContentLayout="Left,12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    BorderWidth="1" CornerRadius="10" HeightRequest="48"
+                                    Clicked="OnSelectAccountClicked"/>
+                            <Picker x:Name="AccountPicker" IsVisible="False" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Cartão -->
+                        <VerticalStackLayout x:Name="CardPanel" IsVisible="False" Spacing="4">
+                            <Label Text="Selecione o cartão" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <controls:LeftAlignedFieldButton x:Name="CardSelectionButton" Text="Selecione o cartão" Style="{StaticResource LeftAlignedFieldButton}"
+                                    ImageSource="{icons:MaterialIconSource Icon=CreditCard, ColorResource=LightFieldIcon, IconSize=20}" ContentLayout="Left,12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1" FontSize="14"
+                                    Clicked="OnSelectCardClicked"/>
+                            <Picker x:Name="CardPicker" IsVisible="False" SelectedIndexChanged="OnCardChanged"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Parcelamento -->
+                <Border x:Name="InstallmentCard" Style="{StaticResource ContentCard}" Padding="12" StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="1">
+                                <Label x:Name="ScheduleTitleLabel" Text="↻ CONFIGURAÇÃO DE PARCELAMENTO" TextColor="{StaticResource BlingPrimary}" FontSize="15" FontAttributes="Bold"/>
+                                <Label x:Name="ScheduleHintLabel" Text="Divida a despesa em até 36 parcelas" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                            </VerticalStackLayout>
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                <Label x:Name="InstallmentStateLabel" Text="Desligado" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="3,0">
+                                    <Switch x:Name="InstallmentSwitch" OnColor="{StaticResource BlingPrimary}" ThumbColor="{StaticResource BlingPrimary}" Toggled="OnInstallmentToggled"/>
+                                </Border>
+                            </HorizontalStackLayout>
+                        </Grid></Border>
+
+                        <VerticalStackLayout x:Name="InstallmentPanel" IsVisible="False" Spacing="12">
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label x:Name="ScheduleCountCaption" Text="Número de parcelas" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                                    <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                            StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                            Padding="16,0" HeightRequest="48">
+                                        <Grid ColumnDefinitions="*,Auto" BackgroundColor="Transparent">
+                                            <Label x:Name="InstallmentCountLabel" Text="2 parcelas" Padding="12,0"
+                                                   TextColor="{StaticResource BlingPrimary}" VerticalTextAlignment="Center"/>
+                                            <Stepper x:Name="InstallmentStepper" Grid.Column="1" Minimum="2" Maximum="36"
+                                                     Increment="1" Value="2" ValueChanged="OnInstallmentInputChanged" VerticalOptions="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Data da 1ª parcela" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                                    <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                            StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                            Padding="16,0" HeightRequest="48">
+                                        <DatePicker x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"
+                                                    DateSelected="OnInstallmentInputChanged" 
+                                                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <Label x:Name="ScheduleSummaryLabel" Text="RESUMO DAS PARCELAS" Style="{StaticResource CardCaption}"/>
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" Padding="10"
+                                    StrokeShape="RoundRectangle 10">
+                                <VerticalStackLayout x:Name="InstallmentsContainer" Spacing="0"/>
+                            </Border>
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Total" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontAttributes="Bold"/>
+                                <Label x:Name="InstallmentTotalLabel" Grid.Column="1" Text="R$ 0,00"
+                                       TextColor="{StaticResource BlingPrimary}" FontAttributes="Bold"/>
+                            </Grid>
+                            <Label x:Name="CardScheduleHint" IsVisible="False" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Pagamento e Recorrência -->
+                <Border x:Name="ScheduleCard" Style="{StaticResource ContentCard}" Padding="12" StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Pagamento e recorrência" TextColor="{StaticResource BlingPrimary}" FontSize="15" FontAttributes="Bold"/>
+
+                        <VerticalStackLayout x:Name="ExpenseStatusPanel" Spacing="8">
+                            <Label Text="Data de vencimento" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                    StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                    Padding="16,0" HeightRequest="48">
+                                <DatePicker x:Name="DueDatePicker" Format="dd/MM/yyyy" 
+                                            BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
+                            </Border>
+
+                            <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Já foi pago" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                    <Label x:Name="PaidStateLabel" Text="Desligado" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="3,0">
+                                        <Switch x:Name="PaidSwitch" OnColor="{StaticResource BlingPrimary}" ThumbColor="{StaticResource BlingPrimary}" Toggled="OnPaidToggled"/>
+                                    </Border>
+                                </HorizontalStackLayout>
+                            </Grid></Border>
+
+                            <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                    StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                    Padding="16,0" HeightRequest="48"
+                                    IsVisible="{Binding Source={x:Reference PaymentDatePicker}, Path=IsVisible}">
+                                <DatePicker x:Name="PaymentDatePicker" IsVisible="False" Format="dd/MM/yyyy" 
+                                            BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <Border Style="{StaticResource SelectionControlContainer}"><Grid x:Name="RecurrenceRow" ColumnDefinitions="*,Auto">
+                            <Label Text="Lançamento recorrente" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                <Label x:Name="RecurringStateLabel" Text="Desligado" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="3,0">
+                                    <Switch x:Name="RecurringSwitch" OnColor="{StaticResource BlingPrimary}" ThumbColor="{StaticResource BlingPrimary}" Toggled="OnRecurringToggled"/>
+                                </Border>
+                            </HorizontalStackLayout>
+                        </Grid></Border>
+
+                        <Border x:Name="FrequencySelectionBorder" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                Padding="0" HeightRequest="48" IsVisible="False">
+                            <Button x:Name="FrequencySelectionButton" Text="Mensal"
+                                    ImageSource="{icons:MaterialIconSource Icon=Refresh, ColorResource=LightFieldIcon, IconSize=20}" ContentLayout="Left,12"
+                                    BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}"
+                                    BorderWidth="0" FontSize="14" HorizontalOptions="Fill"
+                                    Clicked="OnSelectFrequencyClicked"/>
+                        </Border>
+                        <Picker x:Name="FrequencyPicker" IsVisible="False"/>
+                        <VerticalStackLayout x:Name="RecurrencePlanPanel" IsVisible="False" Spacing="8">
+                            <Label Text="Quantidade de recorrências" Style="{StaticResource CardCaption}"/>
+                            <Stepper x:Name="RecurrenceStepper" Minimum="1" Maximum="36" Value="12" ValueChanged="OnRecurrencePlanChanged"/>
+                            <Label x:Name="RecurrenceCountLabel" Text="12 lançamentos" TextColor="{StaticResource BlingPrimary}" FontAttributes="Bold"/>
+                            <Label Text="Vencimentos — toque em uma data para alterar" Style="{StaticResource CardCaption}"/>
+                            <VerticalStackLayout x:Name="RecurrenceDatesContainer" Spacing="5"/>
+                        </VerticalStackLayout>
+
+                        <Label Text="Tags" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                        <FlexLayout x:Name="TagsContainer" Wrap="Wrap" Direction="Row"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card: Observações -->
+                <Border Style="{StaticResource ContentCard}" Padding="12" StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="0">
+                                <Label Text="Observações" TextColor="{StaticResource BlingPrimary}" FontSize="15" FontAttributes="Bold"/>
+                                <Label Text="Adicione informações adicionais" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                            </VerticalStackLayout>
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                <Label x:Name="DetailsStateLabel" Text="Desligado" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="3,0">
+                                    <Switch x:Name="DetailsSwitch" OnColor="{StaticResource BlingPrimary}" ThumbColor="{StaticResource BlingPrimary}" Toggled="OnDetailsToggled"/>
+                                </Border>
+                            </HorizontalStackLayout>
+                        </Grid></Border>
+
+                        <VerticalStackLayout x:Name="DetailsPanel" IsVisible="False">
+                            <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                                    StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                    Padding="12,8" HeightRequest="100">
+                                <Editor x:Name="NotesEditor" Placeholder="Digite suas observações..."
+                                        BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
+                                        PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" AutoSize="TextChanges"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Mensagem de Erro -->
+                <Label x:Name="ErrorLabel" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="12" IsVisible="False" Padding="8,4"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Rodapé Fixado -->
+        <Border Grid.Row="1" VerticalOptions="End"
+                BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
+                Padding="16,12" StrokeShape="RoundRectangle 0" Shadow="{StaticResource CardShadow}">
+            <Grid ColumnDefinitions="*,1.5*" ColumnSpacing="10" MaximumWidthRequest="900" HorizontalOptions="Fill">
+                <Button Text="Cancelar" ImageSource="{icons:MaterialIconSource Icon=Close, ColorResource=BlingTextLight, IconSize=20}"
+                        BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}"
+                        CornerRadius="10" HeightRequest="48" FontSize="14" Clicked="OnCancelClicked"/>
+                <Button Grid.Column="1" Text="Salvar lançamento" ImageSource="{icons:MaterialIconSource Icon=Save, ColorResource=BlingTextLight, IconSize=20}"
+                        BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}"
+                        CornerRadius="10" HeightRequest="48" FontAttributes="Bold" FontSize="14" Clicked="OnSaveClicked"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</ContentPage>
+

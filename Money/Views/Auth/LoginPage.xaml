@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             x:Class="Money.Views.Auth.LoginPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}">
+
+    <Grid x:Name="LoginRoot"
+          ColumnDefinitions="1.15*,*"
+          Padding="70">
+
+        <!-- ========================================================= -->
+        <!-- ESTADOS RESPONSIVOS                                       -->
+        <!-- ========================================================= -->
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+
+                <VisualState x:Name="Phone">
+
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="True"/>
+                    </VisualState.StateTriggers>
+
+                    <VisualState.Setters>
+
+                        <Setter TargetName="BrandPanel"
+                                Property="IsVisible"
+                                Value="False"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Grid.Column"
+                                Value="0"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Grid.ColumnSpan"
+                                Value="2"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Margin"
+                                Value="8"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Padding"
+                                Value="18"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="MaximumWidthRequest"
+                                Value="640"/>
+
+                        <Setter TargetName="LoginRoot"
+                                Property="Padding"
+                                Value="0"/>
+
+                    </VisualState.Setters>
+
+                </VisualState>
+
+
+                <VisualState x:Name="Wide">
+
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800"/>
+                    </VisualState.StateTriggers>
+
+                    <VisualState.Setters>
+
+                        <Setter TargetName="BrandPanel"
+                                Property="IsVisible"
+                                Value="True"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Grid.Column"
+                                Value="1"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Grid.ColumnSpan"
+                                Value="1"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Margin"
+                                Value="0"/>
+
+                        <Setter TargetName="LoginCard"
+                                Property="Padding"
+                                Value="34"/>
+
+                        <Setter TargetName="LoginRoot"
+                                Property="Padding"
+                                Value="60"/>
+
+                    </VisualState.Setters>
+
+                </VisualState>
+
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+
+        <!-- ========================================================= -->
+        <!-- PAINEL DESKTOP                                            -->
+        <!-- ========================================================= -->
+
+        <VerticalStackLayout x:Name="BrandPanel"
+                             VerticalOptions="Center"
+                             Spacing="16"
+                             Margin="20">
+
+            <HorizontalStackLayout Spacing="10">
+
+                <Border WidthRequest="54"
+                        HeightRequest="54"
+                        BackgroundColor="{StaticResource BlingPrimary}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="7">
+
+                    <Image
+                        Source="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=BlingTextLight, IconSize=38}"
+                        WidthRequest="38"
+                        HeightRequest="38"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"/>
+
+                </Border>
+
+                <Label Text="MONEY"
+                       TextColor="{StaticResource BlingPrimary}"
+                       FontSize="30"
+                       FontAttributes="Bold"
+                       VerticalTextAlignment="Center"/>
+
+            </HorizontalStackLayout>
+
+
+            <Label Text="Clareza para decidir.&#10;Controle para realizar."
+                   TextColor="{StaticResource BlingPrimary}"
+                   FontSize="40"
+                   FontAttributes="Bold"
+                   LineHeight="1.05"/>
+
+
+            <Label Text="Seu patrimônio, orçamento e rotina financeira protegidos em um banco local."
+                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                   FontSize="16"
+                   WidthRequest="470"
+                   HorizontalOptions="Start"/>
+
+
+            <HorizontalStackLayout Spacing="20"
+                                   Margin="0,14,0,0">
+
+                <HorizontalStackLayout Spacing="5">
+
+                    <Image
+                        Source="{icons:MaterialIconSource Icon=CheckCircle, ColorResource=BlingPrimary, IconSize=18}"
+                        WidthRequest="18"
+                        HeightRequest="18"/>
+
+                    <Label Text="Dados locais"
+                           TextColor="{StaticResource BlingPrimary}"
+                           FontSize="14"/>
+
+                </HorizontalStackLayout>
+
+
+                <HorizontalStackLayout Spacing="5">
+
+                    <Image
+                        Source="{icons:MaterialIconSource Icon=Lock, ColorResource=BlingPrimary, IconSize=18}"
+                        WidthRequest="18"
+                        HeightRequest="18"/>
+
+                    <Label Text="Senha protegida"
+                           TextColor="{StaticResource BlingPrimary}"
+                           FontSize="14"/>
+
+                </HorizontalStackLayout>
+
+
+                <HorizontalStackLayout Spacing="5">
+
+                    <Image
+                        Source="{icons:MaterialIconSource Icon=Block, ColorResource=BlingPrimary, IconSize=18}"
+                        WidthRequest="18"
+                        HeightRequest="18"/>
+
+                    <Label Text="Sem anúncios"
+                           TextColor="{StaticResource BlingPrimary}"
+                           FontSize="14"/>
+
+                </HorizontalStackLayout>
+
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+
+
+        <!-- ========================================================= -->
+        <!-- CARD LOGIN                                                -->
+        <!-- ========================================================= -->
+
+        <Border x:Name="LoginCard"
+                Grid.Column="1"
+                BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 16"
+                Padding="34"
+                MaximumWidthRequest="600"
+                VerticalOptions="Center">
+
+            <ScrollView VerticalScrollBarVisibility="Never">
+
+                <VerticalStackLayout Spacing="9">
+
+
+                    <!-- ================================================= -->
+                    <!-- LOGO - CARTEIRA                                    -->
+                    <!-- ================================================= -->
+
+                    <Border WidthRequest="84"
+                            HeightRequest="84"
+                            Padding="6"
+                            HorizontalOptions="Center"
+                            BackgroundColor="{StaticResource BlingPrimary}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 22">
+
+                        <Image
+                            Source="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=BlingTextLight, IconSize=52}"
+                            WidthRequest="52"
+                            HeightRequest="52"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"/>
+
+                    </Border>
+
+
+                    <!-- ================================================= -->
+                    <!-- TÍTULO                                             -->
+                    <!-- ================================================= -->
+
+                    <Label Text="Bem-vindo ao Money"
+                           TextColor="{StaticResource BlingPrimary}"
+                           FontSize="26"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,3,0,0"/>
+
+
+                    <Label Text="Entre para acessar suas finanças"
+                           TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                           FontSize="15"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,0,0,6"/>
+
+
+                    <!-- ================================================= -->
+                    <!-- USUÁRIO                                            -->
+                    <!-- ================================================= -->
+
+                    <Label Text="Usuário"
+                           Style="{StaticResource CardCaption}"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           Margin="0,0,0,-2"/>
+
+
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                            Stroke="{StaticResource BlingPrimary}"
+                            StrokeThickness="1.3"
+                            StrokeShape="RoundRectangle 11"
+                            Padding="10,0">
+
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="8"
+                              HeightRequest="52">
+
+
+                            <!-- ÍCONE USUÁRIO -->
+
+                            <Image
+                                Source="{icons:MaterialIconSource Icon=Person, ColorResource=BlingPrimary, IconSize=22}"
+                                WidthRequest="22"
+                                HeightRequest="22"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"/>
+
+
+                            <Entry x:Name="UserEntry"
+                                   Grid.Column="1"
+                                   Placeholder="Ex.: Wadson"
+                                   Keyboard="Text"
+                                   AutomationId="LoginUser"
+                                   BackgroundColor="Transparent"
+                                   FontSize="15"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"
+                                   VerticalOptions="Center"/>
+
+                        </Grid>
+
+                    </Border>
+
+
+                    <!-- ================================================= -->
+                    <!-- SENHA                                              -->
+                    <!-- ================================================= -->
+
+                    <Label Text="Senha"
+                           Style="{StaticResource CardCaption}"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           Margin="0,2,0,-2"/>
+
+
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                            Stroke="{StaticResource BlingPrimary}"
+                            StrokeThickness="1.3"
+                            StrokeShape="RoundRectangle 11"
+                            Padding="10,0,2,0">
+
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="7"
+                              HeightRequest="52">
+
+
+                            <!-- ÍCONE CADEADO -->
+
+                            <Image
+                                Source="{icons:MaterialIconSource Icon=Lock, ColorResource=BlingPrimary, IconSize=21}"
+                                WidthRequest="21"
+                                HeightRequest="21"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"/>
+
+
+                            <!-- CAMPO SENHA -->
+
+                            <Entry x:Name="PasswordEntry"
+                                   Grid.Column="1"
+                                   Placeholder="Sua senha"
+                                   IsPassword="True"
+                                   BackgroundColor="Transparent"
+                                   FontSize="15"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"
+                                   VerticalOptions="Center"/>
+
+
+                            <!-- OLHO -->
+
+                            <Button x:Name="PasswordVisibilityButton"
+                                    Grid.Column="2"
+                                    Text="👁"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource BlingPrimary}"
+                                    BorderWidth="0"
+                                    Padding="2,0"
+                                    HeightRequest="44"
+                                    WidthRequest="44"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    SemanticProperties.Description="Mostrar senha"
+                                    Clicked="OnTogglePasswordClicked"/>
+
+                        </Grid>
+
+                    </Border>
+
+
+                    <!-- ================================================= -->
+                    <!-- LEMBRAR / RECUPERAR                               -->
+                    <!-- ================================================= -->
+
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="5"
+                          Margin="0,2,0,0"
+                          VerticalOptions="Center">
+
+                        <CheckBox x:Name="RememberCheck"
+                                  Grid.Column="0"
+                                  Color="{StaticResource BlingPrimary}"
+                                  VerticalOptions="Center"
+                                  WidthRequest="25"
+                                  HeightRequest="25"/>
+
+
+                        <Label Grid.Column="1"
+                               Text="Lembrar-me"
+                               FontSize="13"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+
+
+                        <Button Grid.Column="2"
+                                Text="Esqueceu a senha?"
+                                FontSize="12"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BlingPrimary}"
+                                Padding="2,2"
+                                BorderWidth="0"
+                                Clicked="OnForgotClicked"
+                                ImageSource="{icons:MaterialIconSource Icon=LockReset, ColorResource=BlingPrimary, IconSize=18}"/>
+
+                    </Grid>
+
+
+                    <!-- ================================================= -->
+                    <!-- ERRO                                               -->
+                    <!-- ================================================= -->
+
+                    <Label x:Name="ErrorLabel"
+                           TextColor="{StaticResource BlingDanger}"
+                           FontSize="12"
+                           IsVisible="False"
+                           Margin="2,0"/>
+
+
+                    <!-- ================================================= -->
+                    <!-- ENTRAR                                             -->
+                    <!-- ================================================= -->
+
+                    <Button Text="Entrar"
+                            Style="{StaticResource PrimaryButton}"
+                            HeightRequest="52"
+                            CornerRadius="11"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            Margin="0,2,0,1"
+                            Clicked="OnLoginClicked"
+                            ImageSource="{icons:MaterialIconSource Icon=AccountCircle, ColorResource=BlingTextLight, IconSize=21}"/>
+
+
+                    <!-- ================================================= -->
+                    <!-- DIVISOR                                             -->
+                    <!-- ================================================= -->
+
+                    <Grid ColumnDefinitions="*,Auto,*"
+                          ColumnSpacing="10"
+                          Margin="0,1,0,1">
+
+                        <BoxView Grid.Column="0"
+                                 HeightRequest="1"
+                                 BackgroundColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                 VerticalOptions="Center"/>
+
+                        <Label Grid.Column="1"
+                               Text="ou"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"
+                               VerticalTextAlignment="Center"/>
+
+                        <BoxView Grid.Column="2"
+                                 HeightRequest="1"
+                                 BackgroundColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                 VerticalOptions="Center"/>
+
+                    </Grid>
+
+
+                    <!-- ================================================= -->
+                    <!-- CRIAR / SAIR                                       -->
+                    <!-- ================================================= -->
+
+                    <Grid ColumnDefinitions="*,*"
+                          ColumnSpacing="8">
+
+                        <Button Text="Criar uma conta"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BlingPrimary}"
+                                BorderColor="{StaticResource BlingPrimary}"
+                                BorderWidth="1.3"
+                                CornerRadius="11"
+                                HeightRequest="48"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                Clicked="OnRegisterClicked"
+                                ImageSource="{icons:MaterialIconSource Icon=PersonAdd, ColorResource=BlingPrimary, IconSize=19}"/>
+
+
+                        <Button Grid.Column="1"
+                                Text="Cancelar / Sair"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource BlingDanger}"
+                                BorderColor="{StaticResource BlingDanger}"
+                                BorderWidth="1.3"
+                                CornerRadius="11"
+                                HeightRequest="48"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                Clicked="OnCancelClicked"
+                                ImageSource="{icons:MaterialIconSource Icon=Logout, ColorResource=BlingDanger, IconSize=19}"/>
+
+                    </Grid>
+
+
+                    <!-- ================================================= -->
+                    <!-- DEMONSTRAÇÃO                                      -->
+                    <!-- ================================================= -->
+
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 11"
+                            Padding="7"
+                            Margin="0,2,0,0">
+
+                        <HorizontalStackLayout HorizontalOptions="Center"
+                                               Spacing="6">
+
+                            <Image
+                                Source="{icons:MaterialIconSource Icon=VerifiedUser, ColorResource=BlingPrimary, IconSize=17}"
+                                WidthRequest="17"
+                                HeightRequest="17"
+                                VerticalOptions="Center"/>
+
+                            <Label Text="Demonstração: Visitante"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                   FontSize="11"
+                                   VerticalTextAlignment="Center"/>
+
+                            <Label Text="•"
+                                   TextColor="{StaticResource BlingPrimary}"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   VerticalTextAlignment="Center"/>
+
+                            <Label Text="Money123"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                   FontSize="11"
+                                   VerticalTextAlignment="Center"/>
+
+                        </HorizontalStackLayout>
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+            </ScrollView>
+
+        </Border>
+
+    </Grid>
+
+</ContentPage>

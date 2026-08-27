@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:Money.Helpers" x:Class="Money.Views.Management.SupplierEditPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*">
+        <Grid Padding="16,14" ColumnDefinitions="44,*" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}">
+            <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingTextLight, IconSize=22}" BackgroundColor="Transparent" WidthRequest="40" HeightRequest="40" Clicked="OnCancelClicked"/>
+            <Label x:Name="TitleLabel" Grid.Column="1" Text="Novo fornecedor" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+        </Grid>
+        <ScrollView Grid.Row="1"><VerticalStackLayout Padding="16,20" Spacing="14">
+            <Border Style="{StaticResource ContentCard}" Padding="16"><VerticalStackLayout Spacing="14">
+                <Label Text="Dados do fornecedor" Style="{StaticResource SectionTitle}"/>
+                <Label Text="NOME DO FORNECEDOR" Style="{StaticResource CardCaption}"/>
+                <Border Style="{StaticResource InputContainer}"><Entry x:Name="NameEntry" Placeholder="Informe o nome" MaxLength="120" BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                    PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="1"><Label Text="Fornecedor ativo" FontAttributes="Bold"/><Label Text="Disponível nos lançamentos de despesas" FontSize="10"/></VerticalStackLayout>
+                    <Switch x:Name="ActiveSwitch" Grid.Column="1" IsToggled="True" OnColor="{StaticResource BlingPrimary}"/>
+                </Grid></Border>
+                <Label x:Name="ErrorLabel" IsVisible="False" TextColor="{StaticResource BlingPrimary}" FontAttributes="Bold"/>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10"><Button Text="Cancelar" Style="{StaticResource TextButton}" Clicked="OnCancelClicked"/>
+                    <Button Grid.Column="1" Text="Salvar" Style="{StaticResource PrimaryButton}" Clicked="OnSaveClicked"/></Grid>
+            </VerticalStackLayout></Border>
+        </VerticalStackLayout></ScrollView>
+    </Grid>
+</ContentPage>

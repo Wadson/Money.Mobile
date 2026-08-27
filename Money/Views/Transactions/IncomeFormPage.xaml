@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ xmlns:icons="clr-namespace:Money.Helpers"
+ x:Class="Money.Views.Transactions.IncomeFormPage" Shell.NavBarIsVisible="False"
+ BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}">
+ <Grid RowDefinitions="Auto,*">
+  <Border BackgroundColor="{StaticResource BlingPrimary}" StrokeThickness="0" Padding="16,14">
+   <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12"><ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingTextLight, IconSize=24}" BackgroundColor="Transparent" WidthRequest="44" HeightRequest="44" Padding="10" Clicked="OnCancelClicked" SemanticProperties.Description="Voltar"/>
+    <VerticalStackLayout Grid.Column="1"><Label x:Name="TitleLabel" Text="Novo salário/recebimento" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource BlingTextLight}"/><Label Text="Cadastre entradas recebidas ou previstas" FontSize="11" TextColor="{StaticResource BlingTextLight}"/></VerticalStackLayout>
+   </Grid>
+  </Border>
+  <ScrollView Grid.Row="1"><VerticalStackLayout Padding="16,16,16,40" Spacing="12" MaximumWidthRequest="720" HorizontalOptions="Fill">
+   <Border Style="{StaticResource ContentCard}"><VerticalStackLayout Spacing="10">
+    <Label Text="DESCRIÇÃO" Style="{StaticResource CardCaption}"/><Entry x:Name="DescriptionEntry" Placeholder="Ex.: Salário, freelance, aluguel recebido"/>
+    <Label Text="VALOR" Style="{StaticResource CardCaption}"/><Entry x:Name="AmountEntry" Placeholder="R$ 0,00" Keyboard="Numeric"/>
+    <Label Text="CATEGORIA" Style="{StaticResource CardCaption}"/>
+    <Border Style="{StaticResource SelectionControlContainer}"><Button x:Name="CategorySelectionButton" Text="Selecione a categoria" Style="{StaticResource SelectorFieldButton}" ContentLayout="Left,12" ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=BlingPrimary, IconSize=20}" Clicked="OnSelectCategoryClicked"/></Border>
+    <Picker x:Name="CategoryPicker" IsVisible="False"/>
+    <Label Text="CONTA DE DESTINO" Style="{StaticResource CardCaption}"/>
+    <Border Style="{StaticResource SelectionControlContainer}"><Button x:Name="AccountSelectionButton" Text="Selecione a conta" Style="{StaticResource SelectorFieldButton}" ContentLayout="Left,12" ImageSource="{icons:MaterialIconSource Icon=AccountBalance, ColorResource=BlingPrimary, IconSize=20}" Clicked="OnSelectAccountClicked"/></Border>
+    <Picker x:Name="AccountPicker" IsVisible="False"/>
+    <Label Text="DATA PREVISTA" Style="{StaticResource CardCaption}"/><DatePicker x:Name="ExpectedDatePicker" Format="dd/MM/yyyy"/>
+    <Grid ColumnDefinitions="*,Auto"><VerticalStackLayout><Label Text="RECEBIDA" Style="{StaticResource CardCaption}"/><Label Text="Ative somente quando o dinheiro já entrou" FontSize="11"/></VerticalStackLayout><Switch x:Name="PaidSwitch" Grid.Column="1" Toggled="OnPaidToggled"/></Grid>
+    <VerticalStackLayout x:Name="PaymentDatePanel" IsVisible="False"><Label Text="DATA DE RECEBIMENTO" Style="{StaticResource CardCaption}"/><DatePicker x:Name="PaymentDatePicker" Format="dd/MM/yyyy"/></VerticalStackLayout>
+    <Grid ColumnDefinitions="*,Auto"><Label Text="RECEITA RECORRENTE" Style="{StaticResource CardCaption}" VerticalTextAlignment="Center"/><Switch x:Name="RecurringSwitch" Grid.Column="1" Toggled="OnRecurringToggled"/></Grid>
+    <VerticalStackLayout x:Name="FrequencyPanel" IsVisible="False" Spacing="8">
+     <Label Text="FREQUÊNCIA" Style="{StaticResource CardCaption}"/><Picker x:Name="FrequencyPicker"/>
+     <Label Text="QUANTIDADE DE RECORRÊNCIAS" Style="{StaticResource CardCaption}"/>
+     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+      <Label x:Name="RecurrenceCountLabel" Text="12 recebimentos" VerticalTextAlignment="Center" FontAttributes="Bold"/>
+      <Stepper x:Name="RecurrenceCountStepper" Grid.Column="1" Minimum="1" Maximum="36" Increment="1" Value="12" ValueChanged="OnRecurrenceCountChanged"/>
+     </Grid>
+     <Label Text="Gera de 1 a 36 recebimentos; cada ocorrência mantém o valor integral." FontSize="11"/>
+    </VerticalStackLayout>
+    <Label Text="OBSERVAÇÕES" Style="{StaticResource CardCaption}"/><Editor x:Name="NotesEditor" HeightRequest="80"/>
+    <Label x:Name="ErrorLabel" IsVisible="False" TextColor="{StaticResource BlingDanger}"/>
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="10"><Button Text="Cancelar" Clicked="OnCancelClicked"/><Button x:Name="SaveButton" Grid.Column="1" Text="Salvar recebimento" Style="{StaticResource PrimaryButton}" IsEnabled="False" Clicked="OnSaveClicked"/></Grid>
+   </VerticalStackLayout></Border>
+  </VerticalStackLayout></ScrollView>
+ </Grid>
+</ContentPage>

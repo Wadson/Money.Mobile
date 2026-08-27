@@ -10,7 +10,10 @@ using QContainer = QuestPDF.Infrastructure.IContainer;
 namespace Money.Services;
 
 public sealed record ReportPdfResult(string Path, string FileName, int ItemCount,
-    decimal Income, decimal Expenses, decimal Balance);
+    decimal Income, decimal PaidExpenses, decimal PendingExpenses, decimal Balance)
+{
+    public decimal Expenses => PaidExpenses + PendingExpenses;
+}
 
 public sealed class ReportPdfService(DatabaseService database)
 {
@@ -24,9 +27,10 @@ public sealed class ReportPdfService(DatabaseService database)
         // a abertura do aplicativo, especialmente no Android.
         var items = await database.GetFinancialReportItemsAsync(
             month, year, categoryId, paymentStatus, supplierId, cardId);
-        var income = items.Where(x => x.Type == "receita").Sum(x => x.Amount);
-        var expenses = items.Where(x => x.Type == "despesa").Sum(x => x.Amount);
-        var balance = income - expenses;
+        var income = items.Where(x => x.Type == "receita" && x.Paid).Sum(x => x.Amount);
+        var paidExpenses = items.Where(x => x.Type == "despesa" && x.Paid).Sum(x => x.Amount);
+        var pendingExpenses = items.Where(x => x.Type == "despesa" && !x.Paid).Sum(x => x.Amount);
+        var balance = income - paidExpenses;
         var period = new DateTime(year, month, 1).ToString("MMMM 'de' yyyy", _culture);
         var fileName = $"money-relatorio-{year:D4}-{month:D2}" +
                        (categoryId is null ? "" : $"-{SafeFileName(categoryName)}") +
@@ -43,16 +47,16 @@ public sealed class ReportPdfService(DatabaseService database)
         };
         var filterLabel = BuildFilterLabel(categoryName, supplierName, cardName);
 #if ANDROID
-        await Money.Platforms.Android.AndroidReportPdfRenderer.GenerateAsync(
-            path, items, period, filterLabel, statusLabel, income, expenses, balance);
+        await Money.Platforms.Android.ProfessionalReportPdfRenderer.GenerateAsync(
+            path, items, period, filterLabel, statusLabel, income, paidExpenses, pendingExpenses, balance);
 #else
         QuestPDF.Settings.License = LicenseType.Community;
         await Task.Run(() => CreateDocument(items, period, filterLabel, statusLabel,
-            income, expenses, balance).GeneratePdf(path));
+            income, paidExpenses, pendingExpenses, balance).GeneratePdf(path));
 #endif
         if (!File.Exists(path) || new FileInfo(path).Length == 0)
             throw new IOException("O arquivo PDF não foi criado corretamente.");
-        return new(path, fileName, items.Count, income, expenses, balance);
+        return new(path, fileName, items.Count, income, paidExpenses, pendingExpenses, balance);
     }
 
     private static string BuildFilterLabel(string? categoryName, string? supplierName, string? cardName)
@@ -65,6 +69,7 @@ public sealed class ReportPdfService(DatabaseService database)
 
     public async Task<string> SaveAsync(ReportPdfResult report)
     {
+        ValidateReportFile(report);
 #if WINDOWS
         var picker = new Windows.Storage.Pickers.FolderPicker();
         picker.FileTypeFilter.Add("*");
@@ -85,9 +90,12 @@ public sealed class ReportPdfService(DatabaseService database)
 #endif
     }
 
-    public Task ShareAsync(ReportPdfResult report) => Share.Default.RequestAsync(
-        new ShareFileRequest("Relatório financeiro - Money Pro",
+    public Task ShareAsync(ReportPdfResult report)
+    {
+        ValidateReportFile(report);
+        return Share.Default.RequestAsync(new ShareFileRequest("Relatório financeiro - Money Pro",
             new ShareFile(report.Path, "application/pdf")));
+    }
 
     public async Task<string> SaveAndOpenAsync(ReportPdfResult report)
     {
@@ -101,9 +109,19 @@ public sealed class ReportPdfService(DatabaseService database)
         return destination;
     }
 
+    private static void ValidateReportFile(ReportPdfResult report)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+        if (string.IsNullOrWhiteSpace(report.Path) || !File.Exists(report.Path) ||
+            new FileInfo(report.Path).Length == 0)
+            throw new FileNotFoundException("O arquivo PDF não está mais disponível. Gere o relatório novamente.",
+                report.Path);
+    }
+
 #if !ANDROID
     public IDocument CreateDocument(IReadOnlyList<FinancialReportItem> items, string period,
-        string? categoryName, string statusLabel, decimal income, decimal expenses, decimal balance) =>
+        string? categoryName, string statusLabel, decimal income, decimal paidExpenses,
+        decimal pendingExpenses, decimal balance) =>
         Document.Create(document =>
         {
             document.Page(page =>
@@ -115,7 +133,7 @@ public sealed class ReportPdfService(DatabaseService database)
                 page.Content().PaddingVertical(16).Column(column =>
                 {
                     column.Spacing(14);
-                    column.Item().Element(c => ComposeSummary(c, income, expenses, balance));
+                    column.Item().Element(c => ComposeSummary(c, income, paidExpenses, pendingExpenses, balance));
                     column.Item().Element(c => ComposeTransactions(c, items));
                 });
                 page.Footer().AlignCenter().Text(text =>
@@ -151,13 +169,15 @@ public sealed class ReportPdfService(DatabaseService database)
         });
     }
 
-    private void ComposeSummary(QContainer container, decimal income, decimal expenses, decimal balance)
+    private void ComposeSummary(QContainer container, decimal income, decimal paidExpenses,
+        decimal pendingExpenses, decimal balance)
     {
         container.Row(row =>
         {
             row.Spacing(8);
             row.RelativeItem().Element(c => SummaryCard(c, "RECEITAS", income, BlingPalette.CardBackgroundHex, BlingPalette.PrimaryHex));
-            row.RelativeItem().Element(c => SummaryCard(c, "DESPESAS", expenses, BlingPalette.CardBackgroundHex, BlingPalette.HeaderDarkHex));
+            row.RelativeItem().Element(c => SummaryCard(c, "DESP. PAGAS", paidExpenses, BlingPalette.CardBackgroundHex, BlingPalette.HeaderDarkHex));
+            row.RelativeItem().Element(c => SummaryCard(c, "DESP. PENDENTES", pendingExpenses, BlingPalette.CardBackgroundHex, BlingPalette.HeaderDarkHex));
             row.RelativeItem().Element(c => SummaryCard(c, "SALDO", balance, BlingPalette.CardBackgroundHex, BlingPalette.PrimaryHex));
         });
     }
@@ -196,8 +216,8 @@ public sealed class ReportPdfService(DatabaseService database)
             {
                 HeaderCell(header.Cell()).Text("DATA");
                 HeaderCell(header.Cell()).Text("DESCRIÇÃO");
-                HeaderCell(header.Cell()).Text("ORIGEM");
-                HeaderCell(header.Cell()).Text("TIPO");
+                HeaderCell(header.Cell()).Text("CATEGORIA");
+                HeaderCell(header.Cell()).Text("STATUS");
                 HeaderCell(header.Cell()).AlignRight().Text("VALOR");
             });
 
@@ -212,9 +232,9 @@ public sealed class ReportPdfService(DatabaseService database)
                 {
                     BodyCell(table.Cell()).Text(item.Date.ToString("dd/MM/yyyy"));
                     BodyCell(table.Cell()).Text(item.Description);
-                    BodyCell(table.Cell()).Text(item.Source);
-                    BodyCell(table.Cell()).Text(item.Type == "receita" ? "Receita" : "Despesa")
-                        .FontColor(item.Type == "receita" ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex);
+                    BodyCell(table.Cell()).Text(item.Category);
+                    BodyCell(table.Cell()).Text(item.Paid ? "Realizado" : "Pendente")
+                        .FontColor(item.Paid ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex);
                     BodyCell(table.Cell()).AlignRight().Text(item.Amount.ToString("C2", _culture))
                         .SemiBold().FontColor(item.Type == "receita" ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex);
                 }

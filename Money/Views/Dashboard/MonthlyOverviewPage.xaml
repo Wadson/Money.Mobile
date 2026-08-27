@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="Money.Views.Dashboard.MonthlyOverviewPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" 
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Cabeçalho Principal -->
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
+
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" 
+                             BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                             WidthRequest="44" HeightRequest="44" 
+                             Padding="10" CornerRadius="12" 
+                             Aspect="AspectFit" 
+                             Clicked="OnBackClicked"
+                             VerticalOptions="Center"/>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                    <Label Text="Visão mensal" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"/>
+                    <Label Text="Receitas, contas e faturas" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Conteúdo Rolável -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,16,16,30" Spacing="16">
+
+                <!-- Seletor de Período / Mês -->
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                        Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" 
+                        StrokeThickness="1"
+                        Padding="8"
+                        StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalOptions="Center">
+
+                        <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" 
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                     WidthRequest="44" HeightRequest="44" 
+                                     Padding="10" CornerRadius="12"
+                                     Clicked="OnPreviousMonthClicked"/>
+
+                        <Label x:Name="PeriodLabel" Grid.Column="1" Text="Julho / 2026"
+                               TextColor="{StaticResource BlingPrimary}" FontSize="15" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+
+                        <ImageButton Grid.Column="2" 
+                                     Source="{icons:MaterialIconSource Icon=ArrowForward, ColorResource=BlingText, IconSize=24}" 
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                                     WidthRequest="44" HeightRequest="44" 
+                                     Padding="10" CornerRadius="12"
+                                     Clicked="OnNextMonthClicked"/>
+                    </Grid>
+                </Border>
+
+                <!-- Resumo Financeiro (Receitas, Despesas e Margem) -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+
+                    <!-- Receitas -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                            Stroke="{StaticResource BlingPrimary}" 
+                            StrokeThickness="1"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="RECEITAS / SALÁRIO" TextColor="{StaticResource BlingPrimary}" FontSize="11" FontAttributes="Bold"/>
+                            <Label x:Name="IncomeLabel" Text="R$ 0,00" TextColor="{StaticResource BlingPrimary}" FontSize="20" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Despesas Totais -->
+                    <Border Grid.Column="1" 
+                            BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                            Stroke="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
+                            StrokeThickness="1"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="DESPESAS TOTAIS" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <Label x:Name="ExpensesLabel" Text="R$ 0,00" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="20" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Saldo Restante / Margem -->
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" 
+                            BackgroundColor="{StaticResource BlingPrimary}"
+                            StrokeThickness="0" 
+                            Padding="18" 
+                            StrokeShape="RoundRectangle 16">
+                        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="SALDO RESTANTE / MARGEM" TextColor="{StaticResource BlingTextLight}" FontSize="11" FontAttributes="Bold"/>
+                                <Label x:Name="RemainingLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}" FontSize="26" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+
+                            <Label x:Name="MarginStatusLabel" Grid.Column="1" Text="Saudável"
+                                   TextColor="{AppThemeBinding Light=White, Dark={StaticResource BlingPrimary}}" FontSize="12" FontAttributes="Bold"
+                                   VerticalTextAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Card de Comprometimento da Renda -->
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                        Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" 
+                        StrokeThickness="1"
+                        Padding="18"
+                        StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="12">
+
+                        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                            <Label Text="Comprometimento da renda" TextColor="{StaticResource BlingPrimary}" FontSize="16" FontAttributes="Bold"/>
+                            <Label x:Name="CommitmentLabel" Grid.Column="1" Text="0%" FontSize="17" FontAttributes="Bold"/>
+                        </Grid>
+
+                        <ProgressBar x:Name="CommitmentProgress" HeightRequest="10"
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource CategoryProgressTrackLight}, Dark={StaticResource BlingCardDark}}"/>
+
+                        <Label x:Name="CommitmentMessageLabel" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="15" LineBreakMode="TailTruncation" MaxLines="2"/>
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Padding="0,4,0,0">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Contas bancárias" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="15"/>
+                                <Label x:Name="AccountExpensesLabel" Text="R$ 0,00" TextColor="{StaticResource BlingPrimary}" FontSize="19" FontAttributes="Bold" LineBreakMode="NoWrap"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="Faturas dos cartões" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" HorizontalTextAlignment="End" LineBreakMode="NoWrap"/>
+                                <Label x:Name="CardInvoicesLabel" Text="R$ 0,00" TextColor="{StaticResource BlingPrimary}" FontSize="19" FontAttributes="Bold" HorizontalTextAlignment="End" LineBreakMode="NoWrap"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card Disponível por Dia -->
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
+                        Stroke="{StaticResource BlingPrimary}" 
+                        StrokeThickness="1"
+                        Padding="18"
+                        StrokeShape="RoundRectangle 16">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" VerticalOptions="Center">
+
+                        <Border HeightRequest="48" WidthRequest="48" 
+                                BackgroundColor="{StaticResource BlingPrimary}"
+                                StrokeThickness="0" 
+                                StrokeShape="RoundRectangle 14"
+                                VerticalOptions="Center">
+                            <Label Text="÷" TextColor="{StaticResource BlingTextLight}" FontSize="24" FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="DISPONÍVEL POR DIA" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold"/>
+                            <Label x:Name="AvailablePerDayLabel" Text="R$ 0,00" TextColor="{StaticResource BlingPrimary}" FontSize="22" FontAttributes="Bold"/>
+                            <Label x:Name="DaysRemainingLabel" Text="0 dias restantes" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,9 @@
+global using Money.Helpers;
+global using Money.Models;
+global using Money.Views.Auth;
+global using Money.Views.Dashboard;
+global using Money.Views.Dialogs;
+global using Money.Views.ImportsAndReports;
+global using Money.Views.Management;
+global using Money.Views.SettingsAndData;
+global using Money.Views.Transactions;

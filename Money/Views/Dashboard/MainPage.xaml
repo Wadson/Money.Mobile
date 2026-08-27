@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             x:Class="Money.Views.Dashboard.MainPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="*,Auto">
+        <RefreshView x:Name="MainContent" Refreshing="OnPullToRefresh" RefreshColor="{StaticResource BlingPrimary}">
+            <ScrollView>
+                <VerticalStackLayout Padding="16,14,16,30" Spacing="14">
+                    <!-- Header executivo -->
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="2" Padding="4,2">
+                        <Label x:Name="GreetingLabel" Grid.ColumnSpan="2" Text="Olá!" FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                        <Label Grid.Row="1" Text="Sua visão financeira" FontSize="18" FontAttributes="Bold"
+                               MaxLines="1" LineBreakMode="NoWrap" VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                        <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                            <ImageButton Source="{icons:MaterialIconSource Icon=Notifications, ColorResource=BlingPrimary, IconSize=22}"
+                                         BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                         WidthRequest="44" HeightRequest="44" CornerRadius="14" Padding="10"
+                                         Clicked="OnNotificationsClicked"/>
+                            <Button x:Name="ThemeToggleButton" AutomationId="ThemeToggleButton" Text="☾" FontSize="20"
+                                    SemanticProperties.Description="Ativar tema escuro"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                    BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    BorderWidth="2"
+                                    TextColor="{StaticResource BlingPrimary}" WidthRequest="44" HeightRequest="44"
+                                    CornerRadius="14" Padding="0" Clicked="OnThemeToggleClicked"/>
+                            <ImageButton Source="{icons:MaterialIconSource Icon=Person, ColorResource=BlingPrimary, IconSize=22}"
+                                         BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                                         WidthRequest="44" HeightRequest="44" CornerRadius="14" Padding="10"
+                                         Clicked="OnProfileClicked"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- Hero: resultado líquido do período selecionado -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingPrimary}}"
+                            StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="18" Shadow="{StaticResource CardShadow}">
+                        <VerticalStackLayout Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="BALANÇO DO MÊS" TextColor="{StaticResource BlingTextLight}" FontSize="12" CharacterSpacing="1.1"/>
+                                    <Label x:Name="BalanceLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}" FontSize="30" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                                <ImageButton Grid.Column="1" x:Name="BalanceVisibilityButton"
+                                             Source="{icons:MaterialIconSource Icon=Visibility, ColorResource=BlingTextLight, IconSize=22}"
+                                             BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=Transparent, Dark=White}" BorderWidth="1" CornerRadius="12" Clicked="OnToggleBalanceVisibilityClicked"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingTextLight, IconSize=20}"
+                                             BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=Transparent, Dark=White}" BorderWidth="1" CornerRadius="12" Clicked="OnPreviousMonthClicked"/>
+                                <Label Grid.Column="1" x:Name="SelectedPeriodLabel" Text="Agosto / 2026"
+                                       TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                                <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=ArrowForward, ColorResource=BlingTextLight, IconSize=20}"
+                                             BackgroundColor="Transparent" BorderColor="{AppThemeBinding Light=Transparent, Dark=White}" BorderWidth="1" CornerRadius="12" Clicked="OnNextMonthClicked"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Entradas realizadas" TextColor="{StaticResource BlingTextLight}" FontSize="13" LineBreakMode="NoWrap"/>
+                                    <Label x:Name="MonthlyIncomeLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}" FontSize="17" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Contas do mês" TextColor="{StaticResource BlingTextLight}" FontSize="13" LineBreakMode="NoWrap"/>
+                                    <Label x:Name="MonthlyExpensesLabel" Text="R$ 0,00" TextColor="{StaticResource BlingTextLight}" FontSize="17" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource ContentCard}" StrokeShape="RoundRectangle 18" Padding="10">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Previsão financeira" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                                <Label x:Name="ProjectionRiskLabel" Grid.Column="1" Text="SEGURO" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                <VerticalStackLayout><Label Text="Resultado realizado" FontSize="14"/><Label x:Name="CurrentBalanceLabel" Text="R$ 0,00" FontSize="17" FontAttributes="Bold"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1"><Label Text="Saldo projetado" FontSize="14"/><Label x:Name="ProjectedBalanceLabel" Text="R$ 0,00" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1"><Label Text="Entradas previstas" FontSize="14"/><Label x:Name="ExpectedIncomeLabel" Text="R$ 0,00" FontSize="15" FontAttributes="Bold"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="1"><Label Text="Contas previstas" FontSize="14"/><Label x:Name="ExpectedExpensesLabel" Text="R$ 0,00" FontSize="15" FontAttributes="Bold"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="2"><Label Text="Resultado projetado" FontSize="14"/><Label x:Name="ProjectedResultLabel" Text="R$ 0,00" FontSize="14" FontAttributes="Bold"/></VerticalStackLayout>
+                                <Label x:Name="ProjectionRiskDetailLabel" Grid.Row="2" Grid.Column="1" Text="Sem risco identificado" FontSize="14" VerticalTextAlignment="Center" LineBreakMode="TailTruncation"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Três ações essenciais -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Button Text="Despesa" FontSize="11" FontAttributes="Bold" HeightRequest="38" Padding="10,3" CornerRadius="12"
+                                ImageSource="{icons:MaterialIconSource Icon=Add, ColorResource=BlingTextLight, IconSize=18}"
+                                BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" Clicked="OnNewTransactionClicked"/>
+                        <Button Grid.Column="1" Text="Receita" FontSize="11" FontAttributes="Bold" HeightRequest="38" Padding="10,3" CornerRadius="12"
+                                ImageSource="{icons:MaterialIconSource Icon=TrendingUp, ColorResource=BlingTextLight, IconSize=18}"
+                                BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" Clicked="OnNewIncomeClicked"/>
+                        <Button Grid.Column="2" Text="Transferir" FontSize="11" FontAttributes="Bold" HeightRequest="38" Padding="10,3" CornerRadius="12"
+                                ImageSource="{icons:MaterialIconSource Icon=SwapHoriz, ColorResource=BlingTextLight, IconSize=18}"
+                                BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" Clicked="OnTransferClicked"/>
+                    </Grid>
+
+                    <!-- Dashboard unificado -->
+                    <Border Style="{StaticResource ContentCard}" StrokeShape="RoundRectangle 18" Padding="10">
+                        <VerticalStackLayout Spacing="15">
+                            <Label Text="Painel do mês" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}" LineBreakMode="TailTruncation"/>
+                            <VerticalStackLayout Spacing="7">
+                                <Grid ColumnDefinitions="*,Auto"><Label Text="Fluxo previsto" FontSize="15" FontAttributes="Bold" LineBreakMode="TailTruncation" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/><Label x:Name="FlowStatusLabel" Grid.Column="1" Text="0% comprometido" FontSize="15" LineBreakMode="NoWrap" TextColor="{StaticResource BlingPrimary}"/></Grid>
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="62,*" RowSpacing="7">
+                                    <Label Text="Entradas" FontSize="14" LineBreakMode="NoWrap" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                    <ProgressBar x:Name="IncomeProgress" Grid.Column="1" Progress="0"
+                                                 ProgressColor="{StaticResource IncomeProgressFill}"
+                                                 BackgroundColor="{AppThemeBinding Light={StaticResource IncomeProgressTrackLight}, Dark={StaticResource IncomeProgressTrackDark}}"
+                                                 HeightRequest="6"/>
+                                    <Label Grid.Row="1" Text="Saídas" FontSize="14" LineBreakMode="NoWrap" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                    <ProgressBar x:Name="ExpenseProgress" Grid.Row="1" Grid.Column="1" Progress="0"
+                                                 ProgressColor="{StaticResource ExpenseProgressFill}"
+                                                 BackgroundColor="{AppThemeBinding Light={StaticResource ExpenseProgressTrackLight}, Dark={StaticResource ExpenseProgressTrackDark}}"
+                                                 HeightRequest="8"/>
+                                </Grid>
+                                <Label x:Name="FlowDetailLabel" Text="Pagas R$ 0,00 · Pendentes R$ 0,00" FontSize="14" LineBreakMode="TailTruncation" MaxLines="1" TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                            </VerticalStackLayout>
+                            <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"/>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Maiores gastos por categoria" FontSize="13" FontAttributes="Bold" LineBreakMode="TailTruncation" MaxLines="1" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                <VerticalStackLayout x:Name="CategoriesContainer" Spacing="7"/>
+                            </VerticalStackLayout>
+                            <Border x:Name="PendingAlertBorder" IsVisible="False" BackgroundColor="{StaticResource BlingDangerSoft}" Stroke="{StaticResource BlingDanger}"
+                                    StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="11">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnPendingAlertTapped"/></Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
+                                    <mi:MauiIcon Icon="{mi:Material Icon=Warning}" IconSize="22" IconColor="{StaticResource BlingDanger}"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                        <Label Text="Pendências que pedem atenção" FontSize="13" FontAttributes="Bold" LineBreakMode="TailTruncation" MaxLines="1" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                        <Label x:Name="PendingAlertLabel" Text="0 atrasadas" FontSize="12" LineBreakMode="NoWrap" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2" Text="Ver" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource BlingDanger}" VerticalTextAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Feed compacto -->
+                    <Border Style="{StaticResource ContentCard}" StrokeShape="RoundRectangle 18" Padding="14">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Últimas movimentações" FontSize="19" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                <Button Grid.Column="1" Text="Ver todas" FontSize="10" Padding="8,0" HeightRequest="32"
+                                        BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}" Clicked="OnViewAllTransactionsClicked"/>
+                            </Grid>
+                            <VerticalStackLayout x:Name="TransactionsContainer" Spacing="2"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+
+        <!-- Barra principal fixa: a seleção indica a tela atualmente visível. -->
+        <Border Grid.Row="1"
+                BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                Stroke="{AppThemeBinding Light=#E5E7EB, Dark={StaticResource BlingBorderDark}}"
+                StrokeThickness="1" Padding="8,7,8,10" StrokeShape="RoundRectangle 22,22,0,0">
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5">
+                <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingCardDark}}"
+                        Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" Padding="4,6"
+                        StrokeShape="RoundRectangle 14" MinimumHeightRequest="58">
+                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomHomeTapped"/></Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                        <mi:MauiIcon Icon="{mi:Material Icon=Home}" IconSize="23"
+                                     IconColor="{AppThemeBinding Light={StaticResource BlingTextLight}, Dark={StaticResource BlingPrimary}}"/>
+                        <Label Text="Home" FontSize="10" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource BlingTextLight}, Dark={StaticResource BlingPrimary}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" BackgroundColor="Transparent" StrokeThickness="0" Padding="4,6" MinimumHeightRequest="58">
+                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomAccountsTapped"/></Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                        <mi:MauiIcon Icon="{mi:Material Icon=ReceiptLong}" IconSize="23" IconColor="{StaticResource BlingPrimary}"/>
+                        <Label Text="Contas" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" Padding="4,6" MinimumHeightRequest="58">
+                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomCardsTapped"/></Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                        <mi:MauiIcon Icon="{mi:Material Icon=CreditCard}" IconSize="23" IconColor="{StaticResource BlingPrimary}"/>
+                        <Label Text="Cartões" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="4,6" MinimumHeightRequest="58">
+                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomBanksTapped"/></Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                        <mi:MauiIcon Icon="{mi:Material Icon=AccountBalanceWallet}" IconSize="23" IconColor="{StaticResource BlingPrimary}"/>
+                        <Label Text="Bancos" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="4" BackgroundColor="Transparent" StrokeThickness="0" Padding="4,6" MinimumHeightRequest="58">
+                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomMenuTapped"/></Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                        <mi:MauiIcon Icon="{mi:Material Icon=Menu}" IconSize="23" IconColor="{StaticResource BlingPrimary}"/>
+                        <Label Text="Menu" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Drawer lateral: permanece na árvore visual para abertura rápida e animação fluida. -->
+        <Grid x:Name="DrawerOverlay" Grid.RowSpan="2" IsVisible="False" ZIndex="100">
+            <BoxView x:Name="DrawerScrim" Color="#99000000" Opacity="0">
+                <BoxView.GestureRecognizers><TapGestureRecognizer Tapped="OnCloseDrawerTapped"/></BoxView.GestureRecognizers>
+            </BoxView>
+            <Border x:Name="DrawerPanel" HorizontalOptions="End" WidthRequest="340" MaximumWidthRequest="380"
+                    TranslationX="380" StrokeThickness="0" Padding="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Padding="18,20,12,16" StrokeThickness="0"
+                            BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark={StaticResource BlingCardDark}}">
+                        <Grid ColumnDefinitions="56,*,44" ColumnSpacing="12">
+                            <Border WidthRequest="52" HeightRequest="52" Padding="4" StrokeThickness="0"
+                                    BackgroundColor="{StaticResource BlingPrimary}"
+                                    StrokeShape="RoundRectangle 14">
+                                <Grid>
+                                    <Image Source="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=BlingTextLight, IconSize=30}" WidthRequest="30" HeightRequest="30"/>
+                                    <Image Source="icon.svg" Aspect="AspectFit"/>
+                                </Grid>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                <Label Text="Money" FontSize="22" FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                <Label Text="Gestão financeira local" FontSize="11"
+                                       TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                            </VerticalStackLayout>
+                            <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=Close, ColorResource=BlingPrimary, IconSize=22}"
+                                         WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12"
+                                         BackgroundColor="Transparent" BorderWidth="0" Clicked="OnCloseDrawerClicked"/>
+                        </Grid>
+                    </Border>
+                    <ScrollView Grid.Row="1">
+                        <VerticalStackLayout Padding="14,12,14,24" Spacing="8">
+                            <Border Style="{StaticResource MoreOptionRow}" HeightRequest="52" Padding="16,0">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDrawerRegistrationsClicked"/></Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="Center">
+                                    <Image Source="{icons:MaterialIconSource Icon=DashboardCustomize, ColorResource=BlingPrimary, IconSize=22}" WidthRequest="22" HeightRequest="22"/>
+                                    <Label Text="Cadastros básicos" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MoreOptionRow}" HeightRequest="52" Padding="16,0">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDrawerReportsClicked"/></Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="Center">
+                                    <Image Source="{icons:MaterialIconSource Icon=Assessment, ColorResource=BlingPrimary, IconSize=22}" WidthRequest="22" HeightRequest="22"/>
+                                    <Label Text="Relatórios" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MoreOptionRow}" HeightRequest="52" Padding="16,0">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDrawerBackupClicked"/></Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="Center">
+                                    <Image Source="{icons:MaterialIconSource Icon=Backup, ColorResource=BlingPrimary, IconSize=22}" WidthRequest="22" HeightRequest="22"/>
+                                    <Label Text="Backup e restauração" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MoreOptionRow}" HeightRequest="52" Padding="16,0">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDrawerSettingsClicked"/></Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="Center">
+                                    <Image Source="{icons:MaterialIconSource Icon=Settings, ColorResource=BlingPrimary, IconSize=22}" WidthRequest="22" HeightRequest="22"/>
+                                    <Label Text="Configurações e tema" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                            <BoxView HeightRequest="1" Margin="0,8" Color="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"/>
+                            <Border Style="{StaticResource MoreOptionRow}" HeightRequest="52" Padding="16,0">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDrawerAboutClicked"/></Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="Center">
+                                    <Image Source="{icons:MaterialIconSource Icon=Info, ColorResource=BlingPrimary, IconSize=22}" WidthRequest="22" HeightRequest="22"/>
+                                    <Label Text="Sobre o sistema" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource MoreOptionRow}" HeightRequest="52" Padding="16,0"
+                                    Stroke="{StaticResource BlingDanger}">
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDrawerLogoutClicked"/></Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="Center">
+                                    <Image Source="{icons:MaterialIconSource Icon=Logout, ColorResource=BlingDanger, IconSize=22}" WidthRequest="22" HeightRequest="22"/>
+                                    <Label Text="Sair do sistema" VerticalTextAlignment="Center" FontAttributes="Bold"
+                                           TextColor="{StaticResource BlingDanger}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

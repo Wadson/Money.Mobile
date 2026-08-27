@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+    xmlns:icons="clr-namespace:Money.Helpers"
+    xmlns:models="clr-namespace:Money.Models"
+    x:Class="Money.Views.Transactions.AccountsPayablePage"
+    BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
+    Shell.NavBarIsVisible="False"
+    SizeChanged="OnPageSizeChanged">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- CABEÇALHO -->
+        <Border
+            Grid.Row="0"
+            BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}"
+            StrokeThickness="0"
+            Padding="16,13">
+            <Grid ColumnDefinitions="Auto,*,44" ColumnSpacing="12">
+                <ImageButton
+                    Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=22}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    Padding="10"
+                    CornerRadius="12"
+                    VerticalOptions="Center"
+                    Clicked="OnBackClicked"/>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <HorizontalStackLayout Spacing="8">
+                        <Image
+                            Source="{icons:MaterialIconSource Icon=Receipt, ColorResource=BlingPrimary, IconSize=20}"
+                            WidthRequest="20"
+                            HeightRequest="20"
+                            VerticalOptions="Center"/>
+                        <Label
+                            Text="Contas a Pagar"
+                            TextColor="{StaticResource BlingTextLight}"
+                            FontSize="20"
+                            FontAttributes="Bold"
+                            VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                    <Label
+                        Text="Acompanhe e quite seus próximos vencimentos"
+                        TextColor="{StaticResource BlingTextLight}"
+                        FontSize="11"/>
+                </VerticalStackLayout>
+                <ImageButton Grid.Column="2"
+                             Source="{icons:MaterialIconSource Icon=Add, ColorResource=BlingTextLight, IconSize=22}"
+                             BackgroundColor="{StaticResource BlingPrimary}"
+                             WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12"
+                             AutomationProperties.Name="Novo lançamento"
+                             Clicked="OnNewExpenseClicked"/>
+            </Grid>
+        </Border>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <Grid Grid.Row="1">
+            <CollectionView
+                x:Name="MobileList"
+                SelectionMode="None"
+                Margin="16,14,16,86"
+                MaximumWidthRequest="1200"
+                HorizontalOptions="Fill"
+                ItemSizingStrategy="MeasureFirstItem"
+                ItemsUpdatingScrollMode="KeepScrollOffset"
+                RemainingItemsThreshold="8"
+                RemainingItemsThresholdReached="OnRemainingItemsThresholdReached">
+
+                <CollectionView.Header>
+                    <VerticalStackLayout Spacing="14" Padding="0,0,0,12">
+
+                        <!-- CARD TOTAL -->
+                        <Border
+                            BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                            StrokeThickness="1"
+                            Padding="14,10"
+                            StrokeShape="RoundRectangle 18">
+                            <Border.Shadow>
+                                <Shadow Brush="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" Offset="0,3" Radius="8"/>
+                            </Border.Shadow>
+
+                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="6">
+                                <VerticalStackLayout Spacing="1">
+                                    <HorizontalStackLayout Spacing="7">
+                                        <Image
+                                            Source="{icons:MaterialIconSource Icon=Payments, ColorResource=BlingPrimary, IconSize=15}"
+                                            WidthRequest="15"
+                                            HeightRequest="15"
+                                            VerticalOptions="Center"/>
+                                        <Label x:Name="MainSummaryTitleLabel"
+                                            Text="TOTAL PENDENTE"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            FontSize="10"
+                                            FontAttributes="Bold"
+                                            CharacterSpacing="1.2"/>
+                                    </HorizontalStackLayout>
+                                    <Label
+                                        x:Name="TotalValueLabel"
+                                        Text="R$ 0,00"
+                                        TextColor="{StaticResource BlingTextLight}"
+                                        FontSize="28"
+                                        FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+
+                                <Border
+                                    Grid.Column="1"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    StrokeThickness="1"
+                                    Padding="10,4"
+                                    StrokeShape="RoundRectangle 12"
+                                    VerticalOptions="Center">
+                                    <VerticalStackLayout Spacing="0">
+                                        <Label
+                                            x:Name="TotalCountLabel"
+                                            Text="0"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            FontSize="20"
+                                            FontAttributes="Bold"
+                                            HorizontalTextAlignment="Center"/>
+                                        <Label
+                                            Text="contas"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            FontSize="11"
+                                            HorizontalTextAlignment="Center"/>
+                                    </VerticalStackLayout>
+                                </Border>
+
+                                <Border x:Name="PaidSummaryBorder"
+                                    Grid.Row="1" Grid.ColumnSpan="2" IsVisible="False"
+                                    BackgroundColor="#1A00A859" Stroke="{StaticResource BlingPrimary}"
+                                    StrokeThickness="1" Padding="8,4" StrokeShape="RoundRectangle 10"
+                                    HorizontalOptions="Fill">
+                                    <Label x:Name="PaidSummaryLabel" Text="Pago: R$ 0,00 (0 contas)"
+                                           TextColor="{StaticResource BlingTextLight}" FontSize="12"
+                                           FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                                </Border>
+
+                                <Border x:Name="OverdueSummaryBorder"
+                                    Grid.Row="2"
+                                    Grid.ColumnSpan="2"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}"
+                                     Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                                    StrokeThickness="1"
+                                    Padding="8,3"
+                                    StrokeShape="RoundRectangle 10"
+                                    HorizontalOptions="Start">
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Image
+                                            Source="{icons:MaterialIconSource Icon=EventBusy, ColorResource=BlingTextLight, IconSize=16}"
+                                            WidthRequest="22"
+                                            HeightRequest="22"
+                                            VerticalOptions="Center"/>
+                                        <Label
+                                            x:Name="OverdueCountLabel"
+                                            Text="0"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            FontSize="16"
+                                            FontAttributes="Bold"
+                                            VerticalTextAlignment="Center"/>
+                                        <Label
+                                            Text="vencidas"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            FontSize="16"
+                                            VerticalTextAlignment="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <Border x:Name="AllPaidBadge"
+                                    Grid.Row="2" Grid.Column="1" IsVisible="False"
+                                    BackgroundColor="#1A00A859" Stroke="{StaticResource BlingPrimary}"
+                                    StrokeThickness="1" Padding="8,3" StrokeShape="RoundRectangle 10"
+                                    HorizontalOptions="End">
+                                    <Label Text="Todas quitadas" TextColor="{StaticResource BlingTextLight}"
+                                           FontSize="11" FontAttributes="Bold"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- FILTROS -->
+                        <!-- FILTROS -->
+                        <Border
+    BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+    Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+    StrokeThickness="1"
+    Padding="10,10"
+    StrokeShape="RoundRectangle 16">
+                            <VerticalStackLayout Spacing="12">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Image Source="{icons:MaterialIconSource Icon=FilterList, ColorResource=BlingPrimary, IconSize=17}"
+                   WidthRequest="17" HeightRequest="17" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                        <Label Text="Filtros" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14" FontAttributes="Bold"/>
+                                        <Label Text="Refine as contas exibidas" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10"/>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="9">
+
+                                    <!-- FORNECEDOR -->
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                        <Label Text="FORNECEDOR" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                                        <Border Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Padding="8,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnSelectSupplierFilterClicked"/>
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="24,*">
+                                                <mi:MauiIcon Icon="{mi:Material Icon=Storefront}" IconSize="18" IconColor="{StaticResource BlingPrimary}" VerticalOptions="Center" HorizontalOptions="Start"/>
+                                                <Button x:Name="SupplierFilterButton" Grid.Column="1" Text="Todos os fornecedores"
+                                InputTransparent="True"
+                                HeightRequest="42" Padding="0" BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                BorderWidth="0" FontSize="13" FontAttributes="Bold" HorizontalOptions="Fill"
+                                LineBreakMode="TailTruncation" Clicked="OnSelectSupplierFilterClicked"/>
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+
+                                    <!-- CARTÃO -->
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                                        <Label Text="CARTÃO" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                                        <Border Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Padding="8,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnSelectCardFilterClicked"/>
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="24,*">
+                                                <mi:MauiIcon Icon="{mi:Material Icon=CreditCard}" IconSize="18" IconColor="{StaticResource BlingPrimary}" VerticalOptions="Center" HorizontalOptions="Start"/>
+                                                <Button x:Name="CardFilterButton" Grid.Column="1" Text="Todos os cartões"
+                                InputTransparent="True"
+                                HeightRequest="42" Padding="0" BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                BorderWidth="0" FontSize="13" FontAttributes="Bold" HorizontalOptions="Fill"
+                                LineBreakMode="TailTruncation" Clicked="OnSelectCardFilterClicked"/>
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+
+                                    <!-- PERÍODO -->
+                                    <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                                        <Label Text="PERÍODO" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                                        <Border Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" StrokeShape="RoundRectangle 10" 
+                        BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Padding="8,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnSelectPeriodClicked"/>
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="24,*">
+                                                <mi:MauiIcon Icon="{mi:Material Icon=CalendarToday}" IconSize="18" IconColor="{StaticResource BlingPrimary}" VerticalOptions="Center" HorizontalOptions="Start"/>
+                                                <Button x:Name="PeriodSelectionButton" Grid.Column="1" Text="Todos os vencimentos"
+                                InputTransparent="True"
+                                HeightRequest="42" Padding="0" BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                BorderWidth="0" FontSize="13" FontAttributes="Bold" HorizontalOptions="Fill"
+                                LineBreakMode="TailTruncation" Clicked="OnSelectPeriodClicked"/>
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+
+                                    <!-- CATEGORIA -->
+                                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
+                                        <Label Text="CATEGORIA" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                                        <Border Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" StrokeShape="RoundRectangle 10" 
+                        BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Padding="8,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnSelectCategoryClicked"/>
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="24,*">
+                                                <mi:MauiIcon Icon="{mi:Material Icon=Category}" IconSize="18" IconColor="{StaticResource BlingPrimary}" VerticalOptions="Center" HorizontalOptions="Start"/>
+                                                <Button x:Name="CategorySelectionButton" Grid.Column="1" Text="Todas as categorias"
+                                InputTransparent="True"
+                                HeightRequest="42" Padding="0" BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                BorderWidth="0" FontSize="13" FontAttributes="Bold" HorizontalOptions="Fill"
+                                LineBreakMode="TailTruncation" Clicked="OnSelectCategoryClicked"/>
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+
+                                    <!-- SITUAÇÃO -->
+                                    <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="4">
+                                        <Label Text="SITUAÇÃO" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontSize="10" FontAttributes="Bold" CharacterSpacing="1"/>
+                                        <Border Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" StrokeShape="RoundRectangle 10" 
+                                  BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" Padding="8,0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnSelectPaymentStatusClicked"/>
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="24,*">
+                                                <mi:MauiIcon Icon="{mi:Material Icon=CheckCircleOutline}" IconSize="18" IconColor="{StaticResource BlingPrimary}" VerticalOptions="Center" HorizontalOptions="Start"/>
+                                                <Button x:Name="PaymentStatusButton" Grid.Column="1" Text="Contas abertas"
+                                InputTransparent="True"
+                                HeightRequest="42" Padding="0" BackgroundColor="Transparent"
+                                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                BorderWidth="0" FontSize="13" FontAttributes="Bold" HorizontalOptions="Fill"
+                                LineBreakMode="TailTruncation" Clicked="OnSelectPaymentStatusClicked"/>
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+
+                                </Grid>
+
+                                <!-- BOTÕES DE AÇÃO DOS FILTROS -->
+                                <Grid ColumnDefinitions="*,48" ColumnSpacing="8">
+                                    <Button Grid.Column="0"
+                                            Text="🔍 Aplicar filtros"
+                                            BackgroundColor="{StaticResource BlingPrimary}"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            FontSize="13"
+                                            FontAttributes="Bold"
+                                            HeightRequest="42"
+                                            CornerRadius="10"
+                                            Clicked="OnFilterClicked"/>
+                                    <Button Grid.Column="1"
+                                            Text=""
+                                            ImageSource="{icons:MaterialIconSource Icon=Refresh, ColorResource=BlingTextLight, IconSize=22}"
+                                            BackgroundColor="{StaticResource BlingPrimary}"
+                                            TextColor="{StaticResource BlingTextLight}"
+                                            HeightRequest="44"
+                                            WidthRequest="44"
+                                            Padding="10"
+                                            CornerRadius="10"
+                                            Clicked="OnClearFilterClicked"/>
+                                </Grid>
+
+                                <Label x:Name="FilterStatusLabel"
+                                   Text="Nenhum filtro aplicado"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                   FontSize="10"
+                                   HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+
+
+                        <!-- TÍTULO DA LISTA -->
+                        <Grid ColumnDefinitions="*,Auto" Margin="2,4,2,0">
+                            <HorizontalStackLayout Spacing="8">
+                                <Image
+                                        Source="{icons:MaterialIconSource Icon=List, ColorResource=BlingPrimary, IconSize=16}"
+                                        WidthRequest="16"
+                                        HeightRequest="16"
+                                        VerticalOptions="Center"/>
+                                <Label
+                                        Text="PRÓXIMOS VENCIMENTOS"
+                                        TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                        FontSize="11"
+                                        FontAttributes="Bold"
+                                        CharacterSpacing="1.1"
+                                        VerticalTextAlignment="Center"/>
+                            </HorizontalStackLayout>
+                            <Label
+                                    Grid.Column="1"
+                                    Text="Deslize para editar"
+                                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                                    FontSize="10"
+                                    VerticalTextAlignment="Center"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </CollectionView.Header>
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30,60" Spacing="12">
+                        <Border
+                            BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                            Stroke="{StaticResource BlingPrimary}"
+                            StrokeThickness="1"
+                            HeightRequest="64"
+                            WidthRequest="64"
+                            HorizontalOptions="Center"
+                            StrokeShape="RoundRectangle 20">
+                            <mi:MauiIcon
+                                Icon="{mi:Material Icon=CheckCircle}"
+                                IconSize="32"
+                                IconColor="{StaticResource BlingPrimary}"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"/>
+                        </Border>
+                        <Label Text="🎉 Tudo em dia!" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                        <Label Text="Nenhuma conta pendente neste período." TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="13" HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ContaPagar">
+
+                        <SwipeView Threshold="70">
+
+                            <!-- PAGAR -->
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Reveal">
+                                    <SwipeItem
+                        Text="Pagar"
+                        BackgroundColor="{StaticResource BlingPrimary}"
+                        CommandParameter="{Binding Id}"
+                        Invoked="OnPaySwipeInvoked"/>
+                                </SwipeItems>
+                            </SwipeView.LeftItems>
+
+                            <!-- EDITAR / EXCLUIR -->
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+
+                                    <SwipeItem
+                        Text="Editar"
+                        BackgroundColor="{StaticResource BlingPrimary}"
+                        CommandParameter="{Binding Id}"
+                        Invoked="OnEditSwipeInvoked"/>
+
+                                    <SwipeItem
+                        Text="Excluir"
+                        BackgroundColor="{StaticResource BlingPrimary}"
+                        CommandParameter="{Binding Id}"
+                        Invoked="OnDeleteSwipeInvoked"/>
+
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+
+                            <!-- ===================================================== -->
+                            <!-- CARD DA CONTA -->
+                            <!-- ===================================================== -->
+
+                            <Border
+                BackgroundColor="{AppThemeBinding
+                    Light={StaticResource BlingCardLight},
+                    Dark={StaticResource BlingCardDark}}"
+
+                Stroke="{AppThemeBinding
+                    Light={StaticResource BlingBorderLight},
+                    Dark={StaticResource BlingBorderDark}}"
+
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 12"
+
+                Padding="10,8"
+                Margin="0,0,0,8">
+
+                                <Grid
+                    ColumnDefinitions="Auto,36,*,Auto"
+                    ColumnSpacing="10"
+                    VerticalOptions="Center">
+
+
+                                    <!-- ================================================= -->
+                                    <!-- SELEÇÃO (CHECKBOX) -->
+                                    <!-- ================================================= -->
+
+                                    <CheckBox
+                        Grid.Column="0"
+                        IsChecked="{Binding Selecionado}"
+                        IsVisible="{Binding IsOpen}"
+                        CheckedChanged="OnItemCheckedChanged"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"/>
+
+
+                                    <!-- ================================================= -->
+                                    <!-- PARCELA (BADGE REFINADA) -->
+                                    <!-- ================================================= -->
+
+                                    <Border
+                        Grid.Column="1"
+
+                        WidthRequest="36"
+                        HeightRequest="36"
+
+                        BackgroundColor="{AppThemeBinding
+                            Light={StaticResource BlingCardLight},
+                            Dark={StaticResource BlingCardDark}}"
+
+                        Stroke="{StaticResource BlingPrimary}"
+                        StrokeThickness="1.5"
+
+                        StrokeShape="RoundRectangle 10"
+
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center">
+
+                                        <Label
+                            Text="{Binding Parcela}"
+
+                            TextColor="{AppThemeBinding
+                                Light={StaticResource BlingTextDarkLight},
+                                Dark={StaticResource BlingTextDarkDark}}"
+
+                            FontSize="11"
+                            FontAttributes="Bold"
+
+                            HorizontalTextAlignment="Center"
+                            VerticalTextAlignment="Center"/>
+                                    </Border>
+
+
+                                    <!-- ================================================= -->
+                                    <!-- DESCRIÇÃO + INFORMAÇÕES -->
+                                    <!-- ================================================= -->
+
+                                    <VerticalStackLayout
+                        Grid.Column="2"
+
+                        Spacing="3"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Fill">
+
+
+                                        <!-- DESCRIÇÃO -->
+
+                                        <Label
+                            Text="{Binding Descricao}"
+
+                            TextColor="{AppThemeBinding
+                                Light={StaticResource BlingTextDarkLight},
+                                Dark={StaticResource BlingTextDarkDark}}"
+
+                            FontSize="14"
+                            FontAttributes="Bold"
+
+                            MaxLines="1"
+                            LineBreakMode="TailTruncation"/>
+
+
+                                        <!-- CATEGORIA -->
+
+                                        <HorizontalStackLayout
+                            Spacing="6"
+                            VerticalOptions="Center">
+
+
+                                            <!-- CATEGORIA -->
+
+                                            <Label
+                                Text="{Binding Categoria}"
+
+                                TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+
+                                FontSize="11"
+                                FontAttributes="Bold"
+
+                                MaxLines="1"
+                                LineBreakMode="TailTruncation"
+
+                                VerticalTextAlignment="Center"/>
+
+
+                                        </HorizontalStackLayout>
+
+                                    </VerticalStackLayout>
+
+
+                                    <!-- ================================================= -->
+                                    <!-- VALOR + VENCIMENTO -->
+                                    <!-- ================================================= -->
+
+                                    <VerticalStackLayout
+                        Grid.Column="3"
+
+                        Spacing="2"
+
+                        VerticalOptions="Center"
+                        HorizontalOptions="End">
+
+
+                                        <!-- VALOR -->
+
+                                        <Label
+                            Text="{Binding Valor, StringFormat='R$ {0:N2}'}"
+
+                            TextColor="{AppThemeBinding
+                                Light={StaticResource BlingTextDarkLight},
+                                Dark={StaticResource BlingTextDarkDark}}"
+
+                            FontSize="14"
+                            FontAttributes="Bold"
+
+                            HorizontalTextAlignment="End"
+                            LineBreakMode="NoWrap"/>
+
+
+                                        <!-- VENCIMENTO -->
+
+                                        <Label
+                            Text="{Binding DataVencimento, StringFormat='Venc. {0:dd/MM/yyyy}'}"
+
+                            TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
+
+                            FontSize="13"
+                            FontAttributes="Bold"
+
+                            HorizontalTextAlignment="End"
+                            LineBreakMode="NoWrap"/>
+
+                                    </VerticalStackLayout>
+
+                                </Grid>
+
+                            </Border>
+
+                        </SwipeView>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+
+
+            </CollectionView>
+
+            <!-- MENSAGEM DE ERRO -->
+            <Label
+                x:Name="ErrorLabel"
+                IsVisible="False"
+                TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                Padding="16,12"
+                Margin="16"
+                VerticalOptions="Start"
+                HorizontalTextAlignment="Center"
+                FontSize="13"
+                ZIndex="5"/>
+
+            <!-- PAGAR SELECIONADAS -->
+            <Border
+                x:Name="PaySelectedButton"
+                IsVisible="False"
+                BackgroundColor="{StaticResource BlingPrimary}"
+                StrokeThickness="0"
+                HeightRequest="48"
+                Padding="18,4"
+                HorizontalOptions="Start"
+                VerticalOptions="End"
+                Margin="16,0,0,16"
+                StrokeShape="RoundRectangle 24"
+                ZIndex="4">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPaySelectedClicked"/>
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="8">
+                    <mi:MauiIcon
+                        Icon="{mi:Material Icon=CheckCircle}"
+                        IconSize="20"
+                        IconColor="{StaticResource BlingTextLight}"
+                        VerticalOptions="Center"/>
+                    <Label
+                        x:Name="PaySelectedLabel"
+                        Text="Pagar selecionadas"
+                        TextColor="{StaticResource BlingTextLight}"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        VerticalTextAlignment="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+
+        </Grid>
+    </Grid>
+</ContentPage>

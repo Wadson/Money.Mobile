@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
+             xmlns:icons="clr-namespace:Money.Helpers"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="Money.Views.SettingsAndData.SettingsPage" BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+            <Grid ColumnDefinitions="44,*">
+                <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Aspect="AspectFit" Clicked="OnBackClicked"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="0">
+                    <HorizontalStackLayout Spacing="6">
+                        <mi:MauiIcon Icon="{mi:Material Icon=Settings}" IconSize="24" IconColor="{StaticResource BlingTextLight}" WidthRequest="28" HeightRequest="28"/>
+                        <Label Text="Configurações e auditoria" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold" VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
+                    <Label Text="Preferências, notificações e logs" TextColor="{StaticResource BlingTextLight}" FontSize="10"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="14">
+                <Border Style="{StaticResource ContentCard}" Padding="14">
+                    <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="10">
+                        <Border WidthRequest="44" HeightRequest="44" StrokeThickness="0"
+                                BackgroundColor="{StaticResource BlingPrimary}" StrokeShape="RoundRectangle 12">
+                            <mi:MauiIcon Icon="{mi:Material Icon=UploadFile}" IconSize="25"
+                                         IconColor="{StaticResource BlingTextLight}"/>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="Importar Contas a Pagar" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <Label Text="Importar lançamentos de um arquivo CSV" FontSize="10"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="Importar" BackgroundColor="{StaticResource BlingPrimary}"
+                                TextColor="{StaticResource BlingTextLight}" CornerRadius="10"
+                                HeightRequest="42" Padding="14,6" Clicked="OnImportPayablesClicked"/>
+                    </Grid>
+                </Border>
+                <Border Style="{StaticResource ContentCard}" Padding="14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Preferências" TextColor="{StaticResource BlingPrimary}" FontSize="17" FontAttributes="Bold"/>
+                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="CurrencyPicker" Title="Moeda" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="DateFormatPicker" Title="Formato de data" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="ThemePicker" Title="Tema" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Alertas de vencimento" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <Switch x:Name="AlertsSwitch" Grid.Column="1"/>
+                        </Grid></Border>
+                        <Border Style="{StaticResource InputContainer}"><Entry x:Name="AlertDaysEntry" Placeholder="Dias de antecedência" Keyboard="Numeric" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Backup automático" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <Switch x:Name="AutomaticBackupSwitch" Grid.Column="1"/>
+                        </Grid></Border>
+                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="BackupFrequencyPicker" Title="Frequência do backup" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Button Text="Salvar preferências" ImageSource="{icons:MaterialIconSource Icon=Save, ColorResource=BlingTextLight, IconSize=20}" Style="{StaticResource PrimaryButton}" Clicked="OnSaveClicked"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Style="{StaticResource ContentCard}" Padding="14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Notificações" TextColor="{StaticResource BlingPrimary}" FontSize="17" FontAttributes="Bold"/>
+                        <VerticalStackLayout x:Name="NotificationsContainer" Spacing="7"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Style="{StaticResource ContentCard}" Padding="14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Logs de auditoria" TextColor="{StaticResource BlingPrimary}" FontSize="17" FontAttributes="Bold"/>
+                        <VerticalStackLayout x:Name="LogsContainer" Spacing="7"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Style="{StaticResource ContentCard}" Padding="14">
+                    <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="10">
+                        <Border WidthRequest="44" HeightRequest="44" StrokeThickness="0"
+                                BackgroundColor="{StaticResource BlingPrimary}" StrokeShape="RoundRectangle 12">
+                            <mi:MauiIcon Icon="{mi:Material Icon=DeleteSweep}" IconSize="25"
+                                         IconColor="{StaticResource BlingTextLight}"/>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="Gerenciar / Limpar Dados" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                            <Label Text="Excluir registros e históricos específicos do banco" FontSize="10"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="Abrir" BackgroundColor="{StaticResource BlingPrimary}"
+                                TextColor="{StaticResource BlingTextLight}" CornerRadius="10"
+                                HeightRequest="42" Padding="14,6" Clicked="OnManageDataClicked"/>
+                    </Grid>
+                </Border>
+                <Label x:Name="ErrorLabel" IsVisible="False" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

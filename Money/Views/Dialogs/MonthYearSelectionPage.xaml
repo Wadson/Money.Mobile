@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Money.Views.Dialogs.MonthYearSelectionPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
+             Shell.NavBarIsVisible="False">
+    <Grid Padding="18" VerticalOptions="Center">
+        <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1"
+                StrokeShape="RoundRectangle 20" Padding="18"
+                MaximumWidthRequest="700" MaximumHeightRequest="650">
+            <Border.Shadow>
+                <Shadow Brush="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" Offset="0,3" Opacity="0.18" Radius="10"/>
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="16">
+                <Grid ColumnDefinitions="*,Auto" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" Padding="12,10">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Selecione o período" TextColor="{StaticResource BlingTextLight}" FontSize="20" FontAttributes="Bold"/>
+                        <Label Text="Escolha o mês e o ano dos vencimentos" TextColor="{StaticResource BlingTextLight}" FontSize="11"/>
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="×" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
+                            BorderWidth="1" WidthRequest="44" HeightRequest="44" CornerRadius="22"
+                            FontSize="22" Padding="0" Clicked="OnCancelClicked"/>
+                </Grid>
+
+                <Border Style="{StaticResource InputContainer}" Padding="6">
+                    <Grid ColumnDefinitions="48,*,48" ColumnSpacing="8">
+                        <Button Text="‹" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}"
+                                BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" FontSize="25" Padding="0"
+                                Clicked="OnPreviousYearClicked" AutomationProperties.Name="Ano anterior"/>
+                        <Entry x:Name="YearEntry" Grid.Column="1" Keyboard="Numeric" MaxLength="4"
+                               HorizontalTextAlignment="Center" BackgroundColor="Transparent"
+                               TextColor="{StaticResource BlingPrimary}" FontSize="20" FontAttributes="Bold"
+                               Completed="OnYearCompleted" Unfocused="OnYearUnfocused"/>
+                        <Button Grid.Column="2" Text="›" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{StaticResource BlingPrimary}"
+                                BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" FontSize="25" Padding="0"
+                                Clicked="OnNextYearClicked" AutomationProperties.Name="Próximo ano"/>
+                    </Grid>
+                </Border>
+
+                <Grid x:Name="MonthsGrid" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto"
+                      ColumnSpacing="8" RowSpacing="8"/>
+
+                <Button Text="Todos os vencimentos" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                        TextColor="{StaticResource BlingPrimary}" BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1"
+                        HeightRequest="48" Clicked="OnAllPeriodsClicked"/>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

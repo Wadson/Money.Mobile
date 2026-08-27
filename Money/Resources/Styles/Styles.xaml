@@ -2,7 +2,27 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Money.Controls"
     x:Class="Money.Resources.Styles.Styles">
+
+    <!-- Escala tipográfica fixa: tema altera somente cores/brushes. -->
+    <x:Double x:Key="CaptionFontSize">10</x:Double>
+    <x:Double x:Key="BodyFontSize">14</x:Double>
+    <x:Double x:Key="SubtitleFontSize">12</x:Double>
+    <x:Double x:Key="TitleFontSize">18</x:Double>
+    <x:Double x:Key="HeaderFontSize">20</x:Double>
+    <x:Double x:Key="MetricFontSize">24</x:Double>
+
+    <!-- Padrão de input/select: equivalente MAUI a flex-start, gap 12 e padding-left 16. -->
+    <Style x:Key="LeftAlignedFieldButton" TargetType="controls:LeftAlignedFieldButton">
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="ContentLayout" Value="Left,12" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="12" />
+    </Style>
 
     <Shadow x:Key="CardShadow" Brush="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"
             Offset="0,2" Radius="8" Opacity="0.10" />
@@ -34,13 +54,15 @@
     <Style TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
         <Setter Property="FontFamily" Value="OpenSansRegular" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
     </Style>
 
     <Style TargetType="Button">
         <Setter Property="BackgroundColor" Value="{StaticResource BlingPrimary}" />
         <Setter Property="TextColor" Value="{StaticResource BlingTextLight}" />
         <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="MinimumHeightRequest" Value="44" />
         <Setter Property="MinimumWidthRequest" Value="44" />
@@ -68,7 +90,10 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" />
-        <Setter Property="MinimumHeightRequest" Value="46" />
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
     </Style>
 
     <Style TargetType="Editor">
@@ -81,7 +106,8 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
         <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" />
-        <Setter Property="MinimumHeightRequest" Value="46" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
     </Style>
 
     <Style TargetType="SearchBar">
@@ -94,6 +120,8 @@
     <Style TargetType="DatePicker">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
     </Style>
 
     <Style TargetType="TimePicker">
@@ -177,6 +205,11 @@
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
+    <!-- ESTILO PARA VALORES CRÍTICOS - Vermelho apenas no tema claro -->
+    <Style x:Key="CriticalMetricValue" TargetType="Label" BasedOn="{StaticResource MetricValue}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingDangerLight}, Dark={StaticResource BlingTextDarkDark}}" />
+    </Style>
+
     <Style x:Key="TableHeader" TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" />
         <Setter Property="FontSize" Value="10" />
@@ -218,8 +251,9 @@
         <Setter Property="TextColor" Value="{StaticResource BlingTextLight}" />
     </Style>
 
+    <!-- Botão de Perigo / Alerta com fundo vermelho -->
     <Style x:Key="DangerButton" TargetType="Button">
-        <Setter Property="BackgroundColor" Value="{StaticResource BlingPrimary}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource BlingDanger}" />
         <Setter Property="TextColor" Value="{StaticResource BlingTextLight}" />
     </Style>
 
@@ -227,6 +261,49 @@
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="TextColor" Value="{StaticResource BlingPrimary}" />
         <Setter Property="BorderColor" Value="Transparent" />
+    </Style>
+
+    <!-- SISTEMA VISUAL SEMÂNTICO: use o estilo pelo papel do componente. -->
+    <Style x:Key="FieldText" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}" />
+        <Setter Property="FontSize" Value="{StaticResource BodyFontSize}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+    </Style>
+
+    <Style x:Key="SelectorFieldButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="Padding" Value="4,0" />
+    </Style>
+
+    <Style x:Key="StandardCard" TargetType="Border" BasedOn="{StaticResource MetricCard}" />
+    <Style x:Key="PositiveStatusCard" TargetType="Border" BasedOn="{StaticResource MetricCard}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource StatusPositiveBackgroundLight}, Dark={StaticResource StatusPositiveBackgroundDark}}" />
+        <Setter Property="Stroke" Value="{StaticResource BlingPrimary}" />
+    </Style>
+    <Style x:Key="CriticalStatusCard" TargetType="Border" BasedOn="{StaticResource MetricCard}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource StatusCriticalBackgroundLight}, Dark={StaticResource StatusCriticalBackgroundDark}}" />
+        <Setter Property="Stroke" Value="{StaticResource BlingDanger}" />
+    </Style>
+    <Style x:Key="WarningStatusCard" TargetType="Border" BasedOn="{StaticResource MetricCard}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource StatusWarningBackgroundLight}, Dark={StaticResource StatusWarningBackgroundDark}}" />
+        <Setter Property="Stroke" Value="#D97706" />
+    </Style>
+
+    <Style x:Key="DrawerMenuButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HeightRequest" Value="52" />
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="ContentLayout" Value="Left,12" />
     </Style>
 
     <Style x:Key="MoreOptionRow" TargetType="Border">

@@ -1,0 +1,56 @@
+﻿Vamos para o Tema Claro tudo no tema claro:
+
+1. Na tela principal, o "Card principal" 
+a) A label: "MÊS / ANO" deve ser maior um pouco
+
+b) As labels: "Entradas realizadas" e "Saldo do mês" deve ter a fonte aumentada com cuidado para não quebrar linha.
+
+2. logo abaixo do card principal há três botões:  Despesa, Receita e Transferência.
+a) deve estreitar mais a altura do botão, está muito largo, 
+(não diminuir o tamanho da fonte)
+
+3. No Card "Painel do Mês"
+a) Aumentar o tamanho da fonte de todas as labels sem deixar que fique com quebra de linhas.
+
+4. Na tela "+ Novo Lançamento" 
+a) nas duas abas tanto "Despesas" e "Receitas" estreitar mais a altura dos botões
+b) dentro de todos os filtros centralizar o texto e os ícones a esquerda e padronizar a cor dos ícones para a cor verde e deixar o texto na cor escura mesmo. isso nas duas abas "Despesas" e "Receitas".
+
+
+5. Nas opções do "Cadastros Básicos", "Mais Opções" botão "Categorias", botão "Nova Categoria" janela que abre "Categorias" organizar a parte de ícones rápidos, adicionar mais ícones todas as possiblidades de despesas e adicionar as cores padrões do tema claro e escuro nas bolinhas, alinhadas.
+
+6. No formulário Contas Bancárias "Nova Conta":
+a) Os filtros de texto e os ícones devem ser alinhados a direita e a cor dos ícones devem ser verde no tema claro.
+
+7. Na Tela "Estorno de Pagamentos":
+a) aumentar o tamanho da label "Parcelas 1/n" 
+b) aumentar o tamanho da label "Compras"
+
+8. Na tela "Análise e Cartões":
+a) O título "Análise de Cartões" e o subtítulo que é o mês estão colados ao botão voltar, centralizar mais ao meio.
+c) No Card "Todos os Cartões" aumentar o tamanho da label "Todosos cartões", "Limite combinado" e Disponível geral, assim como aumentar os valores também, e verificar se não há nenhuma informação oculta por causa da cor. tudo no tema claro.
+d) nos cards abaixo "Todos os Cartões", "Cartão 1", "Cartão 2" etc. esses cards devem ter o tamanho da fonte aumentados das duas labels. "Nome do Cartão" e "Valor da Fatura".
+
+e) No próximo Card que é o resumo do cartão selecionado acima o card "Resumo Cartão", aumentar o tamanho dafonte das labels "Valor utilizado" e valor disponível.
+
+f) No próximo Card logo abaixo "Distribuição dos gastos" aumentar o tamanho da fonte dos valores e das descrições desde que não quebre linhas.
+
+
+9. Na tela "Visão Mensal":
+a) observar o Card "Saldo Restante / Margem" veja se não tem nenhuma label na cor verde, talvez abaixo da lábel "Crítico" haja algo.
+b) A cor da label "Crítico" deve ser branca 
+c) No Próximo card "Comprometimento da Renda", aumentar o tamanho da fonte das labels: "A Maior parte da renda está comprometida com despesas", "Contas bancárias", reduza a descrição "Fatura todos os cartões", aumentar o tamanho da fonte dos valores.
+
+Observação: tudo isso é no tema claro. cuidado para não misturar com o tema escuro.
+
+
+as implementações não foram feitas no total, siga cada etapa um tópico por vez para não se perder.
+
+Observação, a última compilação perdeu o ícone da tela de login, e a borda do botão tema da tela principal. corrija isso e faça devagar com cuidado, passo a passo, um tópico por vez.
+
+
+
+
+
+
+

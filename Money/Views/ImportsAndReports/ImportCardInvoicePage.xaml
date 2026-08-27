@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ xmlns:icons="clr-namespace:Money.Helpers" xmlns:models="clr-namespace:Money.Models" x:Class="Money.Views.ImportsAndReports.ImportCardInvoicePage"
+ BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Shell.NavBarIsVisible="False">
+ <Grid RowDefinitions="Auto,Auto,*,Auto">
+  <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
+   <Grid ColumnDefinitions="44,*" ColumnSpacing="12"><ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnBackClicked"/><VerticalStackLayout Grid.Column="1"><Label Text="Importar Fatura de Cartão" TextColor="{StaticResource BlingTextLight}" FontSize="19" FontAttributes="Bold"/><Label Text="Expansão inteligente de parcelas e faturas" TextColor="{StaticResource BlingTextLight}" FontSize="10"/></VerticalStackLayout></Grid>
+  </Border>
+  <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="14,12,14,8" Padding="12">
+   <VerticalStackLayout Spacing="9">
+    <Label Text="CARTÃO DE DESTINO" Style="{StaticResource CardCaption}"/>
+    <Border Style="{StaticResource InputContainer}" Padding="4,2" HeightRequest="52">
+     <Grid>
+      <Button x:Name="CardSelectionButton" Text="Selecione o cartão"
+              ImageSource="{icons:MaterialIconSource Icon=CreditCard, ColorResource=BlingPrimary, IconSize=21}"
+              BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}"
+              FontAttributes="Bold" HorizontalOptions="Fill" BorderWidth="0"
+              Clicked="OnSelectCardClicked"/>
+      <Picker x:Name="CardPicker" IsVisible="False" InputTransparent="True"
+              SelectedIndexChanged="OnCardChanged"/>
+     </Grid>
+    </Border>
+    <Label x:Name="CardInfoLabel" Text="Selecione um cartão para continuar" FontSize="10" TextColor="{StaticResource BlingPrimary}"/>
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+     <Button Text="Baixar modelo CSV" ImageSource="{icons:MaterialIconSource Icon=Download, ColorResource=BlingPrimary, IconSize=19}"
+             BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}" BorderColor="{StaticResource BlingPrimary}"
+             BorderWidth="1" FontSize="11" Clicked="OnDownloadTemplateClicked"/>
+     <Button x:Name="PickFileButton" Grid.Column="1" Text="Selecionar CSV" IsEnabled="False" ImageSource="{icons:MaterialIconSource Icon=UploadFile, ColorResource=BlingTextLight, IconSize=19}" Style="{StaticResource PrimaryButton}" FontSize="11" Clicked="OnPickFileClicked"/>
+    </Grid>
+    <Label x:Name="SummaryLabel" FontSize="11" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+   </VerticalStackLayout>
+  </Border>
+  <CollectionView x:Name="PreviewList" Grid.Row="2" Margin="14,0" SelectionMode="None">
+   <CollectionView.ItemTemplate><DataTemplate x:DataType="models:CardCsvPurchase"><Border Style="{StaticResource ContentCard}" Padding="10" Margin="0,0,0,7"><VerticalStackLayout Spacing="3"><Grid ColumnDefinitions="*,Auto"><Label Text="{Binding Description}" FontSize="12" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/><Label Grid.Column="1" Text="{Binding InstallmentAmount, StringFormat='R$ {0:N2}'}" TextColor="{StaticResource BlingPrimary}" FontAttributes="Bold"/></Grid><Label Text="{Binding ReadInfo}" FontSize="10" TextColor="{StaticResource BlingPrimary}"/><Label Text="{Binding DueDateInfo}" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/></VerticalStackLayout></Border></DataTemplate></CollectionView.ItemTemplate>
+  </CollectionView>
+  <Border Grid.Row="3" Padding="14,10" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"><Grid ColumnDefinitions="*,1.6*" ColumnSpacing="10"><Button Text="Cancelar" BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}" BorderColor="{StaticResource BlingPrimary}" BorderWidth="1" Clicked="OnBackClicked"/><Button x:Name="ConfirmButton" Grid.Column="1" Text="Confirmar Importação de Fatura" Style="{StaticResource PrimaryButton}" IsEnabled="False" Clicked="OnConfirmClicked"/></Grid></Border>
+ </Grid>
+</ContentPage>

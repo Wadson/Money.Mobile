@@ -1,5 +1,5 @@
-<api type="release" assembly-name="Java.Interop" mvid="d186acfbb56b46399aef55b7b90ac7cb">
-  <module assembly-name="Java.Interop" mvid="d186acfbb56b46399aef55b7b90ac7cb" mvid-bytes="+6yG0Wu1OUaa71W3uQrHyw==">
+<api type="release" assembly-name="Java.Interop" mvid="56a5a4ae3d4447c9bdcedf6497e2faae">
+  <module assembly-name="Java.Interop" mvid="56a5a4ae3d4447c9bdcedf6497e2faae" mvid-bytes="rqSlVkQ9yUe9zt9kl+L6rg==">
     <duplicates>
       <entry java-name="[Ljava/lang/Object;" managed-type-name="Java.Interop.JavaPrimitiveArray`1" token="33554442" skip-in-java-to-managed="True" />
       <entry java-name="[Ljava/lang/Object;" managed-type-name="Java.Interop.JavaObjectArray`1" token="33554445" skip-in-java-to-managed="True" />
