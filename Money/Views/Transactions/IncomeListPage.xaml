@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              xmlns:icons="clr-namespace:Money.Helpers"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="Money.Views.Transactions.IncomeListPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" 
              Shell.NavBarIsVisible="False"
@@ -154,9 +153,6 @@
                                                    HorizontalTextAlignment="End" VerticalTextAlignment="Center"/>
 
                                             <HorizontalStackLayout Grid.Column="5" Spacing="6" Margin="8,0,0,0" VerticalOptions="Center">
-                                                <Button Text="{Binding StatusActionText}" FontSize="10" HeightRequest="44" Padding="8,0"
-                                                        BackgroundColor="{StaticResource BlingPrimary}" TextColor="White"
-                                                        CommandParameter="{Binding Id}" Clicked="OnToggleStatusClicked"/>
                                                 <Button Text=""
                                                         ImageSource="{icons:MaterialIconSource Icon=Edit, ColorResource=BlingTextLight, IconSize=20}"
                                                         BackgroundColor="{StaticResource BlingPrimary}"
@@ -223,9 +219,6 @@
                                                                        Grid.Column="1"
                                                                        Spacing="6"
                                                                        HorizontalOptions="End">
-                                                    <Button Text="{Binding StatusActionText}" FontSize="10" HeightRequest="44" Padding="8,0"
-                                                            BackgroundColor="{StaticResource BlingPrimary}" TextColor="White"
-                                                            CommandParameter="{Binding Id}" Clicked="OnToggleStatusClicked"/>
                                                     <Button Text=""
                                                             ImageSource="{icons:MaterialIconSource Icon=Edit, ColorResource=BlingTextLight, IconSize=20}"
                                                             BackgroundColor="{StaticResource BlingPrimary}"

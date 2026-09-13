@@ -1,0 +1,3 @@
+D:\Projetos\Money.Mobile\.codex-build\v3\bin\Release\net10.0-android\publish\com.companyname.money-Signed.apk
+D:\Projetos\Money.Mobile\.codex-build\v3\bin\Release\net10.0-android\publish\com.companyname.money.apk
+D:\Projetos\Money.Mobile\.codex-build\v3\bin\Release\net10.0-android\publish\_Microsoft.Android.Resource.Designer.dll

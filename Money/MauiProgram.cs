@@ -9,7 +9,6 @@ using Money.Views.ImportsAndReports;
 using Money.Views.Management;
 using Money.Views.SettingsAndData;
 using Money.Views.Transactions;
-using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace Money
 {
@@ -33,7 +32,6 @@ namespace Money
             builder
                 .UseMauiApp<App>()
                 .UseMaterialMauiIcons()
-                .UseSkiaSharp()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -44,13 +42,13 @@ namespace Money
             builder.Services.AddSingleton<FinancialForecastService>();
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<BackupService>();
-            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<RecoveryPage>();
             builder.Services.AddTransient<TransactionFormPage>();
-            builder.Services.AddTransient<AccountTransferPage>();
             builder.Services.AddTransient<CategoryManagementPage>();
+            builder.Services.AddTransient<SubcategoryManagementPage>();
             builder.Services.AddTransient<SupplierManagementPage>();
             builder.Services.AddTransient<CardManagementPage>();
             builder.Services.AddTransient<AccountsPayablePage>();

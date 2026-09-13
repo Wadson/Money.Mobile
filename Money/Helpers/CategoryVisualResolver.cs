@@ -24,40 +24,33 @@ public static class CategoryVisualResolver
             ["icon_income"] = MaterialIcons.TrendingUp
         };
 
-    public static MaterialIcons Icon(CategoryItem category)
+    public static MaterialIcons Icon(ICategoryVisual category)
     {
         var stored = Path.GetFileNameWithoutExtension(category.Icon?.Trim() ?? "");
         if (LegacyIcons.TryGetValue(stored, out var legacy)) return legacy;
-        if (Enum.TryParse<MaterialIcons>(stored, true, out var parsed)) return parsed;
+        if (Enum.TryParse<MaterialIcons>(stored, true, out var parsed) && Enum.IsDefined(parsed)) return parsed;
         var pascal = string.Concat(stored.Split('_', StringSplitOptions.RemoveEmptyEntries)
             .Select(x => char.ToUpperInvariant(x[0]) + x[1..]));
-        if (Enum.TryParse<MaterialIcons>(pascal, true, out parsed)) return parsed;
+        if (Enum.TryParse<MaterialIcons>(pascal, true, out parsed) && Enum.IsDefined(parsed)) return parsed;
 
-        var value = Normalize(category.Name);
-        if (value.Contains("alimenta") || value.Contains("mercado") || value.Contains("restaurante")) return MaterialIcons.Restaurant;
-        if (value.Contains("compra") || value.Contains("roupa")) return MaterialIcons.ShoppingBag;
-        if (value.Contains("educa") || value.Contains("curso") || value.Contains("escola")) return MaterialIcons.School;
-        if (value.Contains("imposto") || value.Contains("taxa")) return MaterialIcons.RequestQuote;
-        if (value.Contains("lazer") || value.Contains("viagem") || value.Contains("assinatura")) return MaterialIcons.Movie;
-        if (value.Contains("moradia") || value.Contains("casa") || value.Contains("aluguel")) return MaterialIcons.House;
-        if (value.Contains("saude") || value.Contains("farmacia") || value.Contains("medic")) return MaterialIcons.MedicalServices;
-        if (value.Contains("transport") || value.Contains("combustivel") || value.Contains("uber")) return MaterialIcons.DirectionsCar;
-        if (value.Contains("utilidade") || value.Contains("energia") || value.Contains("internet") || value.Contains("agua")) return MaterialIcons.Lightbulb;
-        return category.Type == "receita" ? MaterialIcons.TrendingUp : MaterialIcons.Category;
+        var standard = CategoryCatalog.All.SelectMany(x => x.Children).FirstOrDefault(x => CategoryCatalog.Normalize(x.Name) == CategoryCatalog.Normalize(category.Name));
+        if (standard is not null && Enum.TryParse<MaterialIcons>(standard.Icon, out var standardIcon)) return standardIcon;
+        return category is MainCategoryItem ? MaterialIcons.Category : MaterialIcons.Sell;
     }
 
-    public static Color Foreground(CategoryItem category)
+    public static Color Foreground(ICategoryVisual category)
     {
         try { return ThemeColor.Parse(category.Color); }
         catch { return ThemeColor.Get("BlingPrimary"); }
     }
 
-    public static Color Background(CategoryItem category) => Foreground(category).WithAlpha(.14f);
+    public static Color Background(ICategoryVisual category) => Foreground(category).WithAlpha(.14f);
 
-    public static SelectionOption Option(CategoryItem category, int index, bool selected) => new()
+    public static SelectionOption Option(ICategoryVisual category, int index, bool selected) => new()
     {
         Index = index,
         Label = category.Name,
+        Subtitle = category is SubcategoryItem sub ? sub.MainCategoryName : null,
         ImageSource = Icon(category),
         // Em fundos escuros, cores de categorias como preto/grafite perdem contraste.
         Foreground = IsDarkTheme() ? Colors.White : Foreground(category),

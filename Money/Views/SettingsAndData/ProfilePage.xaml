@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
- xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons" xmlns:icons="clr-namespace:Money.Helpers"
+ xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons" xmlns:icons="clr-namespace:Money.Helpers" xmlns:controls="clr-namespace:Money.Controls"
  x:Class="Money.Views.SettingsAndData.ProfilePage" BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Title="Meu perfil">
  <ScrollView><VerticalStackLayout Padding="8,16" Spacing="14" MaximumWidthRequest="900" HorizontalOptions="Center">
   <Grid ColumnDefinitions="Auto,*" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" Padding="16,12"><ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Aspect="AspectFit" Clicked="OnCloseClicked"/><Label Grid.Column="1" Text="Meu perfil" TextColor="{StaticResource BlingTextLight}" FontSize="23" FontAttributes="Bold" VerticalTextAlignment="Center"/></Grid>
@@ -10,7 +10,7 @@
    <Border Style="{StaticResource InputContainer}"><Entry x:Name="NameEntry" Placeholder="Nome completo" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
    <Label Text="E-MAIL" Style="{StaticResource CardCaption}"/>
    <Border Style="{StaticResource InputContainer}"><Entry x:Name="EmailEntry" Placeholder="seu@email.com" Keyboard="Email" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
-   <Label Text="DATA DE NASCIMENTO" Style="{StaticResource CardCaption}"/><Border Style="{StaticResource InputContainer}"><DatePicker x:Name="BirthPicker" Format="dd/MM/yyyy" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/></Border>
+   <Label Text="DATA DE NASCIMENTO" Style="{StaticResource CardCaption}"/><Border Style="{StaticResource InputContainer}"><controls:ThemedDateSelector x:Name="BirthPicker" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" BorderWidth="0"/></Border>
    <Label Text="PERGUNTA DE RECUPERAÇÃO" Style="{StaticResource CardCaption}"/>
    <Border Style="{StaticResource InputContainer}"><Button x:Name="QuestionButton" Text="Selecione uma pergunta" Style="{StaticResource SelectorFieldButton}" Clicked="OnSelectQuestionClicked"/></Border>
    <Label Text="NOVA RESPOSTA DE SEGURANÇA" Style="{StaticResource CardCaption}"/>

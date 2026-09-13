@@ -124,7 +124,7 @@ public partial class DataOperationsPage : ContentPage
 
     private async Task<List<TransactionDraft>> ParseCsvAsync(string content)
     {
-        var categories = await _database.GetCategoriesAsync();
+        var categories = await _database.GetSubcategoriesAsync();
         var accounts = await _database.GetAccountsAsync();
         var lines = content.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
         if (lines.Length < 2)
@@ -152,19 +152,17 @@ public partial class DataOperationsPage : ContentPage
             if (!DateTime.TryParse(Cell(row, "data"), _culture, DateTimeStyles.None, out var date))
                 date = DateTime.Today;
             var account = accounts.FirstOrDefault(x => Normalize(x.Name) == Normalize(Cell(row, "conta"))) ?? accounts.FirstOrDefault();
-            if (account is null)
-                throw new InvalidDataException("Cadastre uma conta antes da importação.");
+
             var destination = type == "transferencia"
                 ? accounts.FirstOrDefault(x => Normalize(x.Name) == Normalize(Cell(row, "conta_destino")))
                 : null;
             if (type == "transferencia" && destination is null)
                 throw new InvalidDataException("Informe a coluna conta_destino nas transferências.");
-            var category = categories.FirstOrDefault(x => x.Type == type && Normalize(x.Name) == Normalize(Cell(row, "categoria")))
-                ?? categories.FirstOrDefault(x => x.Type == type);
+            var category = type == "transferencia" ? null : DatabaseService.ResolveImportedSubcategory(categories.Where(x=>x.Type==type), Cell(row,"categoria"), Cell(row,"subcategoria"));
             if (type != "transferencia" && category is null)
                 throw new InvalidDataException($"Cadastre uma categoria de {type} antes da importação.");
             result.Add(new(Cell(row, "descricao") is { Length: > 0 } d ? d : "Importação CSV",
-                amount, date, type, category?.Id ?? 0, account.Id, null, "Importado de CSV",
+                amount, date, type, category?.Id ?? 0, null, null, "Importado de CSV",
                 destination?.Id, type == "despesa" ? date : null, type == "receita",
                 type == "receita" ? date : null));
         }
@@ -174,8 +172,8 @@ public partial class DataOperationsPage : ContentPage
     private async Task<List<TransactionDraft>> ParseOfxAsync(string content)
     {
         var accounts = await _database.GetAccountsAsync();
-        var categories = await _database.GetCategoriesAsync();
-        var account = accounts.FirstOrDefault() ?? throw new InvalidDataException("Cadastre uma conta antes da importação.");
+        var categories = await _database.GetSubcategoriesAsync();
+
         var result = new List<TransactionDraft>();
         foreach (Match block in Regex.Matches(content, "<STMTTRN>(.*?)(?:</STMTTRN>|(?=<STMTTRN>)|$)", RegexOptions.Singleline | RegexOptions.IgnoreCase))
         {
@@ -183,11 +181,11 @@ public partial class DataOperationsPage : ContentPage
             if (!decimal.TryParse(Tag("TRNAMT"), NumberStyles.Any, CultureInfo.InvariantCulture, out var signed))
                 continue;
             var type = signed >= 0 ? "receita" : "despesa";
-            var category = categories.FirstOrDefault(x => x.Type == type) ?? throw new InvalidDataException($"Cadastre uma categoria de {type}.");
+            var category = DatabaseService.ResolveImportedSubcategory(categories.Where(x=>x.Type==type), type=="despesa"?"Outros":"Receitas",type=="despesa"?"Outras Despesas":"Outras Receitas");
             var rawDate = Tag("DTPOSTED");
             var date = DateTime.TryParseExact(rawDate[..Math.Min(8, rawDate.Length)], "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed) ? parsed : DateTime.Today;
             result.Add(new(Tag("MEMO") is { Length: > 0 } memo ? memo : Tag("NAME"), Math.Abs(signed), date,
-                type, category.Id, account.Id, null, $"OFX FITID: {Tag("FITID")}", null,
+                type, category.Id, null, null, $"Classificação automática: {category.DisplayName}. OFX FITID: {Tag("FITID")}", null,
                 type == "despesa" ? date : null, type == "receita", type == "receita" ? date : null));
         }
         return result;
@@ -211,8 +209,13 @@ public partial class DataOperationsPage : ContentPage
             return;
         try
         {
-            var safety = await _backup.RestoreBackupAsync();
-            await ThemedDialog.ShowAsync(this, "Backup restaurado", $"Cópia anterior salva em:\n{safety}\n\nReinicie o aplicativo.");
+            var result = await _backup.RestoreBackupAsync();
+            try
+            {
+                await ThemedDialog.ShowAsync(this, "Backup restaurado",
+                    result.Summary + "\n\nUma cópia dos dados anteriores foi preservada.");
+            }
+            finally { (Application.Current as App)?.ShowLogin(); }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { await ThemedDialog.ShowAsync(this, "Atenção", SqliteErrorMessage.ToFriendly(ex)); }

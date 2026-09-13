@@ -11,8 +11,8 @@ public partial class CreditCardAnalysisPage : ContentPage
     private readonly DatabaseService _database;
     private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("pt-BR");
     private readonly ObservableCollection<CreditCardAnalysis> _analyses = [];
-    private List<AccountItem> _accounts = [];
-    private int _paymentAccountIndex = -1;
+
+
     private DateTime _period = new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
     public CreditCardAnalysisPage(DatabaseService database)
@@ -26,17 +26,16 @@ public partial class CreditCardAnalysisPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await LoadAsync();
+        try { await LoadAsync(); }
+        catch (Exception ex)
+        {
+            await ThemedDialog.ShowAsync(this, "Não foi possível carregar os cartões",
+                SqliteErrorMessage.ToFriendly(ex), "Fechar");
+        }
     }
 
     private async Task LoadAsync()
     {
-        _accounts = await _database.GetAccountsAsync();
-        if (_paymentAccountIndex >= _accounts.Count) _paymentAccountIndex = -1;
-        if (_accounts.Count > 0 && _paymentAccountIndex < 0) _paymentAccountIndex = 0;
-        PaymentAccountButton.Text = _paymentAccountIndex >= 0
-            ? $"{_accounts[_paymentAccountIndex].Name} · {Currency(_accounts[_paymentAccountIndex].Balance)}"
-            : "Selecione a conta";
         PeriodLabel.Text = InvoicePeriodLabel.Text = _period.ToString("MMMM 'de' yyyy", _culture);
         var cards = await _database.GetCreditCardAnalysisAsync(_period.Month, _period.Year);
         _analyses.Clear();
@@ -181,30 +180,10 @@ public partial class CreditCardAnalysisPage : ContentPage
     private async void OnPayInvoiceClicked(object? sender, EventArgs e)
     {
         if (sender is not Button { CommandParameter: long id }) return;
-        if (_paymentAccountIndex < 0) { await ThemedDialog.ShowAsync(this, "Selecione uma conta", "Escolha a conta usada no pagamento.", "Fechar"); return; }
-        if (!await ThemedDialog.ConfirmAsync(this, "Pagar fatura", "O valor será debitado da conta selecionada. Continuar?", "Pagar")) return;
-        try { await _database.PayCardInvoiceAsync(id, _accounts[_paymentAccountIndex].Id); await LoadAsync(); }
-        catch (Exception ex) { await ThemedDialog.ShowAsync(this, "Pagamento não realizado", SqliteErrorMessage.ToFriendly(ex), "Fechar"); }
-    }
 
-    private async void OnSelectPaymentAccountClicked(object? sender, EventArgs e)
-    {
-        var options = _accounts.Select((account, index) => new SelectionOption
-        {
-            Index = index,
-            Label = $"{account.Name} · {Currency(account.Balance)}",
-            ImageSource = MaterialIcons.AccountBalanceWallet,
-            Background = ThemeColor.Get("BlingCard"),
-            Foreground = ThemeColor.Get("BlingPrimary"),
-            IsSelected = index == _paymentAccountIndex
-        }).ToList();
-        var page = new OptionSelectionPage("Conta para pagamento", options);
-        page.Selected += (_, option) =>
-        {
-            _paymentAccountIndex = option.Index;
-            PaymentAccountButton.Text = options[option.Index].Label;
-        };
-        await Navigation.PushModalAsync(page);
+        if (!await ThemedDialog.ConfirmAsync(this, "Pagar fatura", "Confirmar o pagamento dos lançamentos desta fatura?", "Pagar")) return;
+        try { await _database.PayCardInvoiceAsync(id); await LoadAsync(); }
+        catch (Exception ex) { await ThemedDialog.ShowAsync(this, "Pagamento não realizado", SqliteErrorMessage.ToFriendly(ex), "Fechar"); }
     }
 
     private void OnCardPositionChanged(object? sender, PositionChangedEventArgs e)
@@ -266,4 +245,6 @@ public partial class CreditCardAnalysisPage : ContentPage
     private async void OnNextMonthClicked(object? sender, EventArgs e) { _period = _period.AddMonths(1); await LoadAsync(); }
     private async void OnBackClicked(object? sender, EventArgs e) => await Navigation.PopModalAsync();
     private string Currency(decimal value) => value.ToString("C2", _culture);
+    private async void OnManageCardsClicked(object? sender, EventArgs e)
+        => await Navigation.PushModalAsync(new CardManagementPage(_database));
 }

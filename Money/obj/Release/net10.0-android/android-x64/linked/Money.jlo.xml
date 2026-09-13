@@ -12,7 +12,7 @@
     <type name="MainApplication" package="crc6415dbecfab5a727d8" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiApplication" is_application="True" partial_assembly_qualified_name="Money.MainApplication, Money" application_constructor="MainApplication" />
   </jcw-types>
   <acw-types partial-assembly-name="Money" module-name="Money.dll">
-    <type assembly-qualified-name="Money.MainActivity, Money, Version=1.0.2.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="money.MainActivity" java-key="crc6415dbecfab5a727d8.MainActivity" managed-key="Money.MainActivity" partial-assembly-qualified-name="Money.MainActivity, Money" />
-    <type assembly-qualified-name="Money.MainApplication, Money, Version=1.0.2.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="money.MainApplication" java-key="crc6415dbecfab5a727d8.MainApplication" managed-key="Money.MainApplication" partial-assembly-qualified-name="Money.MainApplication, Money" />
+    <type assembly-qualified-name="Money.MainActivity, Money, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="money.MainActivity" java-key="crc6415dbecfab5a727d8.MainActivity" managed-key="Money.MainActivity" partial-assembly-qualified-name="Money.MainActivity, Money" />
+    <type assembly-qualified-name="Money.MainApplication, Money, Version=1.0.5.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="money.MainApplication" java-key="crc6415dbecfab5a727d8.MainApplication" managed-key="Money.MainApplication" partial-assembly-qualified-name="Money.MainApplication, Money" />
   </acw-types>
 </api>

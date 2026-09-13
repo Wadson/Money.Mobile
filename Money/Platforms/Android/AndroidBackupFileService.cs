@@ -45,11 +45,14 @@ internal static class AndroidBackupFileService
 
         try
         {
-            await using var source = File.OpenRead(sourcePath);
-            await using var destination = activity.ContentResolver!.OpenOutputStream(data.Data, "w")
-                ?? throw new IOException("Não foi possível criar o arquivo na pasta escolhida.");
-            await source.CopyToAsync(destination);
-            await destination.FlushAsync();
+            await using (var source = File.OpenRead(sourcePath))
+            await using (var destination = activity.ContentResolver!.OpenOutputStream(data.Data, "w")
+                ?? throw new IOException("Não foi possível criar o arquivo na pasta escolhida."))
+            {
+                await source.CopyToAsync(destination);
+                await destination.FlushAsync();
+            }
+            // Report success only after the document provider has closed the file.
             completion.TrySetResult(data.Data);
         }
         catch (Exception ex)

@@ -1,0 +1,8 @@
+<api type="release" assembly-name="Money" mvid="965e5f3a1f5f42eeb34e46deb46a974c">
+  <module assembly-name="Money" mvid="965e5f3a1f5f42eeb34e46deb46a974c" mvid-bytes="Ol9ell8f7kKzTkbetGqXTA==">
+    <types-scratch>
+      <entry key="crc6415dbecfab5a727d8/MainActivity" java-name="crc6415dbecfab5a727d8/MainActivity" managed-type-name="Money.MainActivity" token="33554445" />
+      <entry key="crc6415dbecfab5a727d8/MainApplication" java-name="crc6415dbecfab5a727d8/MainApplication" managed-type-name="Money.MainApplication" token="33554446" />
+    </types-scratch>
+  </module>
+</api>

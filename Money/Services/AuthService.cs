@@ -34,7 +34,9 @@ public sealed class AuthService(DatabaseService database)
         await using var command = db.CreateCommand();
         command.CommandText = """
             SELECT id_usuario,nome,senha_hash,tentativas_falhas,bloqueado_ate
-            FROM Usuarios WHERE (lower(nome)=lower(@user) OR lower(email)=lower(@user)) AND ativo=1
+            FROM Usuarios WHERE ativo=1 AND
+              (lower(email)=lower(@user) OR (lower(nome)=lower(@user) AND NOT EXISTS
+                (SELECT 1 FROM Usuarios WHERE lower(email)=lower(@user) AND ativo=1)))
             """;
         command.Parameters.AddWithValue("@user", user.Trim());
         await using var reader = await command.ExecuteReaderAsync();
@@ -45,6 +47,8 @@ public sealed class AuthService(DatabaseService database)
         var hash = reader.GetString(2);
         var attempts = reader.GetInt32(3);
         DateTime? lockedUntil = reader.IsDBNull(4) ? null : reader.GetDateTime(4);
+        if (await reader.ReadAsync())
+            return new(false, "Existe mais de um usuário com esse nome. Entre com seu e-mail para abrir os dados corretos.");
         await reader.DisposeAsync();
 
         if (lockedUntil > DateTime.UtcNow)
@@ -114,6 +118,7 @@ public sealed class AuthService(DatabaseService database)
         {
             if (id is null)
             {
+                await using var userTransaction = db.BeginTransaction();
                 var answerHash = HashRecoveryAnswer(answer!);
                 await ExecuteAsync(db, """
                     INSERT INTO Usuarios(nome,email,senha_hash,senha_alterada_em,data_nascimento,
@@ -125,6 +130,7 @@ public sealed class AuthService(DatabaseService database)
                 var newId = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid();"));
                 await ExecuteAsync(db, "INSERT INTO Configuracoes(id_usuario) VALUES(@id)", ("@id", newId));
                 await CopyDefaultCategoriesAsync(db, newId);
+                userTransaction.Commit();
                 return new(true, "Usuário criado com sucesso.", newId, name.Trim());
             }
 
@@ -186,6 +192,7 @@ public sealed class AuthService(DatabaseService database)
         await db.OpenAsync();
         try
         {
+            await using var userTransaction = db.BeginTransaction();
             await ExecuteAsync(db, """
                 INSERT INTO Usuarios(nome,email,senha_hash,senha_alterada_em,data_nascimento,
                   pergunta_recuperacao,resposta_recuperacao_hash,palavra_chave_hash,dica_palavra_chave)
@@ -196,6 +203,7 @@ public sealed class AuthService(DatabaseService database)
             var id = Convert.ToInt64(await ScalarAsync(db, "SELECT last_insert_rowid();"));
             await ExecuteAsync(db, "INSERT INTO Configuracoes(id_usuario) VALUES(@id)", ("@id", id));
             await CopyDefaultCategoriesAsync(db, id);
+            userTransaction.Commit();
             SetSession(id, name.Trim());
             return new(true, "Conta criada com sucesso.", id, name.Trim());
         }
@@ -271,13 +279,17 @@ public sealed class AuthService(DatabaseService database)
         return true;
     }
 
-    public async Task ActivateLocalUserAsync()
+    public async Task ActivateLocalUserAsync(long configuredUserId)
     {
         await using var db = Connection();
         await db.OpenAsync();
+        if (configuredUserId <= 0)
+            throw new ArgumentException("Configure explicitamente um usuário local válido.", nameof(configuredUserId));
         var name = Convert.ToString(await ScalarAsync(db,
-            "SELECT nome FROM Usuarios WHERE id_usuario=1 AND ativo=1"));
-        SetSession(1, string.IsNullOrWhiteSpace(name) ? "Usuário local" : name);
+            "SELECT nome FROM Usuarios WHERE id_usuario=@id AND ativo=1", ("@id", configuredUserId)));
+        if (string.IsNullOrWhiteSpace(name))
+            throw new InvalidOperationException("O usuário local configurado não existe ou está inativo.");
+        SetSession(configuredUserId, name);
     }
 
     public async Task<(string Name, string Email, DateTime? BirthDate, string? Question)> GetProfileAsync()
@@ -333,6 +345,7 @@ public sealed class AuthService(DatabaseService database)
         SecureStorage.Default.Remove(SessionKey);
         UserId = null;
         UserName = null;
+        database.CurrentUserId = 0;
     }
 
     private void SetSession(long id, string name)
@@ -380,14 +393,8 @@ public sealed class AuthService(DatabaseService database)
         return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(normalized)));
     }
 
-    private static async Task CopyDefaultCategoriesAsync(SqliteConnection db, long id)
-    {
-        await ExecuteAsync(db, """
-            INSERT INTO Categorias(id_usuario,nome_categoria,tipo,cor,icone)
-            SELECT @id,nome_categoria,tipo,cor,icone FROM Categorias
-            WHERE id_usuario=1 AND id_categoria_pai IS NULL
-            """, ("@id", id));
-    }
+    private static Task CopyDefaultCategoriesAsync(SqliteConnection db, long id)
+        => DatabaseService.SeedCategoryCatalogAsync(db, id);
 
     private static Task UpdateAttemptsAsync(SqliteConnection db, long id, int attempts, DateTime? block)
         => ExecuteAsync(db, "UPDATE Usuarios SET tentativas_falhas=@attempts,bloqueado_ate=@block WHERE id_usuario=@id",

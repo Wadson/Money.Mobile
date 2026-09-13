@@ -45,10 +45,10 @@ public partial class SupplierManagementPage : ContentPage
     }
 
     private async void OnNewClicked(object? sender, EventArgs e) => await EditAsync(null);
-    private async void OnEditClicked(object? sender, EventArgs e) => await EditAsync((sender as ImageButton)?.CommandParameter as Fornecedor);
+    private async void OnEditClicked(object? sender, EventArgs e) => await EditAsync((sender as Button)?.CommandParameter as Fornecedor);
     private async void OnDeleteClicked(object? sender, EventArgs e)
     {
-        if ((sender as ImageButton)?.CommandParameter is not Fornecedor item) return;
+        if ((sender as Button)?.CommandParameter is not Fornecedor item) return;
         if (!await ThemedDialog.ConfirmAsync(this, "Excluir fornecedor", $"Deseja excluir {item.NomeFornecedor}? Fornecedores em uso serão apenas desativados.", "Excluir")) return;
         try { await _database.DeleteSupplierAsync(item.IdFornecedor); await LoadAsync(); await ThemedDialog.ShowAsync(this, "Fornecedor excluído", "Operação concluída com sucesso."); }
         catch (Exception ex) { await ThemedDialog.ShowAsync(this, "Atenção", SqliteErrorMessage.ToFriendly(ex)); }

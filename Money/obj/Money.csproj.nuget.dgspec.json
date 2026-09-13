@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projetos\\Money\\Money\\Money.csproj": {}
+    "D:\\Projetos\\Money.Mobile\\Money\\Money.csproj": {}
   },
   "projects": {
-    "D:\\Projetos\\Money\\Money\\Money.csproj": {
-      "version": "1.0.2",
+    "D:\\Projetos\\Money.Mobile\\Money\\Money.csproj": {
+      "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projetos\\Money\\Money\\Money.csproj",
+        "projectUniqueName": "D:\\Projetos\\Money.Mobile\\Money\\Money.csproj",
         "projectName": "Money",
-        "projectPath": "D:\\Projetos\\Money\\Money\\Money.csproj",
+        "projectPath": "D:\\Projetos\\Money.Mobile\\Money\\Money.csproj",
         "packagesPath": "C:\\Users\\WRSoft\\.nuget\\packages\\",
-        "outputPath": "D:\\Projetos\\Money\\Money\\obj\\",
+        "outputPath": "D:\\Projetos\\Money.Mobile\\Money\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
         "fallbackFolders": [
@@ -79,16 +79,12 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.11, )",
+              "version": "[10.0.12, )",
               "autoReferenced": true
             },
             "SQLitePCLRaw.bundle_e_sqlite3": {
               "target": "Package",
               "version": "[2.1.12, )"
-            },
-            "SkiaSharp.Extended.UI.Maui": {
-              "target": "Package",
-              "version": "[2.0.0-preview.86, )"
             }
           },
           "imports": [
@@ -113,7 +109,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -416,10 +412,6 @@
             "SQLitePCLRaw.bundle_e_sqlite3": {
               "target": "Package",
               "version": "[2.1.12, )"
-            },
-            "SkiaSharp.Extended.UI.Maui": {
-              "target": "Package",
-              "version": "[2.0.0-preview.86, )"
             }
           },
           "imports": [
@@ -435,8 +427,24 @@
           "warn": true,
           "downloadDependencies": [
             {
+              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+              "version": "[10.0.12, 10.0.12]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Crossgen2.win-x64",
+              "version": "[10.0.12, 10.0.12]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.win-x64",
+              "version": "[10.0.12, 10.0.12]"
+            },
+            {
               "name": "Microsoft.Windows.SDK.NET.Ref",
               "version": "[10.0.19041.57, 10.0.19041.57]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+              "version": "[10.0.12, 10.0.12]"
             }
           ],
           "frameworkReferences": {
@@ -447,7 +455,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

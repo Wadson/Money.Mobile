@@ -1,4 +1,0 @@
-D:\Publicacao\Money-Android\com.companyname.money-Signed.aab
-D:\Publicacao\Money-Android\com.companyname.money.aab
-D:\Publicacao\Money-Android\com.companyname.money-Signed.apk
-D:\Publicacao\Money-Android\_Microsoft.Android.Resource.Designer.dll

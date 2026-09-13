@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Money</name>
+    </assembly>
+    <members>
+        <member name="T:Money.Controls.LeftAlignedFieldButton">
+            <summary>Campo de seleção com conteúdo fixado ao início no controle nativo.</summary>
+        </member>
+        <member name="T:Money.Controls.TransactionGenerationPlan">
+            <summary>Shared calculation model used by both transaction generation panels.</summary>
+        </member>
+        <member name="T:Money.Helpers.MaterialIconSourceExtension">
+            <summary>
+            Creates a Material icon image source with a semantic, explicit color.
+            This prevents the icon from changing to white when the device uses dark theme
+            while the application control is rendered on a fixed light surface.
+            </summary>
+        </member>
+        <member name="T:Money.Helpers.ThemeColor">
+            <summary>
+            Resolve as cores Bling para controles construídos programaticamente.
+            </summary>
+        </member>
+        <member name="T:Money.Helpers.ThemeVisual">
+            <summary>Único ponto para aplicar cores semânticas a controles criados ou ajustados em código.</summary>
+        </member>
+        <member name="T:Money.Services.AuthService">
+            <summary>Provides local account authentication, lockout, and encrypted session persistence.</summary>
+        </member>
+        <member name="M:Money.Services.AuthService.#ctor(Money.Services.DatabaseService)">
+            <summary>Provides local account authentication, lockout, and encrypted session persistence.</summary>
+        </member>
+        <member name="M:Money.Services.CardInvoiceCsvParser.InstallmentRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>(?:\\b(?:parcela|parc)\\s*)?\\(?\\s*(\\d{1,3})\\s*(?:de|/)\\s*(\\d{1,3})\\s*\\)?</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Optional (greedy).<br/>
+                ○ Match if at a word boundary.<br/>
+                ○ Match a character in the set [Pp].<br/>
+                ○ Match a character in the set [Aa].<br/>
+                ○ Match a character in the set [Rr].<br/>
+                ○ Match with 2 alternative expressions.<br/>
+                    ○ Match a sequence of expressions.<br/>
+                        ○ Match a character in the set [Cc].<br/>
+                        ○ Match a character in the set [Ee].<br/>
+                        ○ Match a character in the set [Ll].<br/>
+                        ○ Match a character in the set [Aa].<br/>
+                    ○ Match a character in the set [Cc].<br/>
+                ○ Match a whitespace character greedily any number of times.<br/>
+            ○ Match '(' atomically, optionally.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ 1st capture group.<br/>
+                ○ Match a Unicode digit atomically at least 1 and at most 3 times.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match with 2 alternative expressions.<br/>
+                ○ Match a sequence of expressions.<br/>
+                    ○ Match a character in the set [Dd].<br/>
+                    ○ Match a character in the set [Ee].<br/>
+                ○ Match '/'.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ 2nd capture group.<br/>
+                ○ Match a Unicode digit atomically at least 1 and at most 3 times.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ Match ')' atomically, optionally.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Money.Services.CardInvoiceCsvParser.LooseLineRegex">
+            <remarks>
+            Pattern:<br/>
+            <code>^\\s*(?&lt;date&gt;\\d{1,4}[-/]\\d{1,2}[-/]\\d{1,4})\\s*[;\\s]+"?(?&lt;description&gt;.+?)"?\\s*[;\\s]+(?:R\\$\\s*)?(?&lt;value&gt;-?[\\d.]+(?:,\\d{1,2})?)\\s*$</code><br/>
+            Options:<br/>
+            <code>RegexOptions.IgnoreCase</code><br/>
+            Explanation:<br/>
+            <code>
+            ○ Match if at the beginning of the string.<br/>
+            ○ Match a whitespace character atomically any number of times.<br/>
+            ○ "date" capture group.<br/>
+                ○ Match a Unicode digit atomically at least 1 and at most 4 times.<br/>
+                ○ Match a character in the set [\-/].<br/>
+                ○ Match a Unicode digit atomically at least 1 and at most 2 times.<br/>
+                ○ Match a character in the set [\-/].<br/>
+                ○ Match a Unicode digit greedily at least 1 and at most 4 times.<br/>
+            ○ Match a whitespace character greedily any number of times.<br/>
+            ○ Match a character in the set [;\s] greedily at least once.<br/>
+            ○ Match '"' greedily, optionally.<br/>
+            ○ "description" capture group.<br/>
+                ○ Match a character other than '\n' lazily at least once.<br/>
+            ○ Match '"' atomically, optionally.<br/>
+            ○ Match a whitespace character greedily any number of times.<br/>
+            ○ Match a character in the set [;\s] greedily at least once.<br/>
+            ○ Optional (greedy).<br/>
+                ○ Match a character in the set [Rr].<br/>
+                ○ Match '$'.<br/>
+                ○ Match a whitespace character greedily any number of times.<br/>
+            ○ "value" capture group.<br/>
+                ○ Match '-' atomically, optionally.<br/>
+                ○ Match a character in the set [.\d] greedily at least once.<br/>
+                ○ Optional (greedy).<br/>
+                    ○ Match ','.<br/>
+                    ○ Match a Unicode digit atomically at least 1 and at most 2 times.<br/>
+            ○ Match a whitespace character greedily any number of times.<br/>
+            ○ Match if at the end of the string or if before an ending newline.<br/>
+            </code>
+            </remarks>
+        </member>
+        <member name="T:Money.Services.DatabaseService">
+            <summary>Manages the local SQLite database and all financial operations.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.InitializeAsync">
+            <summary>Creates and migrates the database on first use.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.AddCategoryAsync(System.String,System.String,System.String,System.String,System.Nullable{System.Int64})">
+            <summary>Cria uma categoria simples. A hierarquia legada não é utilizada pela interface.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetTotalActiveAccountsBalanceAsync">
+            <summary>Returns the current balance of all active accounts owned by the signed-in user.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetMonthlyRealizedTotalsAsync(System.Int32,System.Int32)">
+            <summary>
+            Returns only realized income and paid expenses whose due date belongs to the
+            selected month. This is the single source for the three values in MainPage's hero card.
+            SQL and reader-level fallbacks keep an empty period safely represented by zeroes.
+            </summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetDashboardAsync(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>Loads consolidated dashboard metrics for the current month.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.AddTransactionAsync(Money.Models.TransactionDraft)">
+            <summary>Adds a transaction and updates its funding source atomically.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveInstallmentTransactionAsync(Money.Models.TransactionDraft,System.Int32,System.DateTime,System.Collections.Generic.IReadOnlyList{Money.Models.InstallmentPreview})">
+            <summary>
+            Saves a grouping transaction and all installments atomically. The parent is
+            an audit/grouping row; balances and dashboard totals use the child rows.
+            </summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetMetasAsync">
+            <summary>Lista as metas financeiras do usuário, ordenadas pela data-alvo.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveMetaAsync(System.Nullable{System.Int64},System.String,System.Decimal,System.Decimal,System.DateTime,System.DateTime,System.String,System.String,System.String,System.String)">
+            <summary>Cria ou atualiza uma meta financeira com auditoria.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.DeleteMetaAsync(System.Int64)">
+            <summary>Exclui uma meta pertencente ao usuário atual.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetTagsAsync">
+            <summary>Lista todas as tags do usuário.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveTagAsync(System.Nullable{System.Int64},System.String,System.String,System.String)">
+            <summary>Cria ou atualiza uma tag.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.DeleteTagAsync(System.Int64)">
+            <summary>Exclui uma tag e seus vínculos N:N.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SetTransactionTagsAsync(System.Int64,System.Collections.Generic.IEnumerable{System.Int64})">
+            <summary>Substitui atomicamente as tags vinculadas a uma transação.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetLembretesAsync(System.String)">
+            <summary>Lista lembretes, opcionalmente filtrados por status.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.SaveLembreteAsync(System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.DateTime,System.String)">
+            <summary>Cria ou atualiza um lembrete validado pelo banco.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.AddTransferAsync(System.Int64,System.Int64,System.Decimal,System.DateTime,System.String,System.String)">
+            <summary>Registra uma transferência entre duas contas e atualiza saldos atomicamente.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.UpdateTransferAsync(System.Int64,System.Int64,System.Int64,System.Decimal,System.DateTime,System.String,System.String)">
+            <summary>Altera uma transferência revertendo o impacto anterior e aplicando o novo, atomicamente.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.DeleteTransferAsync(System.Int64)">
+            <summary>Exclui uma transferência e estorna os dois saldos na mesma transação de banco.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GenerateCardInvoicesAsync(System.Int32,System.Int32)">
+            <summary>Gera ou recalcula as faturas mensais de todos os cartões ativos.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetCardInvoicesAsync(System.Int32,System.Int32)">
+            <summary>Lista faturas de cartão de um período.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetMonthlyReportAsync">
+            <summary>Retorna o resumo mensal otimizado pela view vw_resumo_mensal.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.GetCategoryExpenseReportAsync(System.Int32,System.Int32)">
+            <summary>Retorna gastos por categoria usando a view otimizada.</summary>
+        </member>
+        <member name="M:Money.Services.DatabaseService.ImportTransactionsAsync(System.Collections.Generic.IEnumerable{Money.Models.TransactionDraft},System.String,System.String)">
+            <summary>Importa rascunhos sequencialmente e registra o resultado da importação.</summary>
+        </member>
+        <member name="T:Money.Services.FinancialForecastService">
+            <summary>Centraliza projeções mensais independentes pela data de vencimento.</summary>
+        </member>
+        <member name="M:Money.Services.FinancialForecastService.#ctor(Money.Services.DatabaseService)">
+            <summary>Centraliza projeções mensais independentes pela data de vencimento.</summary>
+        </member>
+        <member name="M:Money.Views.Dashboard.MainPage.ApplyThemeMetrics">
+            <summary>
+            Mantém as métricas específicas do tema claro em um único ponto e restaura
+            explicitamente as medidas originais quando o tema escuro é ativado.
+            </summary>
+        </member>
+        <member name="M:Money.Views.Transactions.AccountsPayablePage.AppendNextPage">
+            <summary>
+            Materializa os cartões em lotes. A consulta continua completa para preservar os
+            totais, enquanto a árvore visual cria apenas o que está próximo da viewport.
+            </summary>
+        </member>
+        <member name="M:Money.Views.Transactions.AccountsPayablePage.UpdateSummaryCards(System.Collections.Generic.IEnumerable{Money.Models.ContaPagar})">
+            <summary>Atualiza o resumo usando exclusivamente os itens exibidos pela lista.</summary>
+        </member>
+        <member name="T:Money.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InstallmentRegex_0">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the InstallmentRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.InstallmentRegex_0.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InstallmentRegex_0.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InstallmentRegex_0.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InstallmentRegex_0.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.InstallmentRegex_0.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InstallmentRegex_0.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InstallmentRegex_0.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.InstallmentRegex_0.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LooseLineRegex_1">
+            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the LooseLineRegex method.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.LooseLineRegex_1.Instance">
+            <summary>Cached, thread-safe singleton instance.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LooseLineRegex_1.#ctor">
+            <summary>Initializes the instance.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LooseLineRegex_1.RunnerFactory">
+            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LooseLineRegex_1.RunnerFactory.CreateInstance">
+            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.LooseLineRegex_1.RunnerFactory.Runner">
+            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LooseLineRegex_1.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
+            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LooseLineRegex_1.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if a possible match was found; false if no more matches are possible.</returns>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.LooseLineRegex_1.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
+            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
+            <param name="inputSpan">The text being scanned by the regular expression.</param>
+            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Text.RegularExpressions.Generated.Utilities">
+            <summary>Helper methods used by generated <see cref="T:System.Text.RegularExpressions.Regex"/>-derived implementations.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout">
+            <summary>Default timeout value set in <see cref="T:System.AppContext"/>, or <see cref="F:System.Text.RegularExpressions.Regex.InfiniteMatchTimeout"/> if none was set.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_hasTimeout">
+            <summary>Whether <see cref="F:System.Text.RegularExpressions.Generated.Utilities.s_defaultTimeout"/> is non-infinite.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IndexOfNonAsciiOrAny_AEB712273636B543A48E2D4C30B0BB338C52D066917DF7465A9B31B880FCF159(System.ReadOnlySpan{System.Char})">
+            <summary>Finds the next index of any character that matches a character in the set [(Pp\s\d].</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsBoundaryWordChar(System.Char)">
+            <summary>Determines whether the specified index is a boundary word character.</summary>
+            <remarks>This is the same as \w plus U+200C ZERO WIDTH NON-JOINER and U+200D ZERO WIDTH JOINER.</remarks>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsPreWordCharBoundary(System.ReadOnlySpan{System.Char},System.Int32)">
+            <summary>Determines whether the specified index is a boundary.</summary>
+            <remarks>This variant is only employed when the subsequent character will separately be validated as a word character.</remarks>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPop(System.Int32[],System.Int32@,System.Int32@,System.Int32@)">
+            <summary>Pops 2 values from the backtracking stack.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32,System.Int32)">
+            <summary>Pushes 2 values onto the backtracking stack.</summary>
+        </member>
+        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32,System.Int32,System.Int32)">
+            <summary>Pushes 3 values onto the backtracking stack.</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.WordCategoriesMask">
+            <summary>Provides a mask of Unicode categories that combine to form [\w].</summary>
+        </member>
+        <member name="P:System.Text.RegularExpressions.Generated.Utilities.WordCharBitmap">
+            <summary>Gets a bitmap for whether each character 0 through 127 is in [\w]</summary>
+        </member>
+        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_ascii_FFC1FFFFFEFE00FCFFFFFEFFFFFFFEFF">
+            <summary>Supports searching for characters in or not in "\0\u0001\u0002\u0003\u0004\u0005\u0006\a\b\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f!\"#$%&amp;')*+,-./:;&lt;=&gt;?@ABCDEFGHIJKLMNOQRSTUVWXYZ[\\]^_`abcdefghijklmnoqrstuvwxyz{|}~\u007f".</summary>
+        </member>
+    </members>
+</doc>

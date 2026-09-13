@@ -17,9 +17,10 @@ public partial class MonthYearSelectionPage : ContentPage
 
     public event EventHandler<MonthYearSelectedEventArgs>? PeriodSelected;
 
-    public MonthYearSelectionPage(int? selectedMonth, int? selectedYear)
+    public MonthYearSelectionPage(int? selectedMonth, int? selectedYear, bool allowAllPeriods = true)
     {
         InitializeComponent();
+        AllPeriodsButton.IsVisible = allowAllPeriods;
         _selectedMonth = selectedMonth;
         _selectedYear = selectedYear;
         _year = selectedYear ?? DateTime.Today.Year;

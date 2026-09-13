@@ -8,7 +8,7 @@ public partial class PaymentReversalPage : ContentPage
 {
     private readonly DatabaseService _database;
     private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("pt-BR");
-    private List<CategoryItem> _categories = [];
+    private List<SubcategoryItem> _categories = [];
     private List<Fornecedor> _suppliers = [];
     private List<CardItem> _cards = [];
     private List<ContaPagar> _items = [];
@@ -27,7 +27,7 @@ public partial class PaymentReversalPage : ContentPage
         base.OnAppearing();
         if (_categories.Count == 0)
         {
-            _categories = await _database.GetCategoriesAsync("despesa");
+            _categories = await _database.GetSubcategoriesAsync(type: "despesa");
             _suppliers = await _database.GetSuppliersAsync();
             _cards = await _database.GetCardsAsync();
         }

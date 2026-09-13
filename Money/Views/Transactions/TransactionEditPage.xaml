@@ -69,7 +69,7 @@
                                                 TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontAttributes="Bold"
                                                 HorizontalOptions="Fill" BorderWidth="0"
                                                 Clicked="OnTransactionDateClicked"/>
-                                        <DatePicker x:Name="TransactionDatePicker" IsVisible="False"/>
+                                        <controls:ThemedDateSelector x:Name="TransactionDatePicker" IsVisible="False"/>
                                     </Grid>
                                 </Border>
                             </VerticalStackLayout>
@@ -77,13 +77,15 @@
 
                         <!-- Categoria -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Categoria" Style="{StaticResource CardCaption}" 
+                            <Label Text="Categoria principal" Style="{StaticResource CardCaption}"/>
+                            <Button x:Name="MainCategorySelectionButton" Text="Selecione a categoria" MinimumHeightRequest="48" Clicked="OnSelectMainCategoryClicked" SemanticProperties.Description="Selecionar categoria principal"/>
+                            <Label Text="Subcategoria" Style="{StaticResource CardCaption}" 
                                    TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontAttributes="Bold"/>
                             <Border Stroke="{StaticResource BlingPrimary}" StrokeThickness="2"
                                     StrokeShape="RoundRectangle 12" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
                                     Padding="0" HeightRequest="48">
                                 <Grid>
-                                    <controls:LeftAlignedFieldButton x:Name="CategorySelectionButton" Text="Selecione a categoria" Style="{StaticResource LeftAlignedFieldButton}"
+                                    <controls:LeftAlignedFieldButton x:Name="CategorySelectionButton" Text="Selecione a subcategoria" Style="{StaticResource LeftAlignedFieldButton}"
                                             ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=BlingPrimary, IconSize=20}"
                                             BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
                                             FontAttributes="Bold" HorizontalOptions="Fill" BorderWidth="0"
@@ -166,7 +168,7 @@
                                             TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}" FontAttributes="Bold"
                                             HorizontalOptions="Fill" BorderWidth="0"
                                             Clicked="OnDueDateClicked"/>
-                                    <DatePicker x:Name="DueDatePicker" IsVisible="False"/>
+                                    <controls:ThemedDateSelector x:Name="DueDatePicker" IsVisible="False"/>
                                 </Grid>
                             </Border>
                         </VerticalStackLayout>
@@ -183,7 +185,7 @@
                                             Toggled="OnPaidToggled"/>
                                 </Grid>
                                 <Border x:Name="PaymentDateBorder" IsVisible="False" Style="{StaticResource InputContainer}">
-                                    <DatePicker x:Name="PaymentDatePicker" Format="dd/MM/yyyy"/>
+                                    <controls:ThemedDateSelector x:Name="PaymentDatePicker" Format="dd/MM/yyyy"/>
                                 </Border>
                             </VerticalStackLayout>
                         </Border>
@@ -242,7 +244,7 @@
                                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                                         <Label Text="Primeira parcela" Style="{StaticResource CardCaption}"/>
                                         <Border Style="{StaticResource InputContainer}">
-                                            <DatePicker x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"
+                                            <controls:ThemedDateSelector x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"
                                                         DateSelected="OnFirstInstallmentDateSelected"/>
                                         </Border>
                                     </VerticalStackLayout>

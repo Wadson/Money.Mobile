@@ -1,0 +1,5 @@
+  Determinando os projetos a serem restaurados...
+D:\Projetos\Money.Mobile\Money\Money.csproj : warning NU1900: Ocorreu um erro ao obter os dados de vulnerabilidade do pacote: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente. (127.0.0.1:9)
+  D:\Projetos\Money.Mobile\Money\Money.csproj restaurado (em 19,66 seg).
+D:\Projetos\Money.Mobile\Money\Money.csproj : warning NU1900: Ocorreu um erro ao obter os dados de vulnerabilidade do pacote: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente. (127.0.0.1:9) [TargetFramework=net10.0-android]
+  XAML source generation is enabled (MauiXamlInflator=SourceGen). This generates C# code from XAML at compile time for better performance. To disable, remove the MauiXamlInflator line from your .csproj file (reverts to configuration-based defaults: Runtime in Debug, XamlC in Release).

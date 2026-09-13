@@ -1,3 +1,4 @@
+using MauiIcons.Core;
 using System.Globalization;
 using MauiIcons.Material;
 using Money.Models;
@@ -11,7 +12,8 @@ public partial class TransactionEditPage : ContentPage
     private readonly long _id;
     private readonly string _type;
     private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("pt-BR");
-    private List<CategoryItem> _categories = [];
+    private long? _mainCategoryId;
+    private List<SubcategoryItem> _categories = [];
     private List<TagItem> _tags = [];
     private List<Fornecedor> _suppliers = [];
     private List<AccountItem> _accounts = [];
@@ -31,6 +33,17 @@ public partial class TransactionEditPage : ContentPage
     public TransactionEditPage(DatabaseService database, long id, string type)
     {
         InitializeComponent();
+        CategoryPicker.SelectedIndexChanged += (_, _) =>
+        {
+            var index = CategoryPicker.SelectedIndex;
+            if (index < 0 || index >= _categories.Count) return;
+            var sub = _categories[index];
+            _mainCategoryId = sub.MainCategoryId;
+            MainCategorySelectionButton.Text = sub.MainCategoryName;
+            CategorySelectionButton.Text = sub.Name;
+            CategorySelectionButton.ImageSource = CategoryVisualResolver.Icon(sub).ToImageSource(CategoryVisualResolver.Foreground(sub), 24);
+        };
+
         _database = database;
         _id = id;
         _type = type;
@@ -48,7 +61,7 @@ public partial class TransactionEditPage : ContentPage
         try
         {
             var data = await _database.GetTransactionForEditAsync(_id, _type);
-            _categories = await _database.GetCategoriesAsync(_type);
+            _categories = await _database.GetSubcategoriesAsync(type: _type, includeInactive: true);
             _tags = await _database.GetTagsAsync();
             _suppliers = await _database.GetSuppliersAsync();
             _accounts = await _database.GetAccountsAsync();
@@ -270,7 +283,7 @@ public partial class TransactionEditPage : ContentPage
         }
     }
 
-    private void OnFirstInstallmentDateSelected(object? sender, DateChangedEventArgs e)
+    private void OnFirstInstallmentDateSelected(object? sender, EventArgs e)
     {
         if (_updatingFirstInstallmentDate) return;
         if (!_existingInstallment)
@@ -286,7 +299,7 @@ public partial class TransactionEditPage : ContentPage
             return;
         }
         var firstNumber = _installmentSchedule.Min(x => x.Number);
-        var selectedDate = (e.NewDate ?? e.OldDate ?? DateTime.Today).Date;
+        var selectedDate = (FirstInstallmentDatePicker.Date ?? DateTime.Today).Date;
         foreach (var installment in _installmentSchedule)
         {
             var dueDate = selectedDate.AddMonths(installment.Number - firstNumber);
@@ -399,16 +412,33 @@ public partial class TransactionEditPage : ContentPage
             InstallmentStepper.Value = Math.Min(InstallmentStepper.Maximum, InstallmentStepper.Value + 1);
     }
 
+    private async void OnSelectMainCategoryClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            var parents = await _database.GetMainCategoriesAsync(_type);
+            var page = new OptionSelectionPage("Categoria principal", parents.Select((x,i)=>CategoryVisualResolver.Option(x,i,x.Id==_mainCategoryId)));
+            page.Selected += (_, option) =>
+            {
+                var main = parents[option.Index];
+                _mainCategoryId = main.Id;
+                MainCategorySelectionButton.Text = main.Name;
+                MainCategorySelectionButton.ImageSource = CategoryVisualResolver.Icon(main).ToImageSource(CategoryVisualResolver.Foreground(main),24);
+                CategoryPicker.SelectedIndex = -1;
+                CategorySelectionButton.Text = "Selecione a subcategoria";
+            };
+            await Navigation.PushModalAsync(page);
+        }
+        catch(Exception ex) { await ThemedDialog.ShowAsync(this,"Categorias",ex.Message); }
+    }
     private async void OnSelectCategoryClicked(object? sender, EventArgs e)
     {
-        var options = _categories.Select((category, index) =>
-            CategoryVisualResolver.Option(category, index, CategoryPicker.SelectedIndex == index)).ToList();
-        var page = new OptionSelectionPage("Selecione a categoria", options);
-        page.Selected += (_, option) =>
-        {
-            CategoryPicker.SelectedIndex = option.Index;
-            CategorySelectionButton.Text = options[option.Index].Label;
-        };
+        if (_mainCategoryId is null) { OnSelectMainCategoryClicked(sender,e); return; }
+        var options = _categories.Select((x,i)=>(Item:x,Index:i))
+            .Where(x=>x.Item.MainCategoryId==_mainCategoryId && x.Item.Active)
+            .Select(x=>CategoryVisualResolver.Option(x.Item,x.Index,CategoryPicker.SelectedIndex==x.Index));
+        var page = new OptionSelectionPage("Subcategoria",options);
+        page.Selected += (_,option)=>CategoryPicker.SelectedIndex=option.Index;
         await Navigation.PushModalAsync(page);
     }
 

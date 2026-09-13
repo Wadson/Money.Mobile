@@ -1,0 +1,623 @@
+{
+  "before": 28,
+  "after": 29,
+  "integrity": [
+    [
+      "ok"
+    ]
+  ],
+  "foreign_keys": [],
+  "preserved": {
+    "Transacoes": {
+      "old_rows": 306,
+      "lost_or_changed": 0
+    },
+    "Orcamentos": {
+      "old_rows": 0,
+      "lost_or_changed": 0
+    },
+    "MovimentosConta": {
+      "old_rows": 7,
+      "lost_or_changed": 0
+    },
+    "Contas": {
+      "old_rows": 3,
+      "lost_or_changed": 0
+    },
+    "CategorySeed26": {
+      "old_rows": 3,
+      "lost_or_changed": 0
+    },
+    "CategoryLegacy26": {
+      "old_rows": 293,
+      "lost_or_changed": 0
+    },
+    "CategoryMappingLegacy26": {
+      "old_rows": 69,
+      "lost_or_changed": 0
+    },
+    "CategoryMigration26Log": {
+      "old_rows": 293,
+      "lost_or_changed": 0
+    },
+    "CategoryCatalogRepair27": {
+      "old_rows": 3,
+      "lost_or_changed": 0
+    },
+    "Logs": {
+      "lost_or_changed": 0
+    },
+    "category_ids": {
+      "lost": 0
+    },
+    "pillar_mappings": {
+      "lost_or_changed": 0
+    }
+  },
+  "catalog": [
+    [
+      "Saúde",
+      "MedicalServices",
+      "Academia",
+      "FitnessCenter"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Acessórios",
+      "Watch"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Adiantamento Salarial",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Ajuda Familiar",
+      "Payments"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Aluguel",
+      "Key"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Aluguel Recebido",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Assinaturas",
+      "Sell"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Bonificações",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Bônus",
+      "Payments"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Calçados",
+      "Checkroom"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Casa",
+      "Sell"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Cashback",
+      "Payments"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Celular/Linha",
+      "Smartphone"
+    ],
+    [
+      "Lazer",
+      "Movie",
+      "Cinema",
+      "Movie"
+    ],
+    [
+      "Transporte",
+      "DirectionsCar",
+      "Combustível",
+      "LocalGasStation"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Comissões",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "ComprasMaria",
+      "Sell"
+    ],
+    [
+      "Outros",
+      "Category",
+      "ComprasYago",
+      "Sell"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Condomínio",
+      "Apartment"
+    ],
+    [
+      "Saúde",
+      "MedicalServices",
+      "Consultas Médicas",
+      "MedicalServices"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Consórcios",
+      "Groups"
+    ],
+    [
+      "Educação",
+      "School",
+      "Cursos",
+      "MenuBook"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Decoração",
+      "Chair"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Dividendos",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Doações",
+      "VolunteerActivism"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Doações Recebidas",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Décimo Terceiro",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Dízimos",
+      "Church"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Eletrônicos",
+      "Devices"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Energia Elétrica",
+      "Bolt"
+    ],
+    [
+      "Saúde",
+      "MedicalServices",
+      "Exames",
+      "Biotech"
+    ],
+    [
+      "Saúde",
+      "MedicalServices",
+      "Farmácia",
+      "LocalPharmacy"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Freelance",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Férias",
+      "Payments"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Gás",
+      "LocalFireDepartment"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Herança",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Horas Extras",
+      "Payments"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Impostos",
+      "ReceiptLong"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Indenizações",
+      "Payments"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Informática",
+      "Computer"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Internet",
+      "Wifi"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Investimentos",
+      "TrendingUp"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Investimentos",
+      "Payments"
+    ],
+    [
+      "Lazer",
+      "Movie",
+      "Jogos",
+      "SportsEsports"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Juros Recebidos",
+      "Payments"
+    ],
+    [
+      "Alimentação",
+      "Restaurant",
+      "Lanches",
+      "Fastfood"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Lavanderia",
+      "LocalLaundryService"
+    ],
+    [
+      "Educação",
+      "School",
+      "Livros",
+      "MenuBook"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Manutenção Residencial",
+      "Build"
+    ],
+    [
+      "Transporte",
+      "DirectionsCar",
+      "Manutenção Veículo",
+      "Build"
+    ],
+    [
+      "Educação",
+      "School",
+      "Material Escolar",
+      "Edit"
+    ],
+    [
+      "Educação",
+      "School",
+      "Mensalidade Escolar",
+      "School"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Mesada",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Mesada Filhos",
+      "Sell"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Moradia",
+      "Sell"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Multas",
+      "Gavel"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Móveis",
+      "Chair"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Outras Despesas",
+      "MoreHoriz"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Outras Receitas",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Outros (importado)",
+      "Sell"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Outros (importado)",
+      "Payments"
+    ],
+    [
+      "Lazer",
+      "Movie",
+      "Passeios",
+      "Public"
+    ],
+    [
+      "Animais de Estimação",
+      "Pets",
+      "Pet Shop",
+      "Pets"
+    ],
+    [
+      "Saúde",
+      "MedicalServices",
+      "Plano de Saúde",
+      "HealthAndSafety"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Presentes",
+      "CardGiftcard"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Prêmios",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Reembolso",
+      "Payments"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Reforma/Reparo",
+      "HomeRepairService"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Rendimentos de Investimentos",
+      "Payments"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Reserva Financeira",
+      "Savings"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Resgate de Investimentos",
+      "Payments"
+    ],
+    [
+      "Alimentação",
+      "Restaurant",
+      "Restaurantes",
+      "Restaurant"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Restituição de Imposto",
+      "Payments"
+    ],
+    [
+      "Compras",
+      "ShoppingBag",
+      "Roupas",
+      "Checkroom"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Salário",
+      "Payments"
+    ],
+    [
+      "Transporte",
+      "DirectionsCar",
+      "Seguro Veículo",
+      "Shield"
+    ],
+    [
+      "Outros",
+      "Category",
+      "Serviços",
+      "Sell"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Serviços Domésticos",
+      "CleaningServices"
+    ],
+    [
+      "Lazer",
+      "Movie",
+      "Streaming",
+      "LiveTv"
+    ],
+    [
+      "Alimentação",
+      "Restaurant",
+      "Supermercado",
+      "ShoppingCart"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Tarifas Bancárias",
+      "AccountBalance"
+    ],
+    [
+      "Financeiro",
+      "AccountBalanceWallet",
+      "Taxas",
+      "RequestQuote"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Telefone",
+      "Phone"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Trabalho Autônomo",
+      "Payments"
+    ],
+    [
+      "Transporte",
+      "DirectionsCar",
+      "Transporte Público",
+      "DirectionsBus"
+    ],
+    [
+      "Transporte",
+      "DirectionsCar",
+      "Uber / Táxi",
+      "LocalTaxi"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Venda de Bens",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Venda de Produtos",
+      "Payments"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "Venda de Serviços",
+      "Payments"
+    ],
+    [
+      "Animais de Estimação",
+      "Pets",
+      "Veterinário",
+      "MedicalServices"
+    ],
+    [
+      "Lazer",
+      "Movie",
+      "Viagens",
+      "Flight"
+    ],
+    [
+      "Receitas",
+      "Payments",
+      "YagoContas",
+      "Payments"
+    ],
+    [
+      "Outros",
+      "Category",
+      "iConnect",
+      "Sell"
+    ],
+    [
+      "Casa/Moradia",
+      "House",
+      "Água",
+      "WaterDrop"
+    ]
+  ]
+}

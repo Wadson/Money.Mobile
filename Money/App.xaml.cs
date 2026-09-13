@@ -61,14 +61,8 @@ public partial class App : Application
                     _resourceLoadException);
 
             await _auth.InitializeAsync();
-            // Modo local de usuário único. O fluxo de login permanece disponível para reativação futura.
-            var settings = await _database.GetSettingsAsync();
-            UserAppTheme = settings.Theme switch
-            {
-                "Escuro" => AppTheme.Dark,
-                "Claro" => AppTheme.Light,
-                _ => AppTheme.Unspecified
-            };
+            // Antes do login, nenhum dado ou preferência pessoal é consultado.
+            UserAppTheme = AppTheme.Unspecified;
 
             // Cada nova abertura exige autenticação; a sessão vale apenas para a janela atual.
             _auth.Logout();
@@ -104,10 +98,24 @@ public partial class App : Application
         }
     }
 
-    public void ShowAuthenticatedArea()
+    public async void ShowAuthenticatedArea()
     {
-        if (Windows.Count > 0)
+        if (Windows.Count == 0) return;
+        try
+        {
+            var settings = await _database.GetSettingsAsync();
+            UserAppTheme = settings.Theme switch
+            {
+                "Escuro" => AppTheme.Dark,
+                "Claro" => AppTheme.Light,
+                _ => AppTheme.Unspecified
+            };
             Windows[0].Page = CreateAuthenticatedShell();
+        }
+        catch (Exception)
+        {
+            ShowLogin();
+        }
     }
 
     public void ShowLogin()

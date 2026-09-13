@@ -10,8 +10,8 @@ public partial class PayablesCsvImportPage : ContentPage
 {
     private readonly DatabaseService _database;
     private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("pt-BR");
-    private List<AccountItem> _accounts = [];
-    private List<CategoryItem> _categories = [];
+
+    private List<SubcategoryItem> _categories = [];
     private List<PayableImportRow> _rows = [];
     private string _fileName = "";
     public event EventHandler? Imported;
@@ -21,13 +21,10 @@ public partial class PayablesCsvImportPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (_accounts.Count > 0) return;
-        _accounts = await _database.GetAccountsAsync();
-        _categories = await _database.GetCategoriesAsync("despesa");
-        AccountPicker.ItemsSource = _accounts.Select(x => x.Name).ToList();
-        AccountPicker.SelectedIndex = _accounts.Count > 0 ? 0 : -1;
+        if (_categories.Count > 0) return;
+        try { _categories = await _database.GetSubcategoriesAsync(type: "despesa"); }
+        catch (Exception ex) { await ThemedDialog.ShowAsync(this, "Falha ao carregar", SqliteErrorMessage.ToFriendly(ex)); }
     }
-
     private async void OnPickFileClicked(object? sender, EventArgs e)
     {
         var file = await FilePicker.Default.PickAsync(new PickOptions
@@ -43,13 +40,13 @@ public partial class PayablesCsvImportPage : ContentPage
         try
         {
             using var reader = new StreamReader(await file.OpenReadAsync(), Encoding.UTF8, true);
-            _rows = Parse(await reader.ReadToEndAsync());
+            var content = await reader.ReadToEndAsync(); _rows = Parse(content);
             _fileName = file.FileName;
-            FileLabel.Text = file.FileName;
+            FileLabel.Text = file.FileName + (content.Split('\n')[0].Contains("Subcategoria", StringComparison.OrdinalIgnoreCase) ? "" : " · Formato legado: Categoria identificada como subcategoria");
             PreviewList.ItemsSource = _rows;
             var valid = _rows.Count(x => x.IsValid);
             SummaryLabel.Text = $"{_rows.Count} linha(s) · {valid} válida(s) · {_rows.Count - valid} com erro";
-            ImportButton.IsEnabled = valid > 0 && valid == _rows.Count && AccountPicker.SelectedIndex >= 0;
+            ImportButton.IsEnabled = valid > 0 && valid == _rows.Count;
         }
         catch (Exception ex) { await ThemedDialog.ShowAsync(this, "CSV inválido", ex.Message, "Fechar"); }
     }
@@ -98,21 +95,22 @@ public partial class PayablesCsvImportPage : ContentPage
             if (amount <= 0) errors.Add("Valor deve ser maior que zero");
             if (!DateTime.TryParseExact(Cell(cells, "DataVencimento"), ["dd/MM/yyyy", "yyyy-MM-dd"], _culture, DateTimeStyles.None, out var due)) errors.Add("Data de vencimento inválida");
             var categoryName = Cell(cells, "Categoria");
-            var category = _categories.FirstOrDefault(x => Normalize(x.Name) == Normalize(categoryName));
+            SubcategoryItem? category = null;
+            try { category = DatabaseService.ResolveImportedSubcategory(_categories, categoryName, Cell(cells, "Subcategoria")); }
+            catch (InvalidDataException ex) { errors.Add(ex.Message); }
             if (category is null) errors.Add($"Categoria não cadastrada: {categoryName}");
-            result.Add(new PayableImportRow { LineNumber = i + 1, Description = description, Amount = amount, DueDate = due, Category = categoryName, CategoryId = category?.Id, Supplier = Cell(cells, "Fornecedor"), Notes = Cell(cells, "Observacoes"), Error = string.Join(" · ", errors) });
+            result.Add(new PayableImportRow { LineNumber = i + 1, Description = description, Amount = amount, DueDate = due, Category = category?.DisplayName ?? categoryName, CategoryId = category?.Id, Supplier = Cell(cells, "Fornecedor"), Notes = Cell(cells, "Observacoes"), Error = string.Join(" · ", errors) });
         }
         return result;
     }
 
     private async void OnImportClicked(object? sender, EventArgs e)
     {
-        if (AccountPicker.SelectedIndex < 0) { await ThemedDialog.ShowAsync(this, "Selecione uma conta", "Escolha a conta associada aos lançamentos."); return; }
         if (_rows.Any(x => !x.IsValid)) { await ThemedDialog.ShowAsync(this, "Corrija o arquivo", "Todas as linhas precisam estar válidas antes da importação."); return; }
         if (!await ThemedDialog.ConfirmAsync(this, "Confirmar importação", $"Importar {_rows.Count} conta(s) a pagar?", "Importar")) return;
         try
         {
-            await _database.ImportPayablesAsync(_rows, _accounts[AccountPicker.SelectedIndex].Id, _fileName);
+            await _database.ImportPayablesAsync(_rows, 0, _fileName);
             await ThemedDialog.ShowAsync(this, "Importação concluída", $"{_rows.Count} conta(s) importada(s) com sucesso!");
             Imported?.Invoke(this, EventArgs.Empty); await Navigation.PopModalAsync();
         }

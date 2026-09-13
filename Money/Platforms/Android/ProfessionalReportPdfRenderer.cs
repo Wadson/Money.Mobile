@@ -128,7 +128,7 @@ internal static class ProfessionalReportPdfRenderer
                 BlingPalette.TextDarkHex, Paint.Align.Center, true);
         }
 
-        foreach (var group in items.GroupBy(item => item.Category))
+        foreach (var group in items.GroupBy(item => item.MainCategory))
         {
             Ensure(45);
             Box(Margin, y, Width - Margin, y + 21, "#EDF9F2");
@@ -140,7 +140,7 @@ internal static class ProfessionalReportPdfRenderer
             {
                 Ensure(22);
                 Text(item.Date.ToString("dd/MM/yy"), Margin + 4, y + 14, 6.8f, BlingPalette.TextDarkHex);
-                Text(Cut(item.Description, 27), Margin + 58, y + 14, 7, BlingPalette.TextDarkHex);
+                Text(Cut(item.Subcategory + ": " + item.Description, 27), Margin + 58, y + 14, 7, BlingPalette.TextDarkHex);
                 Text(Cut(item.Source, 18), Margin + 210, y + 14, 6.8f, BlingPalette.TextDarkHex);
                 Text(item.TotalInstallments > 1 ? $"{item.InstallmentNumber}/{item.TotalInstallments}" : "—",
                     Margin + 315, y + 14, 6.8f, BlingPalette.TextDarkHex);

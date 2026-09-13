@@ -2,7 +2,7 @@ using Money.Models;
 
 namespace Money.Services;
 
-/// <summary>Centraliza realizado, comprometido e projeção acumulada sem alterar saldos reais.</summary>
+/// <summary>Centraliza projeções mensais independentes pela data de vencimento.</summary>
 public sealed class FinancialForecastService(DatabaseService database)
 {
     public async Task<FinancialProjectionSummary> CalculateAsync(DateTime firstMonth, int monthCount)
@@ -10,14 +10,7 @@ public sealed class FinancialForecastService(DatabaseService database)
         if (monthCount is < 1 or > 24) throw new ArgumentOutOfRangeException(nameof(monthCount));
         firstMonth = new DateTime(firstMonth.Year, firstMonth.Month, 1);
         var end = firstMonth.AddMonths(monthCount);
-        var today = DateTime.Today;
-        var currentBalance = await database.GetTotalActiveAccountsBalanceAsync();
         var events = await database.GetFinancialProjectionEventsAsync(firstMonth, end);
-
-        // O saldo real atual já contém todos os recebimentos/pagamentos realizados.
-        // A projeção parte desse saldo e aplica somente eventos ainda pendentes,
-        // evitando contabilizar novamente movimentações já efetivadas.
-        var projectedBalance = currentBalance;
         var result = new List<MonthlyFinancialProjection>(monthCount);
         for (var index = 0; index < monthCount; index++)
         {
@@ -28,17 +21,17 @@ public sealed class FinancialForecastService(DatabaseService database)
             var expectedIncome = monthly.Where(x => x.Type == "receita" && !x.Realized).Sum(x => x.Amount);
             var paidExpenses = monthly.Where(x => x.Type == "despesa" && x.Realized).Sum(x => x.Amount);
             var expectedExpenses = monthly.Where(x => x.Type == "despesa" && !x.Realized).Sum(x => x.Amount);
-            var opening = projectedBalance;
-            foreach (var item in monthly.Where(x => !x.Realized && x.Date.Date >= today).OrderBy(x => x.Date).ThenBy(x => x.Id))
-                projectedBalance += item.Type == "receita" ? item.Amount : -item.Amount;
-            var risk = Classify(projectedBalance, currentBalance);
-            result.Add(new(month,opening,realizedIncome,expectedIncome,paidExpenses,expectedExpenses,
-                realizedIncome-paidExpenses,expectedIncome-expectedExpenses,
-                realizedIncome-paidExpenses,projectedBalance,risk));
+            var income = realizedIncome + expectedIncome;
+            var expenses = paidExpenses + expectedExpenses;
+            var monthlyResult = decimal.Round(income - expenses, 2, MidpointRounding.AwayFromZero);
+            var risk = Classify(monthlyResult, income);
+            var realizedResult = decimal.Round(realizedIncome - paidExpenses, 2, MidpointRounding.AwayFromZero);
+            result.Add(new(month,0m,realizedIncome,expectedIncome,paidExpenses,expectedExpenses,
+                realizedResult,monthlyResult,realizedResult,monthlyResult,risk));
         }
         var minimum = result.Count == 0 ? 0m : result.Min(x => x.ProjectedClosingBalance);
         var firstRisk = result.FirstOrDefault(x => x.Risk != FinancialProjectionRisk.Safe)?.Month;
-        return new(currentBalance,result,Classify(minimum,0m),firstRisk,minimum);
+        return new(0m,result,Classify(minimum,0m),firstRisk,minimum);
     }
 
     private static FinancialProjectionRisk Classify(decimal projectedBalance, decimal currentBalance)

@@ -34,16 +34,10 @@ public partial class DataCleanupPage : ContentPage
             Add("Transacoes", "Lançamentos e despesas", "Despesas, parcelas e pagamentos", MaterialIcons.ReceiptLong, counts);
             Add("Receitas", "Receitas e salários", "Entradas financeiras e salários", MaterialIcons.TrendingUp, counts);
             Add("FaturasCartao", "Faturas de cartão", "Histórico de faturas", MaterialIcons.RequestQuote, counts);
-            Add("Contas", "Contas e carteiras", "Contas bancárias e saldos", MaterialIcons.AccountBalanceWallet, counts);
             Add("CartoesCredito", "Cartões de crédito", "Cartões e limites cadastrados", MaterialIcons.CreditCard, counts);
             Add("Fornecedores", "Fornecedores", "Cadastros de fornecedores", MaterialIcons.Storefront, counts);
-            Add("Metas", "Metas financeiras", "Objetivos e aportes", MaterialIcons.Flag, counts);
-            Add("Orcamentos", "Orçamentos", "Planejamento mensal", MaterialIcons.PieChart, counts);
-            Add("Lembretes", "Lembretes", "Pendências e lembretes", MaterialIcons.Notifications, counts);
             Add("Notificacoes", "Notificações", "Histórico de avisos", MaterialIcons.NotificationsActive, counts);
-            Add("Importacoes", "Importações", "Histórico de arquivos importados", MaterialIcons.UploadFile, counts);
             Add("Logs", "Logs de auditoria", "Registros de ações", MaterialIcons.History, counts);
-            Add("Tags", "Tags e vínculos", "Tags e associações com lançamentos", MaterialIcons.Sell, counts);
             UpdateSelectionState();
         }
         catch (Exception ex)

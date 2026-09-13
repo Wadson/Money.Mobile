@@ -1,0 +1,90 @@
+PASS fresh database migration
+PASS financial access requires explicit user
+PASS local identity must be explicitly configured and active
+PASS future schema is rejected before any mutation
+PASS cards
+PASS card analysis
+PASS payables
+PASS reports
+PASS dashboard
+PASS monthly overview
+PASS forecast
+PASS settings
+PASS notifications
+PASS cleanup counts
+PASS card insert
+PASS supplier insert
+PASS expense insert
+PASS expense edit load
+PASS payable filters
+PASS report filters
+PASS expense update without bank account
+PASS PDF generation
+PASS empty PDF
+PASS payment atomic rollback
+PASS payment
+PASS payment reversal
+PASS installments
+PASS invoices generation
+PASS invoices payment
+PASS paid expense deletion blocked
+PASS delete expense after reversal
+PASS income insert and edit
+PASS payables CSV import
+PASS card CSV installments
+PASS repair missing card color on existing schema
+PASS repeat initialization preserves data
+PASS integrity
+PASS cleanup rollback and selective deletion
+PASS card alteration
+PASS card deletion respects current user
+PASS card deletion with invoices and installments
+PASS existing database upgrade preserves expenses
+PASS backup captures committed WAL pages with connection open
+PASS restore replaces data with open connection and preserves previous snapshot
+PASS invalid backup is rejected without changing current database
+PASS SQLite with only Usuarios is rejected
+PASS future schema and broken foreign keys are rejected
+PASS duplicate login names require email and logout clears financial user
+PASS email login selects the intended user despite duplicate names
+PASS moneyproNovo restore and restart retain all transactions for correct user
+PASS forecast separates received, pending, paid and total by due month
+PASS forecast selected month is unaffected by a negative adjacent month
+PASS forecast supports distant future and empty past months
+PASS forecast pending amounts update after receiving and paying
+PASS forecast counts installments without duplicating the parent
+PASS category schema v29 and no recursive hierarchy
+PASS catalog and Material icons: Alimentação
+PASS catalog and Material icons: Animais de Estimação
+PASS catalog and Material icons: Casa/Moradia
+PASS catalog and Material icons: Compras
+PASS catalog and Material icons: Educação
+PASS catalog and Material icons: Financeiro
+PASS catalog and Material icons: Lazer
+PASS catalog and Material icons: Saúde
+PASS catalog and Material icons: Transporte
+PASS catalog and Material icons: Outros
+PASS catalog and Material icons: Receitas
+PASS create main category
+PASS create subcategory with inherited color
+PASS main category is required
+PASS subcategory type must match
+PASS normalized main duplicate rejected
+PASS normalized child duplicate rejected
+PASS same child name permitted under another main
+PASS foreign user cannot read or mutate categories
+PASS main type change with children rejected
+PASS expense stores and edits subcategory ID
+PASS category filters total 450 and subcategory 300
+PASS dashboard groups main categories
+PASS new and legacy CSV resolve exact child
+PASS ambiguous legacy CSV rejected
+PASS deactivation preserves history and blocks new selections
+PASS inactive child rejected for new transaction
+PASS monthly budget retains subcategory relationship
+PASS history prevents deletion
+PASS main with children cannot be deleted
+PASS unused category and child can be deleted
+PASS pillar customization and seed idempotence
+PASS migration repeat preserves IDs logs and integrity
+RESULT 89 passed / 0 failed; database: C:\Users\WRSoft\AppData\Local\Temp\MoneyAudit\5b7f399fc08142178361b1e720bee11c\existing-copy\financeiro.db

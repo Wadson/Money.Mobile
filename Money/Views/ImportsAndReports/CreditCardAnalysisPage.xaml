@@ -5,7 +5,6 @@
              xmlns:icons="clr-namespace:Money.Helpers"
              xmlns:controls="clr-namespace:Money.Controls"
              xmlns:models="clr-namespace:Money.Models"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="Money.Views.ImportsAndReports.CreditCardAnalysisPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="Auto,*">
@@ -21,6 +20,7 @@
         <RefreshView x:Name="RefreshContent" Grid.Row="1" Refreshing="OnRefresh">
             <ScrollView>
                 <VerticalStackLayout Padding="16,16,16,30" Spacing="16">
+                    <Button Text="Cadastro de cartões" Style="{StaticResource PrimaryButton}" Clicked="OnManageCardsClicked"/>
                     <Border Style="{StaticResource ContentCard}" Padding="10">
                         <Grid ColumnDefinitions="44,*,44">
                             <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingText, IconSize=24}" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="12" Clicked="OnPreviousMonthClicked"/>
@@ -136,13 +136,6 @@
                                         VerticalOptions="Center"
                                         Clicked="OnGenerateInvoicesClicked" ImageSource="{icons:MaterialIconSource Icon=Refresh, ColorResource=BlingPrimary, IconSize=20}"/>
                             </Grid>
-                            <Label Text="Conta para pagamento" Style="{StaticResource CardCaption}" FontAttributes="Bold"/>
-                            <Border Style="{StaticResource InputContainer}">
-                                <controls:LeftAlignedFieldButton x:Name="PaymentAccountButton" Text="Selecione a conta" Style="{StaticResource LeftAlignedFieldButton}"
-                                        ImageSource="{icons:MaterialIconSource Icon=AccountBalanceWallet, ColorResource=BlingPrimary, IconSize=20}"
-                                        BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingTextDarkDark}}"
-                                        BorderWidth="0" FontAttributes="Bold" Clicked="OnSelectPaymentAccountClicked"/>
-                            </Border>
                             <VerticalStackLayout x:Name="InvoicesContainer" Spacing="12"/>
                             <VerticalStackLayout x:Name="InvoiceDetailsContainer" IsVisible="False" Spacing="7"/>
                         </VerticalStackLayout>

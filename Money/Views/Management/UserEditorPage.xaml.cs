@@ -1,5 +1,7 @@
 using Money.Models;
 using Money.Services;
+using MauiIcons.Core;
+using MauiIcons.Material;
 
 namespace Money.Views.Management;
 
@@ -34,7 +36,17 @@ public partial class UserEditorPage : ContentPage
         await ThemedDialog.ShowAsync(this, "Usuário salvo", result.Message);
         Saved?.Invoke(this, EventArgs.Empty); await Navigation.PopModalAsync();
     }
-    private void OnPasswordEyeClicked(object? s, EventArgs e) { PasswordEntry.IsPassword=!PasswordEntry.IsPassword; PasswordEye.Text=PasswordEntry.IsPassword?"👁":"🙈"; }
-    private void OnConfirmationEyeClicked(object? s, EventArgs e) { ConfirmationEntry.IsPassword=!ConfirmationEntry.IsPassword; ConfirmationEye.Text=ConfirmationEntry.IsPassword?"👁":"🙈"; }
+    private void OnPasswordEyeClicked(object? s, EventArgs e)
+    {
+        PasswordEntry.IsPassword = !PasswordEntry.IsPassword;
+        PasswordEye.ImageSource = (PasswordEntry.IsPassword ? MaterialIcons.Visibility : MaterialIcons.VisibilityOff)
+            .ToImageSource(ThemeColor.Get("BlingPrimary"), 20);
+    }
+    private void OnConfirmationEyeClicked(object? s, EventArgs e)
+    {
+        ConfirmationEntry.IsPassword = !ConfirmationEntry.IsPassword;
+        ConfirmationEye.ImageSource = (ConfirmationEntry.IsPassword ? MaterialIcons.Visibility : MaterialIcons.VisibilityOff)
+            .ToImageSource(ThemeColor.Get("BlingPrimary"), 20);
+    }
     private async void OnBackClicked(object? sender, EventArgs e) => await Navigation.PopModalAsync();
 }

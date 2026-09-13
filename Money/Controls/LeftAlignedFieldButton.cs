@@ -1,7 +1,7 @@
 namespace Money.Controls;
 
 /// <summary>Campo de seleção com conteúdo fixado ao início no controle nativo.</summary>
-public sealed class LeftAlignedFieldButton : Button
+public class LeftAlignedFieldButton : Button
 {
     protected override void OnHandlerChanged()
     {

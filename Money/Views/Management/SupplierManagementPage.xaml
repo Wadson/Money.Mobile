@@ -7,13 +7,13 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
              Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="Auto,Auto,*">
-        <Grid Padding="16,14" ColumnDefinitions="44,*,44" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}">
+        <Grid Padding="16,14" ColumnDefinitions="44,*,Auto" BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}">
             <ImageButton Source="{icons:MaterialIconSource Icon=ArrowBack, ColorResource=BlingTextLight, IconSize=24}" BackgroundColor="Transparent" Clicked="OnBackClicked"/>
             <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="0">
                 <Label Text="Fornecedores" TextColor="White" FontSize="20" FontAttributes="Bold"/>
                 <Label Text="Cadastros e vínculos das despesas" TextColor="#DCEBE6" FontSize="11"/>
             </VerticalStackLayout>
-            <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=AddBusiness, ColorResource=BlingTextLight, IconSize=24}" BackgroundColor="Transparent" Clicked="OnNewClicked"/>
+            <Button Grid.Column="2" Text="Novo" Style="{StaticResource PrimaryButton}" HeightRequest="44" Padding="12,0" Clicked="OnNewClicked"/>
         </Grid>
         <VerticalStackLayout Grid.Row="1" Padding="16,12,16,8" Spacing="8">
             <SearchBar x:Name="SearchEntry" Placeholder="Pesquisar fornecedor" TextChanged="OnFilterChanged"/>
@@ -33,7 +33,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Border Style="{StaticResource ContentCard}" Padding="12" Margin="0,0,0,8">
-                            <Grid ColumnDefinitions="44,*,32,32" ColumnSpacing="4">
+                            <Grid ColumnDefinitions="44,*" RowDefinitions="Auto,Auto" ColumnSpacing="4">
                                 <Border BackgroundColor="#E8F5F0" StrokeThickness="0" StrokeShape="RoundRectangle 12" WidthRequest="40" HeightRequest="40">
                                     <mi:MauiIcon Icon="{mi:Material Icon=Storefront}" IconSize="22" IconColor="{StaticResource BlingPrimary}" HorizontalOptions="Center" VerticalOptions="Center"/>
                                 </Border>
@@ -41,8 +41,10 @@
                                     <Label Text="{Binding NomeFornecedor}" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding Status}" FontSize="11" TextColor="{StaticResource BlingPrimary}"/>
                                 </VerticalStackLayout>
-                                <ImageButton Grid.Column="2" Source="{icons:MaterialIconSource Icon=Edit, ColorResource=BlingPrimary, IconSize=16}" BackgroundColor="Transparent" BorderWidth="0" WidthRequest="30" HeightRequest="30" Padding="7" Clicked="OnEditClicked" CommandParameter="{Binding .}"/>
-                                <ImageButton Grid.Column="3" Source="{icons:MaterialIconSource Icon=DeleteOutline, ColorResource=BlingPrimary, IconSize=16}" BackgroundColor="Transparent" BorderWidth="0" WidthRequest="30" HeightRequest="30" Padding="7" Clicked="OnDeleteClicked" CommandParameter="{Binding .}"/>
+                                <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10,0,0">
+                                  <Button Text="Alterar" Style="{StaticResource TextButton}" HeightRequest="44" CommandParameter="{Binding .}" Clicked="OnEditClicked"/>
+                                  <Button Grid.Column="1" Text="Excluir" Style="{StaticResource TextButton}" TextColor="{StaticResource BlingDanger}" HeightRequest="44" CommandParameter="{Binding .}" Clicked="OnDeleteClicked"/>
+                                </Grid>
                             </Grid>
                         </Border>
                     </DataTemplate>

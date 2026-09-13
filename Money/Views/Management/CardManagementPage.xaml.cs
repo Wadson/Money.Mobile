@@ -31,7 +31,12 @@ public partial class CardManagementPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await LoadAsync();
+        try { await LoadAsync(); }
+        catch (Exception ex)
+        {
+            await ThemedDialog.ShowAsync(this, "Não foi possível carregar os cartões",
+                SqliteErrorMessage.ToFriendly(ex), "Fechar");
+        }
     }
 
     private async Task LoadAsync()
@@ -318,6 +323,20 @@ public partial class CardManagementPage : ContentPage
         footerGrid.Children.Add(dueStack);
 
         mainStack.Children.Add(footerGrid);
+
+        var actions = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitionCollection { new(GridLength.Star), new(GridLength.Star) },
+            ColumnSpacing = 10,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
+        var editButton = new Button { Text = "Alterar", HeightRequest = 44, Style = (Style)Application.Current!.Resources["TextButton"] };
+        editButton.Clicked += (_, _) => Edit(card);
+        var deleteButton = new Button { Text = "Excluir", HeightRequest = 44, Style = (Style)Application.Current!.Resources["TextButton"], TextColor = ThemeColor.Get("BlingDanger") };
+        deleteButton.Clicked += async (_, _) => await DeleteCard(card);
+        actions.Add(editButton);
+        actions.Add(deleteButton, 1);
+        mainStack.Children.Add(actions);
 
         cardBorder.Content = mainStack;
         return cardBorder;

@@ -15,10 +15,10 @@ public partial class AccountsPayablePage : ContentPage
     private const int PageSize = 40;
     private int? _selectedMonth;
     private int? _selectedYear;
-    private List<CategoryItem> _categories = [];
+    private List<SubcategoryItem> _categories = [];
     private List<Fornecedor> _suppliers = [];
     private List<CardItem> _cards = [];
-    private List<AccountItem> _paymentAccounts = [];
+
     private long? _selectedSupplierId;
     private long? _selectedCardId;
     private string? _selectedCategory;
@@ -40,13 +40,12 @@ public partial class AccountsPayablePage : ContentPage
         {
             await _database.InitializeAsync();
             if (_categories.Count == 0)
-                _categories = await _database.GetCategoriesAsync("despesa");
+                _categories = await _database.GetSubcategoriesAsync(type: "despesa");
             if (_suppliers.Count == 0)
                 _suppliers = await _database.GetSuppliersAsync();
             if (_cards.Count == 0)
                 _cards = await _database.GetCardsAsync();
-            if (_paymentAccounts.Count == 0)
-                _paymentAccounts = await _database.GetAccountsAsync();
+
             await LoadAsync();
         }
         catch (Exception ex)
@@ -72,44 +71,11 @@ public partial class AccountsPayablePage : ContentPage
         await Navigation.PushModalAsync(page);
     }
 
+    private long? _mainCategoryId;
     private async void OnSelectCategoryClicked(object? sender, EventArgs e)
     {
-        var options = new List<SelectionOption>
-        {
-            new()
-            {
-                Index = 0, Label = "Todas as categorias",
-                Background = ThemeColor.Get("BlingCard"),
-                Foreground = ThemeColor.Get("BlingPrimary"),
-                IsSelected = string.IsNullOrWhiteSpace(_selectedCategory)
-            }
-        };
-        options.AddRange(_categories.Select((category, index) => new SelectionOption
-        {
-            Index = index + 1,
-            Label = category.Name,
-            ImageSource = CategoryVisualResolver.Icon(category),
-            Background = CategoryVisualResolver.Background(category),
-            Foreground = CategoryVisualResolver.Foreground(category),
-            IsSelected = _selectedCategoryId == category.Id
-        }));
-
-        var page = new OptionSelectionPage("Selecione a categoria", options);
-        page.Selected += (_, option) =>
-        {
-            if (option.Index == 0)
-            {
-                _selectedCategory = null;
-                _selectedCategoryId = null;
-                CategorySelectionButton.Text = "Todas as categorias";
-                return;
-            }
-            var category = _categories[option.Index - 1];
-            _selectedCategory = category.Name;
-            _selectedCategoryId = category.Id;
-            CategorySelectionButton.Text = category.Name;
-        };
-        await Navigation.PushModalAsync(page);
+        try { await CategoryFilterPicker.ShowAsync(this,_database,(main,sub,label)=> { _mainCategoryId=main; _selectedCategoryId=sub; _selectedCategory=label; CategorySelectionButton.Text=label; }); }
+        catch(Exception ex) { await ThemedDialog.ShowAsync(this,Title,ex.Message); }
     }
 
     private async void OnSelectPaymentStatusClicked(object? sender, EventArgs e)
@@ -141,7 +107,7 @@ public partial class AccountsPayablePage : ContentPage
         {
             var (month, year) = SelectedPeriod();
             var items = await _database.GetContasPagarAsync(month, year, _paidFilter,
-                _selectedSupplierId, _selectedCardId, _selectedCategoryId);
+                _selectedSupplierId, _selectedCardId, _selectedCategoryId, _mainCategoryId);
             _items = items;
             _visibleItems.Clear();
             AppendNextPage();
@@ -205,7 +171,7 @@ public partial class AccountsPayablePage : ContentPage
         _selectedMonth = null;
         _selectedYear = null;
         _selectedCategory = null;
-        _selectedCategoryId = null;
+        _selectedCategoryId = null; _mainCategoryId = null;
         _paidFilter = false;
         _selectedSupplierId = null;
         _selectedCardId = null;
@@ -285,7 +251,7 @@ public partial class AccountsPayablePage : ContentPage
 
     private void UpdateSelectionButton()
     {
-        var selected = _items.Where(x => x.Selecionado).ToList();
+        var selected = _items.Where(x => x.Selecionado && x.IsOpen).ToList();
         PaySelectedButton.IsVisible = selected.Count > 0;
         PaySelectedLabel.Text = selected.Count == 1
             ? "Pagar 1 selecionada"
@@ -302,42 +268,6 @@ public partial class AccountsPayablePage : ContentPage
     {
         if (sender is SwipeItem swipeItem)
             OnDeleteClicked(new Button { CommandParameter = swipeItem.CommandParameter }, e);
-    }
-
-    private void OnPaySwipeInvoked(object? sender, EventArgs e)
-    {
-        if (sender is SwipeItem swipeItem)
-            OnPrimaryActionClicked(new Button { CommandParameter = swipeItem.CommandParameter }, e);
-    }
-
-    private async void OnPrimaryActionClicked(object? sender, EventArgs e)
-    {
-        if (sender is not Button button || !long.TryParse(button.CommandParameter?.ToString(), out var id))
-            return;
-        var item = _items.FirstOrDefault(x => x.Id == id);
-        if (item is null) return;
-        if (item.IsPaid)
-        {
-            var reverse = await ThemedDialog.ConfirmAsync(this, "Estornar pagamento",
-                $"Deseja reabrir “{item.Descricao}” e devolver {item.Valor.ToString("C2", _culture)} ao saldo da conta?",
-                "Estornar", "Cancelar");
-            if (!reverse) return;
-            try
-            {
-                await _database.EstornarPagamentoAsync(id);
-                await LoadAsync();
-            }
-            catch (Exception ex)
-            {
-                await ThemedDialog.ShowAsync(this, "Estorno não realizado", SqliteErrorMessage.ToFriendly(ex), "Fechar");
-            }
-            return;
-        }
-        var confirm = await ThemedDialog.ConfirmAsync(this, "Confirmar pagamento",
-            $"Pagar “{item.Descricao}” no valor de {item.Valor.ToString("C2", _culture)}?",
-            "Pagar", "Cancelar");
-        if (!confirm) return;
-        await SelectPaymentAccountAndPayAsync([id]);
     }
 
     private async void OnEditClicked(object? sender, EventArgs e)
@@ -383,7 +313,7 @@ public partial class AccountsPayablePage : ContentPage
 
     private async void OnPaySelectedClicked(object? sender, EventArgs e)
     {
-        var selected = _items.Where(x => x.Selecionado).ToList();
+        var selected = _items.Where(x => x.Selecionado && x.IsOpen).ToList();
         if (selected.Count == 0) return;
         var total = selected.Sum(x => x.Valor);
         var confirm = await ThemedDialog.ConfirmAsync(this, "Confirmar pagamentos",
@@ -393,29 +323,8 @@ public partial class AccountsPayablePage : ContentPage
         await SelectPaymentAccountAndPayAsync(selected.Select(x => x.Id).ToArray());
     }
 
-    private async Task SelectPaymentAccountAndPayAsync(IReadOnlyCollection<long> transactionIds)
-    {
-        if (_paymentAccounts.Count == 0)
-        {
-            await ThemedDialog.ShowAsync(this, "Nenhuma conta disponível",
-                "Cadastre ou ative uma conta bancária antes de realizar a baixa.", "Fechar");
-            return;
-        }
-
-        var options = _paymentAccounts.Select((account, index) => new SelectionOption
-        {
-            Index = index,
-            Label = $"{account.Name} · {account.Balance.ToString("C2", _culture)}",
-            ImageSource = MaterialIcons.AccountBalanceWallet,
-            Background = ThemeColor.Get("BlingCard"),
-            Foreground = ThemeColor.Get("BlingPrimary")
-        }).ToList();
-        var page = new OptionSelectionPage("Conta para pagamento", options);
-        page.Selected += async (_, option) => await ExecutePaymentAsync(() =>
-            _database.MarcarMultiplasComoPagaAsync(transactionIds, _paymentAccounts[option.Index].Id));
-        await Navigation.PushModalAsync(page);
-    }
-
+    private Task SelectPaymentAccountAndPayAsync(IReadOnlyCollection<long> transactionIds) =>
+        ExecutePaymentAsync(() => _database.MarcarMultiplasComoPagaAsync(transactionIds));
     private async Task ExecutePaymentAsync(Func<Task> payment)
     {
         try
@@ -450,7 +359,7 @@ public partial class AccountsPayablePage : ContentPage
         _selectedMonth = null;
         _selectedYear = null;
         _selectedCategory = null;
-        _selectedCategoryId = null;
+        _selectedCategoryId = null; _mainCategoryId = null;
         _paidFilter = false;
         _selectedSupplierId = null;
         _selectedCardId = null;

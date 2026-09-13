@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              xmlns:icons="clr-namespace:Money.Helpers"
+             xmlns:controls="clr-namespace:Money.Controls"
              x:Class="Money.Views.Auth.RegisterPage"
              Title="Criar conta"
              BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
@@ -335,7 +336,7 @@
                                 HeightRequest="21"
                                 VerticalOptions="Center"/>
 
-                            <DatePicker x:Name="BirthDatePicker"
+                            <controls:ThemedDateSelector x:Name="BirthDatePicker"
                                         Grid.Column="1"
                                         Format="dd/MM/yyyy"
                                         Date="01/01/1990"

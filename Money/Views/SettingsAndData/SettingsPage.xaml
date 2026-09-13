@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              xmlns:icons="clr-namespace:Money.Helpers"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="Money.Views.SettingsAndData.SettingsPage" BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}" Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="Auto,*">
         <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingHeaderDarkLight}, Dark={StaticResource BlingHeaderDarkDark}}" StrokeThickness="0" Padding="16,12">
@@ -41,9 +40,9 @@
                 <Border Style="{StaticResource ContentCard}" Padding="14">
                     <VerticalStackLayout Spacing="10">
                         <Label Text="Preferências" TextColor="{StaticResource BlingPrimary}" FontSize="17" FontAttributes="Bold"/>
-                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="CurrencyPicker" Title="Moeda" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
-                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="DateFormatPicker" Title="Formato de data" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
-                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="ThemePicker" Title="Tema" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Border Style="{StaticResource InputContainer}"><Grid><Button x:Name="CurrencyButton" Text="Moeda" Style="{StaticResource SelectorFieldButton}" Clicked="OnCurrencyClicked"/><Picker x:Name="CurrencyPicker" IsVisible="False"/></Grid></Border>
+                        <Border Style="{StaticResource InputContainer}"><Grid><Button x:Name="DateFormatButton" Text="Formato de data" Style="{StaticResource SelectorFieldButton}" Clicked="OnDateFormatClicked"/><Picker x:Name="DateFormatPicker" IsVisible="False"/></Grid></Border>
+                        <Border Style="{StaticResource InputContainer}"><Grid><Button x:Name="ThemeButton" Text="Tema" Style="{StaticResource SelectorFieldButton}" Clicked="OnThemeClicked"/><Picker x:Name="ThemePicker" IsVisible="False"/></Grid></Border>
                         <Border Style="{StaticResource SelectionControlContainer}"><Grid ColumnDefinitions="*,Auto">
                             <Label Text="Alertas de vencimento" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
                             <Switch x:Name="AlertsSwitch" Grid.Column="1"/>
@@ -53,7 +52,7 @@
                             <Label Text="Backup automático" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
                             <Switch x:Name="AutomaticBackupSwitch" Grid.Column="1"/>
                         </Grid></Border>
-                        <Border Style="{StaticResource InputContainer}"><Picker x:Name="BackupFrequencyPicker" Title="Frequência do backup" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" TitleColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/></Border>
+                        <Border Style="{StaticResource InputContainer}"><Grid><Button x:Name="BackupFrequencyButton" Text="Frequência do backup" Style="{StaticResource SelectorFieldButton}" Clicked="OnBackupFrequencyClicked"/><Picker x:Name="BackupFrequencyPicker" IsVisible="False"/></Grid></Border>
                         <Button Text="Salvar preferências" ImageSource="{icons:MaterialIconSource Icon=Save, ColorResource=BlingTextLight, IconSize=20}" Style="{StaticResource PrimaryButton}" Clicked="OnSaveClicked"/>
                     </VerticalStackLayout>
                 </Border>

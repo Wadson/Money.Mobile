@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
- xmlns:icons="clr-namespace:Money.Helpers"
+ xmlns:icons="clr-namespace:Money.Helpers" xmlns:controls="clr-namespace:Money.Controls"
  x:Class="Money.Views.Transactions.IncomeFormPage" Shell.NavBarIsVisible="False"
  BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}">
  <Grid RowDefinitions="Auto,*">
@@ -13,18 +13,15 @@
    <Border Style="{StaticResource ContentCard}"><VerticalStackLayout Spacing="10">
     <Label Text="DESCRIÇÃO" Style="{StaticResource CardCaption}"/><Entry x:Name="DescriptionEntry" Placeholder="Ex.: Salário, freelance, aluguel recebido"/>
     <Label Text="VALOR" Style="{StaticResource CardCaption}"/><Entry x:Name="AmountEntry" Placeholder="R$ 0,00" Keyboard="Numeric"/>
-    <Label Text="CATEGORIA" Style="{StaticResource CardCaption}"/>
-    <Border Style="{StaticResource SelectionControlContainer}"><Button x:Name="CategorySelectionButton" Text="Selecione a categoria" Style="{StaticResource SelectorFieldButton}" ContentLayout="Left,12" ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=BlingPrimary, IconSize=20}" Clicked="OnSelectCategoryClicked"/></Border>
+    <Label Text="Categoria principal" Style="{StaticResource CardCaption}"/>
+                            <Button x:Name="MainCategorySelectionButton" Text="Selecione a categoria" MinimumHeightRequest="48" Clicked="OnSelectMainCategoryClicked" SemanticProperties.Description="Selecionar categoria principal"/>
+                            <Label Text="SUBCATEGORIA" Style="{StaticResource CardCaption}"/>
+    <Border Style="{StaticResource SelectionControlContainer}"><Button x:Name="CategorySelectionButton" Text="Selecione a subcategoria" Style="{StaticResource SelectorFieldButton}" ContentLayout="Left,12" ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=BlingPrimary, IconSize=20}" Clicked="OnSelectCategoryClicked"/></Border>
     <Picker x:Name="CategoryPicker" IsVisible="False"/>
-    <Label Text="CONTA DE DESTINO" Style="{StaticResource CardCaption}"/>
-    <Border Style="{StaticResource SelectionControlContainer}"><Button x:Name="AccountSelectionButton" Text="Selecione a conta" Style="{StaticResource SelectorFieldButton}" ContentLayout="Left,12" ImageSource="{icons:MaterialIconSource Icon=AccountBalance, ColorResource=BlingPrimary, IconSize=20}" Clicked="OnSelectAccountClicked"/></Border>
-    <Picker x:Name="AccountPicker" IsVisible="False"/>
-    <Label Text="DATA PREVISTA" Style="{StaticResource CardCaption}"/><DatePicker x:Name="ExpectedDatePicker" Format="dd/MM/yyyy"/>
-    <Grid ColumnDefinitions="*,Auto"><VerticalStackLayout><Label Text="RECEBIDA" Style="{StaticResource CardCaption}"/><Label Text="Ative somente quando o dinheiro já entrou" FontSize="11"/></VerticalStackLayout><Switch x:Name="PaidSwitch" Grid.Column="1" Toggled="OnPaidToggled"/></Grid>
-    <VerticalStackLayout x:Name="PaymentDatePanel" IsVisible="False"><Label Text="DATA DE RECEBIMENTO" Style="{StaticResource CardCaption}"/><DatePicker x:Name="PaymentDatePicker" Format="dd/MM/yyyy"/></VerticalStackLayout>
+    <Label Text="DATA PREVISTA" Style="{StaticResource CardCaption}"/><controls:ThemedDateSelector x:Name="ExpectedDatePicker" Style="{StaticResource SelectorFieldButton}"/>
     <Grid ColumnDefinitions="*,Auto"><Label Text="RECEITA RECORRENTE" Style="{StaticResource CardCaption}" VerticalTextAlignment="Center"/><Switch x:Name="RecurringSwitch" Grid.Column="1" Toggled="OnRecurringToggled"/></Grid>
     <VerticalStackLayout x:Name="FrequencyPanel" IsVisible="False" Spacing="8">
-     <Label Text="FREQUÊNCIA" Style="{StaticResource CardCaption}"/><Picker x:Name="FrequencyPicker"/>
+     <Label Text="FREQUÊNCIA" Style="{StaticResource CardCaption}"/><Border Style="{StaticResource InputContainer}"><Grid><Button x:Name="FrequencySelectionButton" Text="Mensal" Style="{StaticResource SelectorFieldButton}" Clicked="OnSelectFrequencyClicked"/><Picker x:Name="FrequencyPicker" IsVisible="False"/></Grid></Border>
      <Label Text="QUANTIDADE DE RECORRÊNCIAS" Style="{StaticResource CardCaption}"/>
      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
       <Label x:Name="RecurrenceCountLabel" Text="12 recebimentos" VerticalTextAlignment="Center" FontAttributes="Bold"/>

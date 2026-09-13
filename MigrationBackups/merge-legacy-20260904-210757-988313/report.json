@@ -1,0 +1,63 @@
+{
+  "source_sha256": "cd7ed89edfc7eccbab27cdb1b1b0cba9402dba5f780fea908605137ca4c0c32f",
+  "backup": "D:\\Projetos\\Money.Mobile\\MigrationBackups\\merge-legacy-20260904-210757-988313",
+  "tables": {
+    "Usuarios": {
+      "inserted": 1,
+      "reused": 1,
+      "source": 2
+    },
+    "Categorias": {
+      "inserted": 184,
+      "reused": 10,
+      "source": 194
+    },
+    "CartoesCredito": {
+      "inserted": 2,
+      "reused": 0,
+      "source": 2
+    },
+    "Fornecedores": {
+      "inserted": 60,
+      "reused": 0,
+      "source": 60
+    },
+    "Configuracoes": {
+      "inserted": 1,
+      "reused": 1,
+      "source": 2
+    },
+    "FaturasCartao": {
+      "inserted": 4,
+      "reused": 0,
+      "source": 4
+    },
+    "Transacoes": {
+      "source": 250,
+      "inserted": 250,
+      "reused": 0
+    }
+  },
+  "financial_totals": [
+    {
+      "tipo": "despesa",
+      "pago": 0,
+      "quantidade": 128,
+      "valor": 30550.76
+    },
+    {
+      "tipo": "despesa",
+      "pago": 1,
+      "quantidade": 117,
+      "valor": 12183.65
+    },
+    {
+      "tipo": "receita",
+      "pago": 1,
+      "quantidade": 5,
+      "valor": 9424.6
+    }
+  ],
+  "archived_accounts": 6,
+  "archived_transfers": 10
+}

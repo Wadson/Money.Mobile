@@ -1,4 +1,5 @@
 using Money.Services;
+using Money.Views.Dialogs;
 
 namespace Money.Views.SettingsAndData;
 
@@ -28,6 +29,10 @@ public partial class SettingsPage : ContentPage
             AlertDaysEntry.Text = settings.DueAlertDays.ToString();
             AutomaticBackupSwitch.IsToggled = settings.AutomaticBackup;
             BackupFrequencyPicker.SelectedItem = settings.BackupFrequency;
+            CurrencyButton.Text = settings.Currency;
+            DateFormatButton.Text = settings.DateFormat;
+            ThemeButton.Text = settings.Theme;
+            BackupFrequencyButton.Text = settings.BackupFrequency;
             RenderNotifications(await _database.GetNotificationsAsync());
             RenderLogs(await _database.GetAuditLogsAsync(50));
         }
@@ -94,6 +99,23 @@ public partial class SettingsPage : ContentPage
     {
         if (sender is Button { CommandParameter: long id })
         { await _database.MarkNotificationReadAsync(id); OnAppearing(); }
+    }
+
+    private async void OnCurrencyClicked(object? sender, EventArgs e) => await SelectOptionAsync("Moeda", CurrencyPicker, CurrencyButton);
+    private async void OnDateFormatClicked(object? sender, EventArgs e) => await SelectOptionAsync("Formato de data", DateFormatPicker, DateFormatButton);
+    private async void OnThemeClicked(object? sender, EventArgs e) => await SelectOptionAsync("Tema", ThemePicker, ThemeButton);
+    private async void OnBackupFrequencyClicked(object? sender, EventArgs e) => await SelectOptionAsync("Frequência do backup", BackupFrequencyPicker, BackupFrequencyButton);
+
+    private async Task SelectOptionAsync(string title, Picker picker, Button button)
+    {
+        var values = picker.ItemsSource?.Cast<object>().Select(x => x?.ToString() ?? "").ToList() ?? [];
+        var page = new OptionSelectionPage(title, values.Select((value, index) => new SelectionOption
+        {
+            Index = index, Label = value, IsSelected = picker.SelectedIndex == index,
+            Background = ThemeColor.Get("BlingCard"), Foreground = ThemeColor.Get("BlingPrimary")
+        }));
+        page.Selected += (_, option) => { picker.SelectedIndex = option.Index; button.Text = option.Label; };
+        await Navigation.PushModalAsync(page);
     }
 
     private static Label Empty(string text) => new() { Text = text, TextColor = ThemeColor.Get("BlingText"), FontSize = 11 };

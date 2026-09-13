@@ -13,9 +13,9 @@ internal static class CsvTemplateService
 
     public static Task<string> SavePayablesTemplateAsync() => SaveAsync(
         "modelo-importacao-contas-a-pagar.csv",
-        "Descricao;Valor;DataVencimento;Categoria;Fornecedor;Observacoes\r\n" +
-        "Calça Jeans;120,50;15/08/2026;Roupas;Loja Z;Compra parcelada\r\n" +
-        "Internet Fibra;99,90;20/08/2026;Internet;Provedor X;Mensalidade\r\n");
+        "Descricao;Valor;DataVencimento;Categoria;Subcategoria;Fornecedor;Observacoes\r\n" +
+        "Calça Jeans;120,50;15/08/2026;Compras;Roupas;Loja Z;Compra parcelada\r\n" +
+        "Internet Fibra;99,90;20/08/2026;Casa/Moradia;Internet;Provedor X;Mensalidade\r\n");
 
     private static async Task<string> SaveAsync(string fileName, string content)
     {

@@ -1,3 +1,4 @@
+using MauiIcons.Core;
 using System.Globalization;
 using MauiIcons.Material;
 using Money.Models;
@@ -15,7 +16,8 @@ public partial class TransactionFormPage : ContentPage
 {
     private readonly DatabaseService _database;
     private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("pt-BR");
-    private List<CategoryItem> _categories = new();
+    private long? _mainCategoryId;
+    private List<SubcategoryItem> _categories = new();
     private List<AccountItem> _accounts = new();
     private List<CardItem> _cards = new();
     private List<TagItem> _tags = new();
@@ -33,6 +35,17 @@ public partial class TransactionFormPage : ContentPage
     public TransactionFormPage(DatabaseService database, string initialType = "despesa")
     {
         InitializeComponent();
+        CategoryPicker.SelectedIndexChanged += (_, _) =>
+        {
+            var index = CategoryPicker.SelectedIndex;
+            if (index < 0 || index >= _categories.Count) return;
+            var sub = _categories[index];
+            _mainCategoryId = sub.MainCategoryId;
+            MainCategorySelectionButton.Text = sub.MainCategoryName;
+            CategorySelectionButton.Text = sub.Name;
+            CategorySelectionButton.ImageSource = CategoryVisualResolver.Icon(sub).ToImageSource(CategoryVisualResolver.Foreground(sub), 24);
+        };
+
         _database = database;
         DatePicker.Date = DateTime.Today;
         FirstInstallmentDatePicker.Date = DateTime.Today;
@@ -163,10 +176,12 @@ public partial class TransactionFormPage : ContentPage
 
     private async Task LoadCategoriesAsync()
     {
-        _categories = await _database.GetCategoriesAsync(_selectedType);
+        _categories = await _database.GetSubcategoriesAsync(type: _selectedType, includeInactive: true);
         CategoryPicker.ItemsSource = _categories.Select(x => x.Name).ToList();
         CategoryPicker.SelectedIndex = -1;
-        CategorySelectionButton.Text = "Selecione uma categoria";
+        CategorySelectionButton.Text = "Selecione a subcategoria";
+        _mainCategoryId = null;
+        MainCategorySelectionButton.Text = "Selecione a categoria";
     }
 
     // ============================================================
@@ -194,7 +209,7 @@ public partial class TransactionFormPage : ContentPage
         // Atualizar opções de origem
         SourceTypePicker.ItemsSource = new[]
         {
-            "Conta Bancária", "Cartão de Crédito", "Boleto", "Crediário / Promissória"
+            "Sem cartão", "Cartão de Crédito", "Boleto", "Crediário / Promissória"
         };
         SourceTypePicker.SelectedIndex = 0;
         ConfigureSource();
@@ -218,7 +233,7 @@ public partial class TransactionFormPage : ContentPage
             _ = ReloadCategoriesSafelyAsync();
 
         // Atualizar opções de origem
-        SourceTypePicker.ItemsSource = new[] { "Conta bancária" };
+        SourceTypePicker.ItemsSource = new[] { "Sem cartão" };
         SourceTypePicker.SelectedIndex = 0;
         ConfigureSource();
     }
@@ -389,28 +404,33 @@ public partial class TransactionFormPage : ContentPage
         }
     }
 
-    private async void OnSelectCategoryClicked(object? sender, EventArgs e)
+    private async void OnSelectMainCategoryClicked(object? sender, EventArgs e)
     {
         try
         {
-            await LoadCategoriesAsync();
+            var parents = await _database.GetMainCategoriesAsync(_selectedType);
+            var page = new OptionSelectionPage("Categoria principal", parents.Select((x,i)=>CategoryVisualResolver.Option(x,i,x.Id==_mainCategoryId)));
+            page.Selected += (_, option) =>
+            {
+                var main = parents[option.Index];
+                _mainCategoryId = main.Id;
+                MainCategorySelectionButton.Text = main.Name;
+                MainCategorySelectionButton.ImageSource = CategoryVisualResolver.Icon(main).ToImageSource(CategoryVisualResolver.Foreground(main),24);
+                CategoryPicker.SelectedIndex = -1;
+                CategorySelectionButton.Text = "Selecione a subcategoria";
+            };
+            await Navigation.PushModalAsync(page);
         }
-        catch (Exception ex)
-        {
-            ShowError($"Não foi possível carregar as categorias: {SqliteErrorMessage.ToFriendly(ex)}");
-            return;
-        }
-
-        var options = _categories.Select((category, index) =>
-        {
-            return CategoryVisualResolver.Option(category, index, CategoryPicker.SelectedIndex == index);
-        });
-        var page = new OptionSelectionPage("Selecione a categoria", options);
-        page.Selected += (_, option) =>
-        {
-            CategoryPicker.SelectedIndex = option.Index;
-            CategorySelectionButton.Text = option.Label;
-        };
+        catch(Exception ex) { await ThemedDialog.ShowAsync(this,"Categorias",ex.Message); }
+    }
+    private async void OnSelectCategoryClicked(object? sender, EventArgs e)
+    {
+        if (_mainCategoryId is null) { OnSelectMainCategoryClicked(sender,e); return; }
+        var options = _categories.Select((x,i)=>(Item:x,Index:i))
+            .Where(x=>x.Item.MainCategoryId==_mainCategoryId && x.Item.Active)
+            .Select(x=>CategoryVisualResolver.Option(x.Item,x.Index,CategoryPicker.SelectedIndex==x.Index));
+        var page = new OptionSelectionPage("Subcategoria",options);
+        page.Selected += (_,option)=>CategoryPicker.SelectedIndex=option.Index;
         await Navigation.PushModalAsync(page);
     }
 
@@ -480,48 +500,7 @@ public partial class TransactionFormPage : ContentPage
         await Navigation.PushModalAsync(page);
     }
 
-    private static (MaterialIcons Icon, string Background, string Foreground) CategoryVisual(string name)
-    {
-        var normalized = name.ToLowerInvariant();
-        if (normalized.Contains("alimenta")) return (MaterialIcons.Restaurant, "AccentOrangeSurface", "AccentOrange");
-        if (normalized.Contains("compra")) return (MaterialIcons.ShoppingBag, "AccentPinkSurface", "AccentPink");
-        if (normalized.Contains("educa")) return (MaterialIcons.School, "BlingCard", "BlingPrimary");
-        if (normalized.Contains("imposto")) return (MaterialIcons.RequestQuote, "BlingCard", "BlingText");
-        if (normalized.Contains("lazer")) return (MaterialIcons.Movie, "BlingCard", "BlingText");
-        if (normalized.Contains("moradia")) return (MaterialIcons.House, "BlingCard", "BlingText");
-        if (normalized.Contains("saúde") || normalized.Contains("saude")) return (MaterialIcons.MedicalServices, "BlingCard", "BlingText");
-        if (normalized.Contains("transporte")) return (MaterialIcons.DirectionsCar, "BlingCard", "AccentTeal");
-        if (normalized.Contains("utilidade")) return (MaterialIcons.Lightbulb, "BlingCard", "BlingText");
-        return (MaterialIcons.Category, "BlingCard", "BlingText");
-    }
 
-    private static MaterialIcons CategoryImage(CategoryItem category)
-    {
-        var storedIcon = category.Icon?.Trim();
-        if (!string.IsNullOrWhiteSpace(storedIcon))
-        {
-            var iconName = Path.GetFileNameWithoutExtension(storedIcon);
-            if (Enum.TryParse<MaterialIcons>(iconName, true, out var icon))
-                return icon;
-
-            var pascalName = string.Concat(iconName.Split('_', StringSplitOptions.RemoveEmptyEntries)
-                .Select(part => char.ToUpperInvariant(part[0]) + part[1..]));
-            if (Enum.TryParse<MaterialIcons>(pascalName, true, out icon))
-                return icon;
-        }
-
-        var value = category.Name.ToLowerInvariant();
-        if (value.Contains("alimenta")) return MaterialIcons.Restaurant;
-        if (value.Contains("compra")) return MaterialIcons.ShoppingBag;
-        if (value.Contains("educa")) return MaterialIcons.School;
-        if (value.Contains("imposto")) return MaterialIcons.RequestQuote;
-        if (value.Contains("lazer")) return MaterialIcons.Movie;
-        if (value.Contains("moradia") || value.Contains("casa")) return MaterialIcons.House;
-        if (value.Contains("saúde") || value.Contains("saude")) return MaterialIcons.MedicalServices;
-        if (value.Contains("transport")) return MaterialIcons.DirectionsCar;
-        if (value.Contains("utilidade")) return MaterialIcons.Lightbulb;
-        return MaterialIcons.Category;
-    }
 
     private void OnCardChanged(object? sender, EventArgs e)
     {
@@ -549,7 +528,7 @@ public partial class TransactionFormPage : ContentPage
     {
         var useCard = SourceTypePicker.SelectedIndex == 1;
         var useAccount = SourceTypePicker.SelectedIndex == 0;
-        AccountPanel.IsVisible = useAccount;
+        AccountPanel.IsVisible = false;
         CardPanel.IsVisible = useCard;
 
         if (useCard)
@@ -747,7 +726,7 @@ public partial class TransactionFormPage : ContentPage
         // Validar origem
         var useCard = SourceTypePicker.SelectedIndex == 1;
         var useAccount = SourceTypePicker.SelectedIndex == 0;
-        var accountRequiredNow = _selectedType == "receita" || PaidSwitch.IsToggled;
+        var accountRequiredNow = false;
         if ((useCard && CardPicker.SelectedIndex < 0) ||
             (useAccount && accountRequiredNow && AccountPicker.SelectedIndex < 0))
         {

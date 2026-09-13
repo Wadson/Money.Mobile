@@ -11,7 +11,7 @@ public partial class ReportPage : ContentPage
     private readonly ReportPdfService _reports;
     private readonly FinancialForecastService _forecast;
     private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("pt-BR");
-    private List<CategoryItem> _categories = [];
+    private List<SubcategoryItem> _categories = [];
     private List<Fornecedor> _suppliers = [];
     private List<CardItem> _cards = [];
     private int _month = DateTime.Today.Month;
@@ -37,12 +37,21 @@ public partial class ReportPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        try
+        {
+        ErrorLabel.IsVisible = false;
         if (_categories.Count == 0)
-            _categories = await _database.GetCategoriesAsync();
+            _categories = await _database.GetSubcategoriesAsync();
         if (_suppliers.Count == 0)
             _suppliers = await _database.GetSuppliersAsync();
         if (_cards.Count == 0)
             _cards = await _database.GetCardsAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorLabel.Text = SqliteErrorMessage.ToFriendly(ex);
+            ErrorLabel.IsVisible = true;
+        }
     }
 
     private async void OnSelectPeriodClicked(object? sender, EventArgs e)
@@ -59,44 +68,11 @@ public partial class ReportPage : ContentPage
         await Navigation.PushModalAsync(page);
     }
 
+    private long? _mainCategoryId;
     private async void OnSelectCategoryClicked(object? sender, EventArgs e)
     {
-        var options = new List<SelectionOption>
-        {
-            new()
-            {
-                Index = 0, Label = "Todas as categorias", ImageSource = MaterialIcons.Category,
-                Background = ThemeColor.Get("BlingCard"),
-                Foreground = ThemeColor.Get("BlingPrimary"), IsSelected = _categoryId is null
-            }
-        };
-        options.AddRange(_categories.Select((category, index) => new SelectionOption
-        {
-            Index = index + 1, Label = category.Name,
-            ImageSource = CategoryVisualResolver.Icon(category),
-            Background = CategoryVisualResolver.Background(category),
-            Foreground = CategoryVisualResolver.Foreground(category),
-            IsSelected = _categoryId == category.Id
-        }));
-        var page = new OptionSelectionPage("Selecione a categoria", options);
-        page.Selected += (_, option) =>
-        {
-            if (option.Index == 0)
-            {
-                _categoryId = null;
-                _categoryName = null;
-                CategoryButton.Text = "Todas as categorias";
-            }
-            else
-            {
-                var category = _categories[option.Index - 1];
-                _categoryId = category.Id;
-                _categoryName = category.Name;
-                CategoryButton.Text = _categoryName;
-            }
-            ResetResult();
-        };
-        await Navigation.PushModalAsync(page);
+        try { await CategoryFilterPicker.ShowAsync(this,_database,(main,sub,label)=> { _mainCategoryId=main; _categoryId=sub; _categoryName=label; CategoryButton.Text=label; ResetResult(); }); }
+        catch(Exception ex) { await ThemedDialog.ShowAsync(this,Title,ex.Message); }
     }
 
     private async void OnSelectSupplierClicked(object? sender, EventArgs e)
@@ -208,7 +184,7 @@ public partial class ReportPage : ContentPage
         {
             await Task.Yield();
             _result = await _reports.GenerateAsync(_month, _year, _categoryId, _categoryName,
-                _paymentStatus, _supplierId, _supplierName, _cardId, _cardName);
+                _paymentStatus, _supplierId, _supplierName, _cardId, _cardName, _mainCategoryId);
             var projectionStart = new DateTime(DateTime.Today.Year,DateTime.Today.Month,1);
             var selectedOffset = Math.Max(0,(_year-projectionStart.Year)*12+_month-projectionStart.Month);
             var projection = await _forecast.CalculateAsync(projectionStart,Math.Min(24,Math.Max(12,selectedOffset+1)));

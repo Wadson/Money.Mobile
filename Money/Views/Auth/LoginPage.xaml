@@ -293,7 +293,7 @@
 
                             <Entry x:Name="UserEntry"
                                    Grid.Column="1"
-                                   Placeholder="Ex.: Wadson"
+                                   Placeholder="Nome ou e-mail"
                                    Keyboard="Text"
                                    AutomationId="LoginUser"
                                    BackgroundColor="Transparent"

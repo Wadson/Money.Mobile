@@ -16,7 +16,7 @@ public partial class MainPage : ContentPage
     private DateTime _selectedPeriod = new(DateTime.Today.Year, DateTime.Today.Month, 1);
     private bool _balanceVisible = true;
     private decimal _currentMonthResult;
-    private bool _refreshing;
+    private int _refreshVersion;
 
     public MainPage(DatabaseService database, AuthService auth, BackupService backup,
         FinancialForecastService forecast)
@@ -93,7 +93,7 @@ public partial class MainPage : ContentPage
                     label.MaxLines = 1;
                 }
             }
-            else if (element is Button button && (button.Text is "Despesa" or "Receita" or "Transferir"))
+            else if (element is Button button && (button.Text is "Despesa" or "Receita"))
             {
                 button.HeightRequest = 36;
                 button.Padding = new Thickness(8, 2);
@@ -103,21 +103,29 @@ public partial class MainPage : ContentPage
 
     private async Task RefreshAsync()
     {
-        if (_refreshing) return;
-        _refreshing = true;
+        var refreshVersion = ++_refreshVersion;
+        var period = _selectedPeriod;
+        SelectedPeriodLabel.Text = _culture.TextInfo.ToTitleCase(period.ToString("MMMM / yyyy", _culture));
+        ProjectionPeriodLabel.Text = _culture.TextInfo.ToTitleCase(period.ToString("MMMM / yyyy", _culture));
+        IndicatorsPeriodLabel.Text = _culture.TextInfo.ToTitleCase(period.ToString("MMMM / yyyy", _culture));
+        ForecastValuesGrid.IsVisible = false;
+        ProjectionRiskLabel.Text = "CARREGANDO";
+        ProjectionRiskLabel.TextColor = ThemeColor.Get("BlingPrimary");
+        ProjectionRiskDetailLabel.Text = "Consultando o mês selecionado...";
         var primaryCardLoaded = false;
         try
         {
-            var month = _selectedPeriod.Month;
-            var year = _selectedPeriod.Year;
+            var month = period.Month;
+            var year = period.Year;
             var realizedTotalsTask = _database.GetMonthlyRealizedTotalsAsync(month, year);
             var dashboardTask = _database.GetDashboardAsync(month, year);
             var overviewTask = _database.GetMonthlyOverviewAsync(month, year);
             var payablesTask = _database.GetContasPagarAsync(month, year, false);
             var categoriesTask = _database.GetCategoryExpenseReportAsync(month, year);
-            var projectionStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            var selectedOffset = Math.Max(0, (year - projectionStart.Year) * 12 + month - projectionStart.Month);
-            var projectionTask = _forecast.CalculateAsync(projectionStart, Math.Min(24, Math.Max(12, selectedOffset + 1)));
+            var projectionTask = _forecast.CalculateAsync(period, 1);
+            await Task.WhenAll(realizedTotalsTask, dashboardTask, overviewTask, payablesTask, categoriesTask, projectionTask);
+            // A delayed request must not repaint the screen after the user selects another month.
+            if (refreshVersion != _refreshVersion) return;
 
             var realizedTotals = await realizedTotalsTask;
             var totalReceitas = realizedTotals?.TotalReceitas ?? 0.00m;
@@ -125,39 +133,33 @@ public partial class MainPage : ContentPage
             _currentMonthResult = totalReceitas - totalDespesas;
             UpdateBalanceVisibility();
             SelectedPeriodLabel.Text = _culture.TextInfo.ToTitleCase(
-                _selectedPeriod.ToString("MMMM / yyyy", _culture));
+                period.ToString("MMMM / yyyy", _culture));
             MonthlyIncomeLabel.Text = Currency(totalReceitas);
             MonthlyExpensesLabel.Text = Currency(totalDespesas);
             primaryCardLoaded = true;
 
-            await Task.WhenAll(dashboardTask, overviewTask, payablesTask, categoriesTask, projectionTask);
             var dashboard = await dashboardTask;
             var monthly = await overviewTask;
             var payables = await payablesTask;
             var categories = await categoriesTask;
             var projection = await projectionTask;
-            var projectedMonth = projection.FindMonth(month, year);
-
-            CurrentBalanceLabel.Text = Currency(_currentMonthResult);
-            ExpectedIncomeLabel.Text = Currency(projectedMonth?.ExpectedIncome ?? 0m);
-            ExpectedExpensesLabel.Text = Currency(projectedMonth?.ExpectedExpenses ?? 0m);
-            ProjectedResultLabel.Text = Currency(projectedMonth?.ProjectedResult ?? 0m);
-            ProjectedBalanceLabel.Text = Currency(projectedMonth?.ProjectedClosingBalance ?? projection.CurrentBalance);
-            ProjectionRiskLabel.Text = projection.Risk switch
-            {
-                FinancialProjectionRisk.Critical => "CRÍTICO",
-                FinancialProjectionRisk.Attention => "ATENÇÃO",
-                _ => "SEGURO"
-            };
-            ProjectionRiskLabel.TextColor = projection.Risk switch
-            {
-                FinancialProjectionRisk.Critical => ThemeColor.Get("BlingDanger"),
-                FinancialProjectionRisk.Attention => ThemeColor.Get("BlingWarning"),
-                _ => ThemeColor.Get("BlingPrimary")
-            };
-            ProjectionRiskDetailLabel.Text = projection.FirstRiskMonth is DateTime riskMonth
-                ? $"Primeiro mês de atenção: {riskMonth:MM/yyyy} · mínimo {Currency(projection.MinimumProjectedBalance)}"
-                : $"Sem saldo negativo nos próximos {projection.Months.Count} meses";
+            var projectedMonth = projection.Months.Single();
+            UpdateMonthlyIndicators(dashboard);
+            ForecastIncomeLabel.Text = Currency(projectedMonth.TotalIncome);
+            ForecastExpensesLabel.Text = Currency(projectedMonth.TotalExpenses);
+            ExpectedIncomeLabel.Text = Currency(projectedMonth.ExpectedIncome);
+            ExpectedExpensesLabel.Text = Currency(projectedMonth.ExpectedExpenses);
+            ForecastValuesGrid.IsVisible = true;
+            var difference = projectedMonth.ProjectedResult;
+            ProjectionRiskLabel.Text = !projectedMonth.HasActivity ? "SEM LANÇAMENTOS"
+                : difference < 0 ? "DESPESAS MAIORES"
+                : difference == 0 ? "EQUILIBRADO" : "RECEITAS COBREM AS DESPESAS";
+            ProjectionRiskLabel.TextColor = difference < 0 ? ThemeColor.Get("BlingDanger") : ThemeColor.Get("BlingPrimary");
+            ProjectionRiskDetailLabel.Text = !projectedMonth.HasActivity
+                ? "Nenhuma receita ou despesa cadastrada para este mês."
+                : difference < 0 ? "As despesas superam as receitas cadastradas neste mês."
+                : difference == 0 ? "As receitas e despesas cadastradas têm o mesmo valor."
+                : "As receitas cadastradas são suficientes para as despesas deste mês.";
 
             var scale = Math.Max(monthly.Income, monthly.TotalExpenses);
             IncomeProgress.Progress = scale <= 0 ? 0 : Math.Clamp((double)(monthly.Income / scale), 0, 1);
@@ -173,6 +175,10 @@ public partial class MainPage : ContentPage
         }
         catch (Exception ex)
         {
+            if (refreshVersion != _refreshVersion) return;
+            ForecastValuesGrid.IsVisible = false;
+            ProjectionRiskLabel.Text = "INDISPONÍVEL";
+            ProjectionRiskDetailLabel.Text = "Não foi possível consultar este mês. Puxe a tela para tentar novamente.";
             // Uma falha secundária não pode apagar um card principal já calculado.
             if (!primaryCardLoaded)
             {
@@ -183,7 +189,18 @@ public partial class MainPage : ContentPage
             }
             System.Diagnostics.Debug.WriteLine($"[MainPage.RefreshAsync] {ex}");
         }
-        finally { _refreshing = false; }
+    }
+
+    private void UpdateMonthlyIndicators(DashboardSummary dashboard)
+    {
+        SavingsIndicatorLabel.Text = Currency(dashboard.Savings);
+        SavingsIndicatorLabel.TextColor = dashboard.Savings < 0
+            ? ThemeColor.Get("BlingDanger") : ThemeColor.Get("BlingPrimary");
+        SavingsRateIndicatorLabel.Text = dashboard.Income <= 0
+            ? "Não calculável" : $"{dashboard.SavingsRate:N1}%";
+        DailyExpenseIndicatorLabel.Text = Currency(dashboard.DailyAverage);
+        FinancialScoreIndicatorLabel.Text = dashboard.Income <= 0
+            ? "Sem dados" : $"{dashboard.FinancialScore}/100";
     }
 
     private void BuildCategories(IEnumerable<CategoryExpenseReport> source)
@@ -223,6 +240,17 @@ public partial class MainPage : ContentPage
             };
             row.Add(progress, 0, 1);
             Grid.SetColumnSpan(progress, 2);
+            var tap=new TapGestureRecognizer();
+            tap.Tapped+=async(_,_)=>{
+                try{
+                    var main=(await _database.GetMainCategoriesAsync("despesa",true)).Single(x=>x.Name==item.Category);
+                    var subs=await _database.GetSubcategoriesAsync(main.Id,includeInactive:true);
+                    var transactions=await _database.GetFinancialReportItemsAsync(_selectedPeriod.Month,_selectedPeriod.Year,mainCategoryId:main.Id);
+                    var options=subs.Select((sub,i)=>new SelectionOption{Index=i,Label=sub.Name,Subtitle=Currency(transactions.Where(t=>t.CategoryId==sub.Id).Sum(t=>t.Amount)),ImageSource=CategoryVisualResolver.Icon(sub),Foreground=CategoryVisualResolver.Foreground(sub),Background=CategoryVisualResolver.Background(sub)});
+                    await Navigation.PushModalAsync(new Money.Views.Dialogs.OptionSelectionPage(main.Name+" / Subcategorias",options));
+                }catch(Exception ex){await ThemedDialog.ShowAsync(this,"Categorias",ex.Message);}
+            };
+            row.GestureRecognizers.Add(tap);SemanticProperties.SetDescription(row,"Detalhar subcategorias de "+item.Category);
             CategoriesContainer.Children.Add(row);
         }
     }
@@ -321,13 +349,6 @@ public partial class MainPage : ContentPage
         await Navigation.PushModalAsync(new IncomeListPage(_database));
     }
 
-    private async void OnTransferClicked(object? sender, EventArgs e)
-    {
-        var page = new AccountTransferPage(_database);
-        page.Saved += async (_, _) => await RefreshAsync();
-        await Navigation.PushModalAsync(page);
-    }
-
     private void OnPendingAlertTapped(object? sender, TappedEventArgs e) => OnAccountsPayableClicked(sender, EventArgs.Empty);
     private async void OnViewAllTransactionsClicked(object? sender, EventArgs e) => await Navigation.PushModalAsync(new ReportPage(_database));
     private async void OnNotificationsClicked(object? sender, EventArgs e) => await Navigation.PushModalAsync(new SettingsPage(_database));
@@ -369,15 +390,13 @@ public partial class MainPage : ContentPage
         (Application.Current?.UserAppTheme == AppTheme.Unspecified &&
          Application.Current?.RequestedTheme == AppTheme.Dark);
     private async void OnProfileClicked(object? sender, EventArgs e) => await Navigation.PushModalAsync(new ProfilePage(_auth));
-    private async void OnAccountsPayableClicked(object? sender, EventArgs e) => await Navigation.PushModalAsync(new AccountsPayablePage(_database));
+    private async void OnAccountsPayableClicked(object? sender, EventArgs e) => await OpenPageSafelyAsync(() => new AccountsPayablePage(_database));
     private async void OnMobileMoreClicked(object? sender, EventArgs e) => await OpenDrawerAsync();
     private void OnBottomHomeTapped(object? sender, TappedEventArgs e) { }
     private async void OnBottomAccountsTapped(object? sender, TappedEventArgs e) =>
-        await Navigation.PushModalAsync(new AccountsPayablePage(_database));
+        await OpenPageSafelyAsync(() => new AccountsPayablePage(_database));
     private async void OnBottomCardsTapped(object? sender, TappedEventArgs e) =>
-        await Navigation.PushModalAsync(new CreditCardAnalysisPage(_database));
-    private async void OnBottomBanksTapped(object? sender, TappedEventArgs e) =>
-        await Navigation.PushModalAsync(new AccountManagementPage(_database));
+        await OpenPageSafelyAsync(() => new CreditCardAnalysisPage(_database));
     private async void OnBottomMenuTapped(object? sender, TappedEventArgs e) => await OpenDrawerAsync();
 
     private async Task OpenDrawerAsync()
@@ -398,7 +417,21 @@ public partial class MainPage : ContentPage
     private async void OnCloseDrawerTapped(object? sender, TappedEventArgs e) => await CloseDrawerAsync();
     private async void OnCloseDrawerClicked(object? sender, EventArgs e) => await CloseDrawerAsync();
     private async void OnDrawerRegistrationsClicked(object? sender, EventArgs e) { await CloseDrawerAsync(); await Navigation.PushModalAsync(new MorePage(_database, _auth, _backup)); }
-    private async void OnDrawerReportsClicked(object? sender, EventArgs e) { await CloseDrawerAsync(); await Navigation.PushModalAsync(new ReportPage(_database)); }
+    private async void OnDrawerReportsClicked(object? sender, EventArgs e) { await CloseDrawerAsync(); await OpenPageSafelyAsync(() => new ReportPage(_database)); }
+    private bool _openingPage;
+    private async Task OpenPageSafelyAsync(Func<Page> createPage)
+    {
+        if (_openingPage) return;
+        _openingPage = true;
+        try { await Navigation.PushModalAsync(createPage()); }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
+            await ThemedDialog.ShowAsync(this, "Não foi possível abrir a tela",
+                SqliteErrorMessage.ToFriendly(ex), "Fechar");
+        }
+        finally { _openingPage = false; }
+    }
     private async void OnDrawerBackupClicked(object? sender, EventArgs e) { await CloseDrawerAsync(); await Navigation.PushModalAsync(new BackupPage(_backup)); }
     private async void OnDrawerSettingsClicked(object? sender, EventArgs e) { await CloseDrawerAsync(); await Navigation.PushModalAsync(new SettingsPage(_database)); }
     private async void OnDrawerAboutClicked(object? sender, EventArgs e) { await CloseDrawerAsync(); await Navigation.PushModalAsync(new AboutPage()); }

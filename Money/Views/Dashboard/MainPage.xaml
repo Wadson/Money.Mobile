@@ -71,34 +71,30 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Style="{StaticResource ContentCard}" StrokeShape="RoundRectangle 18" Padding="10">
-                        <VerticalStackLayout Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Previsão financeira" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
-                                <Label x:Name="ProjectionRiskLabel" Grid.Column="1" Text="SEGURO" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                    <Border Style="{StaticResource ContentCard}" StrokeShape="RoundRectangle 18" Padding="16">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Previsão financeira" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                            <Label x:Name="ProjectionPeriodLabel" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                            <Grid x:Name="ForecastValuesGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="14">
+                                <VerticalStackLayout Spacing="3"><Label Text="Receitas do mês" FontSize="13"/><Label x:Name="ForecastIncomeLabel" Text="—" FontSize="18" FontAttributes="Bold"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3"><Label Text="Despesas do mês" FontSize="13"/><Label x:Name="ForecastExpensesLabel" Text="—" FontSize="18" FontAttributes="Bold"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1" Spacing="3"><Label Text="A receber" FontSize="13"/><Label x:Name="ExpectedIncomeLabel" Text="—" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/></VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="3"><Label Text="A pagar" FontSize="13"/><Label x:Name="ExpectedExpensesLabel" Text="—" FontSize="17" FontAttributes="Bold"/></VerticalStackLayout>
                             </Grid>
-                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                                <VerticalStackLayout><Label Text="Resultado realizado" FontSize="14"/><Label x:Name="CurrentBalanceLabel" Text="R$ 0,00" FontSize="17" FontAttributes="Bold"/></VerticalStackLayout>
-                                <VerticalStackLayout Grid.Column="1"><Label Text="Saldo projetado" FontSize="14"/><Label x:Name="ProjectedBalanceLabel" Text="R$ 0,00" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/></VerticalStackLayout>
-                                <VerticalStackLayout Grid.Row="1"><Label Text="Entradas previstas" FontSize="14"/><Label x:Name="ExpectedIncomeLabel" Text="R$ 0,00" FontSize="15" FontAttributes="Bold"/></VerticalStackLayout>
-                                <VerticalStackLayout Grid.Row="1" Grid.Column="1"><Label Text="Contas previstas" FontSize="14"/><Label x:Name="ExpectedExpensesLabel" Text="R$ 0,00" FontSize="15" FontAttributes="Bold"/></VerticalStackLayout>
-                                <VerticalStackLayout Grid.Row="2"><Label Text="Resultado projetado" FontSize="14"/><Label x:Name="ProjectedResultLabel" Text="R$ 0,00" FontSize="14" FontAttributes="Bold"/></VerticalStackLayout>
-                                <Label x:Name="ProjectionRiskDetailLabel" Grid.Row="2" Grid.Column="1" Text="Sem risco identificado" FontSize="14" VerticalTextAlignment="Center" LineBreakMode="TailTruncation"/>
-                            </Grid>
+                            <Label Text="Totais por vencimento, incluindo pagos e pendentes." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                            <Label x:Name="ProjectionRiskLabel" Text="CARREGANDO" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                            <Label x:Name="ProjectionRiskDetailLabel" FontSize="13" LineBreakMode="WordWrap"/>
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Três ações essenciais -->
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <!-- Ações essenciais -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
                         <Button Text="Despesa" FontSize="11" FontAttributes="Bold" HeightRequest="38" Padding="10,3" CornerRadius="12"
                                 ImageSource="{icons:MaterialIconSource Icon=Add, ColorResource=BlingTextLight, IconSize=18}"
                                 BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" Clicked="OnNewTransactionClicked"/>
                         <Button Grid.Column="1" Text="Receita" FontSize="11" FontAttributes="Bold" HeightRequest="38" Padding="10,3" CornerRadius="12"
                                 ImageSource="{icons:MaterialIconSource Icon=TrendingUp, ColorResource=BlingTextLight, IconSize=18}"
                                 BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" Clicked="OnNewIncomeClicked"/>
-                        <Button Grid.Column="2" Text="Transferir" FontSize="11" FontAttributes="Bold" HeightRequest="38" Padding="10,3" CornerRadius="12"
-                                ImageSource="{icons:MaterialIconSource Icon=SwapHoriz, ColorResource=BlingTextLight, IconSize=18}"
-                                BackgroundColor="{StaticResource BlingPrimary}" TextColor="{StaticResource BlingTextLight}" Clicked="OnTransferClicked"/>
                     </Grid>
 
                     <!-- Dashboard unificado -->
@@ -152,6 +148,55 @@
                             <VerticalStackLayout x:Name="TransactionsContainer" Spacing="2"/>
                         </VerticalStackLayout>
                     </Border>
+
+                    <!-- Indicadores realizados: painel complementar, abaixo do dashboard existente. -->
+                    <Border Style="{StaticResource ContentCard}" StrokeShape="RoundRectangle 18" Padding="14">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Indicadores do mês" FontSize="19" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+                                    <Label x:Name="IndicatorsPeriodLabel" FontSize="12"
+                                           TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                                </VerticalStackLayout>
+                                <mi:MauiIcon Grid.Column="1" Icon="{mi:Material Icon=Insights}" IconSize="26"
+                                             IconColor="{StaticResource BlingPrimary}" VerticalOptions="Center"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                <Border BackgroundColor="{AppThemeBinding Light=#EAF8F0, Dark=#173D2B}" StrokeThickness="0" Padding="12" StrokeShape="RoundRectangle 14">
+                                    <VerticalStackLayout Spacing="3">
+                                        <Label Text="ECONOMIA REALIZADA" FontSize="10" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                                        <Label x:Name="SavingsIndicatorLabel" Text="R$ 0,00" FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                                        <Label Text="Receitas menos despesas pagas" FontSize="10" LineBreakMode="WordWrap"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                                <Border Grid.Column="1" BackgroundColor="{AppThemeBinding Light=#EEF5FF, Dark=#1D3048}" StrokeThickness="0" Padding="12" StrokeShape="RoundRectangle 14">
+                                    <VerticalStackLayout Spacing="3">
+                                        <Label Text="TAXA DE ECONOMIA" FontSize="10" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                                        <Label x:Name="SavingsRateIndicatorLabel" Text="Não calculável" FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                                        <Label Text="Economia ÷ receitas recebidas" FontSize="10" LineBreakMode="WordWrap"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                                <Border Grid.Row="1" BackgroundColor="{AppThemeBinding Light=#F5F3FF, Dark=#30284B}" StrokeThickness="0" Padding="12" StrokeShape="RoundRectangle 14">
+                                    <VerticalStackLayout Spacing="3">
+                                        <Label Text="MÉDIA DIÁRIA" FontSize="10" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                                        <Label x:Name="DailyExpenseIndicatorLabel" Text="R$ 0,00" FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                                        <Label Text="Despesas pagas por dia do período" FontSize="10" LineBreakMode="WordWrap"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{AppThemeBinding Light=#FFF7E8, Dark=#49391D}" StrokeThickness="0" Padding="12" StrokeShape="RoundRectangle 14">
+                                    <VerticalStackLayout Spacing="3">
+                                        <Label Text="SCORE DO MÊS" FontSize="10" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
+                                        <Label x:Name="FinancialScoreIndicatorLabel" Text="Sem dados" FontSize="17" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                                        <Label Text="Indicador interno de 0 a 100" FontSize="10" LineBreakMode="WordWrap"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </Grid>
+                            <Label Text="Indicadores baseados exclusivamente nos lançamentos realizados no mês selecionado."
+                                   FontSize="11" LineBreakMode="WordWrap"
+                                   TextColor="{AppThemeBinding Light={StaticResource BlingTextMutedLight}, Dark={StaticResource BlingTextMutedDark}}"/>
+                        </VerticalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
             </ScrollView>
         </RefreshView>
@@ -161,7 +206,7 @@
                 BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
                 Stroke="{AppThemeBinding Light=#E5E7EB, Dark={StaticResource BlingBorderDark}}"
                 StrokeThickness="1" Padding="8,7,8,10" StrokeShape="RoundRectangle 22,22,0,0">
-            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="5">
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="5">
                 <Border BackgroundColor="{AppThemeBinding Light={StaticResource BlingPrimary}, Dark={StaticResource BlingCardDark}}"
                         Stroke="{StaticResource BlingPrimary}" StrokeThickness="1" Padding="4,6"
                         StrokeShape="RoundRectangle 14" MinimumHeightRequest="58">
@@ -191,14 +236,6 @@
                 </Border>
 
                 <Border Grid.Column="3" BackgroundColor="Transparent" StrokeThickness="0" Padding="4,6" MinimumHeightRequest="58">
-                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomBanksTapped"/></Border.GestureRecognizers>
-                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
-                        <mi:MauiIcon Icon="{mi:Material Icon=AccountBalanceWallet}" IconSize="23" IconColor="{StaticResource BlingPrimary}"/>
-                        <Label Text="Bancos" FontSize="10" FontAttributes="Bold" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Grid.Column="4" BackgroundColor="Transparent" StrokeThickness="0" Padding="4,6" MinimumHeightRequest="58">
                     <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnBottomMenuTapped"/></Border.GestureRecognizers>
                     <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
                         <mi:MauiIcon Icon="{mi:Material Icon=Menu}" IconSize="23" IconColor="{StaticResource BlingPrimary}"/>

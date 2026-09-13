@@ -4,7 +4,6 @@
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              xmlns:icons="clr-namespace:Money.Helpers"
              xmlns:local="clr-namespace:Money.Views.Dialogs"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="Money.Views.Dialogs.OptionSelectionPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" 
              Shell.NavBarIsVisible="False">

@@ -16,8 +16,12 @@ public partial class MorePage : ContentPage
         _backup = backup;
     }
 
+    private async void OnBudgetRuleTapped(object? sender, TappedEventArgs e)
+        => await Navigation.PushModalAsync(new BudgetRuleAnalysisPage(_database));
     private async void OnCardsTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new CreditCardAnalysisPage(_database));
+    private async void OnManageCardsTapped(object? sender, TappedEventArgs e)
+        => await Navigation.PushModalAsync(new CardManagementPage(_database));
     private async void OnReportsTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new ReportPage(_database));
     private async void OnMonthlyTapped(object? sender, TappedEventArgs e)
@@ -33,6 +37,8 @@ public partial class MorePage : ContentPage
             await ThemedDialog.ShowAsync(this, "Categorias", SqliteErrorMessage.ToFriendly(ex), "Fechar");
         }
     }
+    private async void OnSubcategoriesTapped(object? sender, TappedEventArgs e)
+        => await Navigation.PushModalAsync(new SubcategoryManagementPage(_database));
     private async void OnSuppliersTapped(object? sender, TappedEventArgs e)
     {
         try
@@ -49,20 +55,11 @@ public partial class MorePage : ContentPage
         => await Navigation.PushModalAsync(new ProfilePage(_auth));
     private async void OnUsersTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new UserManagementPage(_auth));
-    private async void OnPlanningTapped(object? sender, TappedEventArgs e)
-        => await Navigation.PushModalAsync(new PlanningPage(_database));
-    private async void OnTagsTapped(object? sender, TappedEventArgs e)
-        => await Navigation.PushModalAsync(new PlanningPage(_database));
     private async void OnSettingsTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new SettingsPage(_database));
-    private async void OnAccountsTapped(object? sender, TappedEventArgs e)
-        => await Navigation.PushModalAsync(new AccountManagementPage(_database));
-    private async void OnBudgetsTapped(object? sender, TappedEventArgs e)
-        => await Navigation.PushModalAsync(new BudgetManagementPage(_database));
     private async void OnPaymentReversalTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new PaymentReversalPage(_database));
     private async void OnBackupTapped(object? sender, TappedEventArgs e)
         => await Navigation.PushModalAsync(new BackupPage(_backup));
     private async void OnBackClicked(object? sender, EventArgs e) => await Navigation.PopModalAsync();
 }
-

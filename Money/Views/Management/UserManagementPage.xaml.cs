@@ -23,7 +23,7 @@ public partial class UserManagementPage : ContentPage
     private async void OnNewClicked(object? sender, EventArgs e) => await OpenEditorAsync(null);
     private async void OnEditClicked(object? sender, EventArgs e)
     {
-        if (sender is ImageButton { CommandParameter: ManagedUser user }) await OpenEditorAsync(user);
+        if (sender is Button { CommandParameter: ManagedUser user }) await OpenEditorAsync(user);
     }
     private async Task OpenEditorAsync(ManagedUser? user)
     {
@@ -33,7 +33,7 @@ public partial class UserManagementPage : ContentPage
     }
     private async void OnDeleteClicked(object? sender, EventArgs e)
     {
-        if (sender is not ImageButton { CommandParameter: ManagedUser user }) return;
+        if (sender is not Button { CommandParameter: ManagedUser user }) return;
         if (!await ThemedDialog.ConfirmAsync(this, "Excluir usuário",
             $"Deseja excluir o acesso de “{user.Name}”? Os dados financeiros serão preservados.", "Excluir", "Cancelar")) return;
         var result = await _auth.DeleteManagedUserAsync(user.Id);

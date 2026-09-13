@@ -21,12 +21,12 @@ public sealed class ReportPdfService(DatabaseService database)
 
     public async Task<ReportPdfResult> GenerateAsync(int month, int year, long? categoryId,
         string? categoryName, string paymentStatus = "todas", long? supplierId = null,
-        string? supplierName = null, long? cardId = null, string? cardName = null)
+        string? supplierName = null, long? cardId = null, string? cardName = null, long? mainCategoryId = null)
     {
         // Inicialização tardia: evita carregar o mecanismo nativo de PDF durante
         // a abertura do aplicativo, especialmente no Android.
         var items = await database.GetFinancialReportItemsAsync(
-            month, year, categoryId, paymentStatus, supplierId, cardId);
+            month, year, categoryId, paymentStatus, supplierId, cardId, mainCategoryId);
         var income = items.Where(x => x.Type == "receita" && x.Paid).Sum(x => x.Amount);
         var paidExpenses = items.Where(x => x.Type == "despesa" && x.Paid).Sum(x => x.Amount);
         var pendingExpenses = items.Where(x => x.Type == "despesa" && !x.Paid).Sum(x => x.Amount);
@@ -216,12 +216,12 @@ public sealed class ReportPdfService(DatabaseService database)
             {
                 HeaderCell(header.Cell()).Text("DATA");
                 HeaderCell(header.Cell()).Text("DESCRIÇÃO");
-                HeaderCell(header.Cell()).Text("CATEGORIA");
+                HeaderCell(header.Cell()).Text("SUBCATEGORIA");
                 HeaderCell(header.Cell()).Text("STATUS");
                 HeaderCell(header.Cell()).AlignRight().Text("VALOR");
             });
 
-            foreach (var group in items.GroupBy(x => x.Category))
+            foreach (var group in items.GroupBy(x => x.MainCategory))
             {
                 table.Cell().ColumnSpan(5).Background(BlingPalette.CardBackgroundHex).BorderBottom(1)
                     .BorderColor(BlingPalette.PrimaryHex).Padding(7)
@@ -232,7 +232,7 @@ public sealed class ReportPdfService(DatabaseService database)
                 {
                     BodyCell(table.Cell()).Text(item.Date.ToString("dd/MM/yyyy"));
                     BodyCell(table.Cell()).Text(item.Description);
-                    BodyCell(table.Cell()).Text(item.Category);
+                    BodyCell(table.Cell()).Text(item.Subcategory);
                     BodyCell(table.Cell()).Text(item.Paid ? "Realizado" : "Pendente")
                         .FontColor(item.Paid ? BlingPalette.PrimaryHex : BlingPalette.HeaderDarkHex);
                     BodyCell(table.Cell()).AlignRight().Text(item.Amount.ToString("C2", _culture))

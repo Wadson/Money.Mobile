@@ -21,13 +21,13 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Money
-build_property.ProjectDir = D:\Projetos\Money\Money\
+build_property.ProjectDir = D:\Projetos\Money.Mobile\Money\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/Projetos/Money/Money/App.xaml]
+[D:/Projetos/Money.Mobile/Money/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
@@ -37,7 +37,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/AppShell.xaml]
+[D:/Projetos/Money.Mobile/Money/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
@@ -47,7 +47,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Resources/Styles/Colors.xaml]
+[D:/Projetos/Money.Mobile/Money/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
@@ -57,7 +57,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Resources/Styles/Styles.xaml]
+[D:/Projetos/Money.Mobile/Money/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
@@ -67,7 +67,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Auth/LoginPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Auth/LoginPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Auth.LoginPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Auth\LoginPage.xaml
@@ -77,7 +77,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Auth/RecoveryPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Auth/RecoveryPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Auth.RecoveryPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Auth\RecoveryPage.xaml
@@ -87,7 +87,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Auth/RegisterPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Auth/RegisterPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Auth.RegisterPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Auth\RegisterPage.xaml
@@ -97,7 +97,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Dashboard/MainPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Dashboard/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Dashboard.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Dashboard\MainPage.xaml
@@ -107,7 +107,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Dashboard/MonthlyOverviewPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Dashboard/MonthlyOverviewPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Dashboard.MonthlyOverviewPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Dashboard\MonthlyOverviewPage.xaml
@@ -117,17 +117,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Dashboard/PlanningPage.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Dashboard.PlanningPage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\Dashboard\PlanningPage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\Dashboard\PlanningPage.xaml
-build_metadata.AdditionalFiles.Inflator = SourceGen
-build_metadata.AdditionalFiles.NoWarn = 
-build_metadata.AdditionalFiles.EnableDiagnostics = 
-build_metadata.AdditionalFiles.LineInfo = 
-
-[D:/Projetos/Money/Money/Views/Dialogs/CalendarDateSelectionPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Dialogs/CalendarDateSelectionPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Dialogs.CalendarDateSelectionPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Dialogs\CalendarDateSelectionPage.xaml
@@ -137,7 +127,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Dialogs/MonthYearSelectionPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Dialogs/MonthYearSelectionPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Dialogs.MonthYearSelectionPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Dialogs\MonthYearSelectionPage.xaml
@@ -147,7 +137,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Dialogs/OptionSelectionPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Dialogs/OptionSelectionPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Dialogs.OptionSelectionPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Dialogs\OptionSelectionPage.xaml
@@ -157,7 +147,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/ImportsAndReports/CreditCardAnalysisPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/ImportsAndReports/CreditCardAnalysisPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.ImportsAndReports.CreditCardAnalysisPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\ImportsAndReports\CreditCardAnalysisPage.xaml
@@ -167,7 +157,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/ImportsAndReports/ImportCardInvoicePage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/ImportsAndReports/ImportCardInvoicePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.ImportsAndReports.ImportCardInvoicePage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\ImportsAndReports\ImportCardInvoicePage.xaml
@@ -177,7 +167,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/ImportsAndReports/PayablesCsvImportPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/ImportsAndReports/PayablesCsvImportPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.ImportsAndReports.PayablesCsvImportPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\ImportsAndReports\PayablesCsvImportPage.xaml
@@ -187,7 +177,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/ImportsAndReports/ReportPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/ImportsAndReports/ReportPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.ImportsAndReports.ReportPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\ImportsAndReports\ReportPage.xaml
@@ -197,27 +187,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Management/AccountManagementPage.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.AccountManagementPage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\Management\AccountManagementPage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\Management\AccountManagementPage.xaml
-build_metadata.AdditionalFiles.Inflator = SourceGen
-build_metadata.AdditionalFiles.NoWarn = 
-build_metadata.AdditionalFiles.EnableDiagnostics = 
-build_metadata.AdditionalFiles.LineInfo = 
-
-[D:/Projetos/Money/Money/Views/Management/BudgetManagementPage.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.BudgetManagementPage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\Management\BudgetManagementPage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\Management\BudgetManagementPage.xaml
-build_metadata.AdditionalFiles.Inflator = SourceGen
-build_metadata.AdditionalFiles.NoWarn = 
-build_metadata.AdditionalFiles.EnableDiagnostics = 
-build_metadata.AdditionalFiles.LineInfo = 
-
-[D:/Projetos/Money/Money/Views/Management/CardManagementPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Management/CardManagementPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.CardManagementPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Management\CardManagementPage.xaml
@@ -227,7 +197,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Management/CategoryManagementPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Management/CategoryManagementPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.CategoryManagementPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Management\CategoryManagementPage.xaml
@@ -237,7 +207,17 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Management/SupplierEditPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Management/SubcategoryManagementPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.SubcategoryManagementPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\Management\SubcategoryManagementPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\Management\SubcategoryManagementPage.xaml
+build_metadata.AdditionalFiles.Inflator = SourceGen
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[D:/Projetos/Money.Mobile/Money/Views/Management/SupplierEditPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.SupplierEditPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Management\SupplierEditPage.xaml
@@ -247,7 +227,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Management/SupplierManagementPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Management/SupplierManagementPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.SupplierManagementPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Management\SupplierManagementPage.xaml
@@ -257,7 +237,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Management/UserEditorPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Management/UserEditorPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.UserEditorPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Management\UserEditorPage.xaml
@@ -267,7 +247,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Management/UserManagementPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Management/UserManagementPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Management.UserManagementPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Management\UserManagementPage.xaml
@@ -277,7 +257,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/AboutPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/AboutPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.AboutPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\AboutPage.xaml
@@ -287,7 +267,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/BackupPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/BackupPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.BackupPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\BackupPage.xaml
@@ -297,7 +277,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/DataCleanupPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/DataCleanupPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.DataCleanupPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\DataCleanupPage.xaml
@@ -307,7 +287,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/DataOperationsPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/DataOperationsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.DataOperationsPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\DataOperationsPage.xaml
@@ -317,7 +297,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/MorePage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/MorePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.MorePage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\MorePage.xaml
@@ -327,7 +307,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/ProfilePage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/ProfilePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.ProfilePage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\ProfilePage.xaml
@@ -337,7 +317,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/SettingsAndData/SettingsPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/SettingsAndData/SettingsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.SettingsAndData.SettingsPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\SettingsAndData\SettingsPage.xaml
@@ -347,7 +327,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Transactions/AccountsPayablePage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Transactions/AccountsPayablePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.AccountsPayablePage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Transactions\AccountsPayablePage.xaml
@@ -357,17 +337,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Transactions/AccountTransferPage.xaml]
-build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.AccountTransferPage.xaml
-build_metadata.AdditionalFiles.TargetPath = Views\Transactions\AccountTransferPage.xaml
-build_metadata.AdditionalFiles.RelativePath = Views\Transactions\AccountTransferPage.xaml
-build_metadata.AdditionalFiles.Inflator = SourceGen
-build_metadata.AdditionalFiles.NoWarn = 
-build_metadata.AdditionalFiles.EnableDiagnostics = 
-build_metadata.AdditionalFiles.LineInfo = 
-
-[D:/Projetos/Money/Money/Views/Transactions/IncomeFormPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Transactions/IncomeFormPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.IncomeFormPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Transactions\IncomeFormPage.xaml
@@ -377,7 +347,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Transactions/IncomeListPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Transactions/IncomeListPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.IncomeListPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Transactions\IncomeListPage.xaml
@@ -387,7 +357,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Transactions/PaymentReversalPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Transactions/PaymentReversalPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.PaymentReversalPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Transactions\PaymentReversalPage.xaml
@@ -397,7 +367,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Transactions/TransactionEditPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Transactions/TransactionEditPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.TransactionEditPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Transactions\TransactionEditPage.xaml
@@ -407,7 +377,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[D:/Projetos/Money/Money/Views/Transactions/TransactionFormPage.xaml]
+[D:/Projetos/Money.Mobile/Money/Views/Transactions/TransactionFormPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = Money.Views.Transactions.TransactionFormPage.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\Transactions\TransactionFormPage.xaml

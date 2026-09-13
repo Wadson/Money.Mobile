@@ -13,8 +13,7 @@
   </Border>
   <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="14,12,14,8" Padding="12">
    <VerticalStackLayout Spacing="9">
-    <Label Text="Colunas: Descricao; Valor; DataVencimento; Categoria; Fornecedor; Observacoes" FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
-    <Border Style="{StaticResource InputContainer}"><Picker x:Name="AccountPicker" Title="Conta associada aos lançamentos" BackgroundColor="Transparent"/></Border>
+    <Label Text="Colunas: Descricao; Valor; DataVencimento; Categoria; Subcategoria; Fornecedor; Observacoes" FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
      <Button Text="Baixar modelo CSV" ImageSource="{icons:MaterialIconSource Icon=Download, ColorResource=BlingPrimary, IconSize=19}"
              BackgroundColor="Transparent" TextColor="{StaticResource BlingPrimary}" BorderColor="{StaticResource BlingPrimary}"
@@ -31,7 +30,7 @@
      <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8">
       <Label Text="{Binding Description}" FontAttributes="Bold" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
       <Label Grid.Column="1" Text="{Binding AmountText}" FontAttributes="Bold" TextColor="{StaticResource BlingPrimary}"/>
-      <Label Grid.Row="1" Text="{Binding Category, StringFormat='Categoria: {0}'}" FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
+      <Label Grid.Row="1" Text="{Binding Category, StringFormat='Categoria / Subcategoria: {0}'}" FontSize="10" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}"/>
       <Label Grid.Row="1" Grid.Column="1" Text="{Binding DueDate, StringFormat='{0:dd/MM/yyyy}'}" FontSize="10"/>
       <Label Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Status}" TextColor="{Binding StatusColor}" FontSize="10" FontAttributes="Bold"/>
      </Grid>

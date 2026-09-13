@@ -1,4 +1,0 @@
-D:\Projetos\Money\Money\bin\Release\net10.0-android\publish\com.companyname.money-Signed.aab
-D:\Projetos\Money\Money\bin\Release\net10.0-android\publish\com.companyname.money.aab
-D:\Projetos\Money\Money\bin\Release\net10.0-android\publish\com.companyname.money-Signed.apk
-D:\Projetos\Money\Money\bin\Release\net10.0-android\publish\_Microsoft.Android.Resource.Designer.dll

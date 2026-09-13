@@ -13,7 +13,12 @@ public sealed record FinancialProjectionEvent(long Id, DateTime Date, string Des
 public sealed record MonthlyFinancialProjection(DateTime Month, decimal OpeningBalance,
     decimal RealizedIncome, decimal ExpectedIncome, decimal PaidExpenses, decimal ExpectedExpenses,
     decimal RealizedResult, decimal ProjectedResult, decimal RealClosingBalance,
-    decimal ProjectedClosingBalance, FinancialProjectionRisk Risk);
+    decimal ProjectedClosingBalance, FinancialProjectionRisk Risk)
+{
+    public decimal TotalIncome => RealizedIncome + ExpectedIncome;
+    public decimal TotalExpenses => PaidExpenses + ExpectedExpenses;
+    public bool HasActivity => TotalIncome > 0 || TotalExpenses > 0;
+}
 public sealed record FinancialProjectionSummary(decimal CurrentBalance,
     IReadOnlyList<MonthlyFinancialProjection> Months, FinancialProjectionRisk Risk,
     DateTime? FirstRiskMonth, decimal MinimumProjectedBalance)
@@ -30,13 +35,13 @@ public sealed record TransactionItem(long Id, string Description, decimal Amount
 public sealed record FinancialReportItem(long Id, DateTime Date, string Description, string Type,
     decimal Amount, long? CategoryId, string Category, string Source, bool Paid,
     int InstallmentNumber = 1, int TotalInstallments = 1,
-    IReadOnlyList<TagItem>? Tags = null);
+    IReadOnlyList<TagItem>? Tags = null, string MainCategory = "", string Subcategory = "");
 public sealed record ManagedUser(long Id, string Name, string Email, DateTime? BirthDate,
     string? RecoveryQuestion, bool Active, DateTime? LastAccess);
 public sealed record BudgetProgress(string Category, string Color, decimal Limit, decimal Spent,
     double Percentage, string Status = "ok");
 public sealed record CategoryItem(long Id, string Name, string Type, string Color, string? Icon,
-    long? ParentId = null, int Level = 1, string? FullPath = null);
+    long? ParentId = null, int Level = 1, string? FullPath = null) : ICategoryVisual;
 public sealed record AccountItem(long Id, string Name, decimal Balance, string Type,
     string Color = BlingPalette.PrimaryHex, string Icon = "AccountBalance");
 public sealed record CardItem(long Id, string Name, decimal CreditLimit, decimal Used,

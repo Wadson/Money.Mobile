@@ -1,15 +1,13 @@
-using Microsoft.Data.Sqlite;
 
 namespace Money.Services;
 
 public enum BackupDestination { Folder, Share }
 
-public sealed class BackupService(DatabaseService database)
+public sealed class BackupService(DatabaseService database, AuthService auth)
 {
     public async Task<string> CreateBackupAsync(BackupDestination? selectedDestination = null)
     {
-        await CheckpointAsync();
-        var fileName = $"moneypro-backup-{DateTime.Now:yyyyMMdd-HHmmss}.db";
+        var fileName = $"moneypro-backup-{DateTime.Now:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.db";
 
 #if WINDOWS
         var picker = new Windows.Storage.Pickers.FolderPicker();
@@ -19,12 +17,12 @@ public sealed class BackupService(DatabaseService database)
         var folder = await picker.PickSingleFolderAsync();
         if (folder is null) throw new OperationCanceledException("Backup cancelado.");
         var destination = Path.Combine(folder.Path, fileName);
-        File.Copy(database.DatabasePath, destination, false);
+        await new SqliteBackupStore(database).CreateAsync(destination);
         await database.RecordBackupAsync(fileName, destination, new FileInfo(destination).Length);
         return destination;
 #else
         var destination = Path.Combine(FileSystem.CacheDirectory, fileName);
-        File.Copy(database.DatabasePath, destination, true);
+        await new SqliteBackupStore(database).CreateAsync(destination);
 
 #if ANDROID
         // Adicionados ícones/glifos modernos nas opções do menu
@@ -60,7 +58,7 @@ public sealed class BackupService(DatabaseService database)
 #endif
     }
 
-    public async Task<string> RestoreBackupAsync()
+    public async Task<BackupRestoreResult> RestoreBackupAsync()
     {
         var selected = await FilePicker.Default.PickAsync(new PickOptions
         {
@@ -68,44 +66,24 @@ public sealed class BackupService(DatabaseService database)
             FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
             {
                 [DevicePlatform.WinUI] = [".db"],
-                [DevicePlatform.Android] = ["application/octet-stream", "application/x-sqlite3"]
+                [DevicePlatform.Android] = ["application/octet-stream", "application/x-sqlite3", "application/vnd.sqlite3", "application/x-sqlite", "*/*"]
             })
         });
         if (selected is null)
             throw new OperationCanceledException("Restauração cancelada.");
-        var importPath = Path.Combine(FileSystem.CacheDirectory,
-            $"moneypro-restore-{DateTime.Now:yyyyMMddHHmmss}.db");
-        await using (var source = await selected.OpenReadAsync())
-        await using (var destination = File.Create(importPath))
-            await source.CopyToAsync(destination);
-        await ValidateAsync(importPath);
-        var safety = database.DatabasePath + $".antes-restauracao-{DateTime.Now:yyyyMMddHHmmss}.bak";
-        await CheckpointAsync();
-        File.Copy(database.DatabasePath, safety, true);
-        File.Copy(importPath, database.DatabasePath, true);
-        return safety;
-    }
-
-    private async Task CheckpointAsync()
-    {
-        await using var db = new SqliteConnection($"Data Source={database.DatabasePath}");
-        await db.OpenAsync();
-        await using var command = db.CreateCommand();
-        command.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
-        await command.ExecuteNonQueryAsync();
-    }
-
-    private static async Task ValidateAsync(string path)
-    {
-        await using var db = new SqliteConnection($"Data Source={path};Mode=ReadOnly");
-        await db.OpenAsync();
-        await using var command = db.CreateCommand();
-        command.CommandText = "PRAGMA integrity_check;";
-        var result = Convert.ToString(await command.ExecuteScalarAsync());
-        if (!string.Equals(result, "ok", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException("O arquivo selecionado não é um banco SQLite íntegro.");
-        command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='Usuarios';";
-        if (Convert.ToInt32(await command.ExecuteScalarAsync()) != 1)
-            throw new InvalidDataException("O arquivo não é um backup válido do Money Pro.");
+        var importPath = Path.Combine(FileSystem.CacheDirectory, $"moneypro-restore-{Guid.NewGuid():N}.db");
+        try
+        {
+            await using (var source = await selected.OpenReadAsync())
+            await using (var destination = File.Create(importPath))
+                await source.CopyToAsync(destination);
+            var result = await new SqliteBackupStore(database).RestoreAsync(importPath);
+            auth.Logout();
+            return result;
+        }
+        finally
+        {
+            try { File.Delete(importPath); } catch (IOException) { }
+        }
     }
 }

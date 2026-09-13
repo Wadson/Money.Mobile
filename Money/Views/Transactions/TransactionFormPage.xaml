@@ -4,7 +4,6 @@
              xmlns:mi="http://www.aathifmahir.com/dotnet/2022/maui/icons"
              xmlns:icons="clr-namespace:Money.Helpers"
              xmlns:controls="clr-namespace:Money.Controls"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="Money.Views.Transactions.TransactionFormPage"
              BackgroundColor="{AppThemeBinding Light={StaticResource BlingBackgroundLight}, Dark={StaticResource BlingBackgroundDark}}"
              Title="Novo lançamento"
@@ -87,7 +86,7 @@
                                 <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
                                         StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
                                         Padding="16,0" HeightRequest="48">
-                                    <DatePicker x:Name="DatePicker" Format="dd/MM/yyyy"
+                                    <controls:ThemedDateSelector x:Name="DatePicker" Format="dd/MM/yyyy"
                                                 FontSize="14" BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
                                 </Border>
                             </VerticalStackLayout>
@@ -101,8 +100,10 @@
 
                         <!-- Categoria -->
                         <VerticalStackLayout x:Name="CategoryPanel" Spacing="4">
-                            <Label Text="Categoria" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
-                            <controls:LeftAlignedFieldButton x:Name="CategorySelectionButton" Text="Selecione uma categoria" Style="{StaticResource LeftAlignedFieldButton}"
+                            <Label Text="Categoria principal" Style="{StaticResource CardCaption}"/>
+                            <Button x:Name="MainCategorySelectionButton" Text="Selecione a categoria" MinimumHeightRequest="48" Clicked="OnSelectMainCategoryClicked" SemanticProperties.Description="Selecionar categoria principal"/>
+                            <Label Text="Subcategoria" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                            <controls:LeftAlignedFieldButton x:Name="CategorySelectionButton" Text="Selecione a subcategoria" Style="{StaticResource LeftAlignedFieldButton}"
                                     ImageSource="{icons:MaterialIconSource Icon=Category, ColorResource=LightFieldIcon, IconSize=20}"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="14"
                                     BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}"
@@ -198,7 +199,7 @@
                                     <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
                                             StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
                                             Padding="16,0" HeightRequest="48">
-                                        <DatePicker x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"
+                                        <controls:ThemedDateSelector x:Name="FirstInstallmentDatePicker" Format="dd/MM/yyyy"
                                                     DateSelected="OnInstallmentInputChanged" 
                                                     BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
                                     </Border>
@@ -231,7 +232,7 @@
                             <Border Stroke="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" StrokeThickness="1" 
                                     StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
                                     Padding="16,0" HeightRequest="48">
-                                <DatePicker x:Name="DueDatePicker" Format="dd/MM/yyyy" 
+                                <controls:ThemedDateSelector x:Name="DueDatePicker" Format="dd/MM/yyyy"
                                             BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
                             </Border>
 
@@ -249,7 +250,7 @@
                                     StrokeShape="RoundRectangle 8" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}" 
                                     Padding="16,0" HeightRequest="48"
                                     IsVisible="{Binding Source={x:Reference PaymentDatePicker}, Path=IsVisible}">
-                                <DatePicker x:Name="PaymentDatePicker" IsVisible="False" Format="dd/MM/yyyy" 
+                                <controls:ThemedDateSelector x:Name="PaymentDatePicker" IsVisible="False" Format="dd/MM/yyyy"
                                             BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" VerticalOptions="Center"/>
                             </Border>
                         </VerticalStackLayout>
@@ -282,8 +283,8 @@
                             <VerticalStackLayout x:Name="RecurrenceDatesContainer" Spacing="5"/>
                         </VerticalStackLayout>
 
-                        <Label Text="Tags" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
-                        <FlexLayout x:Name="TagsContainer" Wrap="Wrap" Direction="Row"/>
+                        <Label IsVisible="False" Text="Tags" TextColor="{AppThemeBinding Light={StaticResource BlingTextDarkLight}, Dark={StaticResource BlingTextDarkDark}}" FontSize="11" FontAttributes="Bold"/>
+                        <FlexLayout IsVisible="False" x:Name="TagsContainer" Wrap="Wrap" Direction="Row"/>
                     </VerticalStackLayout>
                 </Border>
 

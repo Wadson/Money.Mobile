@@ -42,7 +42,7 @@
                 <Grid x:Name="MonthsGrid" ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto,Auto"
                       ColumnSpacing="8" RowSpacing="8"/>
 
-                <Button Text="Todos os vencimentos" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
+                <Button x:Name="AllPeriodsButton" Text="Todos os vencimentos" BackgroundColor="{AppThemeBinding Light={StaticResource BlingCardLight}, Dark={StaticResource BlingCardDark}}"
                         TextColor="{StaticResource BlingPrimary}" BorderColor="{AppThemeBinding Light={StaticResource BlingBorderLight}, Dark={StaticResource BlingBorderDark}}" BorderWidth="1"
                         HeightRequest="48" Clicked="OnAllPeriodsClicked"/>
             </VerticalStackLayout>

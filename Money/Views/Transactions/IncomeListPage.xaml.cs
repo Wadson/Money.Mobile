@@ -87,13 +87,6 @@ public partial class IncomeListPage : ContentPage
         await Navigation.PushModalAsync(page);
     }
 
-    private async void OnToggleStatusClicked(object? sender,EventArgs e)
-    {
-        if(!TryGetId(sender,out var id))return; var item=_items.FirstOrDefault(x=>x.Id==id); if(item is null)return;
-        try { await _database.SetIncomePaidStatusAsync(id,!item.Paid,!item.Paid?DateTime.Today:null); await LoadAsync(); }
-        catch(Exception ex){await ThemedDialog.ShowAsync(this,"Não foi possível alterar o status",SqliteErrorMessage.ToFriendly(ex));}
-    }
-
     private async void OnDeleteClicked(object? sender, EventArgs e)
     {
         if (!TryGetId(sender, out var id)) return;
